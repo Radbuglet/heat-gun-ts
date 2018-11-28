@@ -217,7 +217,7 @@ setInterval(() => {
 }, 1000 / 60);
 
 setInterval(() => {
-    world.replicate_everything(true);
+    world.replicate_everything(false);
 }, 2000);
 
 server.listen(SERVER_PORT);

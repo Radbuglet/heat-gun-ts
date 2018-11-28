@@ -221,7 +221,7 @@ export abstract class GameWorld extends CanvasSubApplication {
                             rect.size.mutfloor();
                         });
 
-                        for (let x = 0; x < MAX_HEALTH; x++) {
+                        for (let x = 1; x <= MAX_HEALTH; x++) {
                             const cloned_sectioned_hpbar_rect = sectioned_hpbar_rect.clone_and_perform(rect => {
                                 rect.top_left.mutadd(new Vector(0, 
                                     4 * Math.sin(torad(x * 5 + Date.now() / 5))
