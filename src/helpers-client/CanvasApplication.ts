@@ -249,8 +249,6 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
         return;
       }
 
-      window.requestAnimationFrame(this.tick.bind(this));
-
       const ticks_passed = calculate_ticks(dt);
       this.frames++;
 
@@ -279,6 +277,8 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
       }
 
       this.mousedown_frame = false;
+
+      window.requestAnimationFrame(this.tick.bind(this));
     }
 
     getWidth() {
