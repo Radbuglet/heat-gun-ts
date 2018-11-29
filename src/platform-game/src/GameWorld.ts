@@ -124,6 +124,10 @@ export abstract class GameWorld extends CanvasSubApplication {
             this.camera.dettach(ctx);
         });
 
+        // Draw localizers
+        this.draw_localizer(LocalizerSides.left);
+        this.draw_localizer(LocalizerSides.right);
+
         this.draw(() => { // HUD
             const screen_rect = new Rect(new Vector(0, 0), new Vector(width, height));
             this.draw(() => { // Bottom part
@@ -298,6 +302,37 @@ export abstract class GameWorld extends CanvasSubApplication {
         this.weapon_stats_menu.render();
     }
 
+    draw_localizer(side : LocalizerSides) {
+        this.draw(ctx => {
+            const x_level = side === LocalizerSides.left ? 0 : this.getWidth() - 0;
+            ctx.strokeStyle = rainbow_color({ time_div: 20, saturation: 20, light: 40 });
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(x_level, 0);
+            for (let y = 0; y < this.getHeight(); y += 20) {
+                let magnitude = 3;
+                this.world.players.forEach(player => {
+                    if (player !== this.local_player && side === LocalizerSides.left ? player.position.getX() < this.local_player.position.getX() : player.position.getX() > this.local_player.position.getX()) {
+                        const player_dist = Math.abs(player.position.getX() - this.local_player.position.getX());
+                        const axis_dist = Math.abs(player.position.getY() - this.camera.toWorldPos(new Vector(x_level, y), this.getWidth(), this.getHeight()).getY());
+
+                        magnitude += Math.max(
+                            (-Math.pow(axis_dist / 100, 2) + 40) + (-Math.pow(player_dist / 400, 2) + 50),
+                            0);
+                    }
+                });
+
+                ctx.lineTo(
+                    side === LocalizerSides.left ?
+                        x_level + Math.random() * magnitude * (this.local_player.using_scope ? 1 : 0.3) :
+                        x_level - Math.random() * magnitude * (this.local_player.using_scope ? 1 : 0.3),
+                y);
+            }
+
+            ctx.stroke();
+        });
+    }
+
     app_keydown(e : KeyboardEvent) {
         if (!this.weapon_stats_menu.changing_weapon_stats) {
             if (this.local_player.can_use_rush) {
@@ -353,4 +388,8 @@ export abstract class GameWorld extends CanvasSubApplication {
     app_mouseup() {
 
     }
+}
+
+enum LocalizerSides {
+    left, right
 }
