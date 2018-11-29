@@ -44,6 +44,7 @@ export abstract class GameWorld extends CanvasSubApplication {
             delta, ticks, exec_mode: ExecMode.client, total_ms: this.total_ms, total_ticks: this.total_ticks
         }
 
+        this.local_player.gun_look_direction = this.get_mouse_position().sub(new Vector(this.getWidth() / 2, this.getHeight() / 2)).normalized();
         this.world.update(event);
 
         if (!this.weapon_stats_menu.changing_weapon_stats) {
@@ -72,8 +73,6 @@ export abstract class GameWorld extends CanvasSubApplication {
                 if (tile.layer === Layers.dec) collided_dec_tile_index = tile.absolute_tile_index;
                 if (typeof tile.visgroup === "string") visgroup = tile.visgroup;
             });
-
-            this.local_player.gun_look_direction = this.get_mouse_position().sub(new Vector(width / 2, height / 2)).normalized();
 
             this.world.render_beams();
             this.world.render_particles();
