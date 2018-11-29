@@ -6,6 +6,10 @@ export function num_in_range(min: number, num: number, max: number) {
     return min <= num && num <= max;
 }
 
+export function num_in_range_noinclude(min: number, num: number, max: number) {
+    return min < num && num < max;
+}
+
 export function torad(deg: number) {
     return deg * (Math.PI / 180);
 }
