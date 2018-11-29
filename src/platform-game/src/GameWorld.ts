@@ -22,6 +22,7 @@ export abstract class GameWorld extends CanvasSubApplication {
     private total_ticks = 0;
     private total_ms = 0;
     protected ping : number = 0;
+    private direction_negate_mode : boolean = false;
 
     constructor(main_app : CanvasApplication, maploader : MapLoader, my_uuid : string, my_name : string, my_spawn : Vector) {
         super(main_app);
@@ -45,6 +46,8 @@ export abstract class GameWorld extends CanvasSubApplication {
         }
 
         this.local_player.gun_look_direction = this.get_mouse_position().sub(new Vector(this.getWidth() / 2, this.getHeight() / 2)).normalized();
+
+        if (this.direction_negate_mode) this.local_player.gun_look_direction.mutnegate();
         this.world.update(event);
 
         if (!this.weapon_stats_menu.changing_weapon_stats) {
@@ -367,6 +370,8 @@ export abstract class GameWorld extends CanvasSubApplication {
         if (e.code === "Digit2") this.local_player.selected_slot = 1;
         if (e.code === "Digit3") this.local_player.selected_slot = 2;
 
+        if (e.code === "KeyR") this.direction_negate_mode = !this.direction_negate_mode;
+
         if (e.code === "Tab") {
             e.preventDefault();
         }
@@ -381,12 +386,12 @@ export abstract class GameWorld extends CanvasSubApplication {
         }
     }
 
-    app_mousedown() {
-        
+    app_mousedown(e : MouseEvent) {
+        if (e.button === 2) this.direction_negate_mode = true;
     }
 
-    app_mouseup() {
-
+    app_mouseup(e : MouseEvent) {
+        if (e.button === 2) this.direction_negate_mode = false;
     }
 }
 
