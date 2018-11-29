@@ -8,16 +8,12 @@ import {
   TPZONE_RIGHT,
   PLAYER_COLLISION_BOX,
   MAX_ROLLBACK_POSITIONS_ALLOWED,
-  MAX_ROLLBACK_POINT_DIST,
-  MAX_POSSYNC_CHECK_COUNT,
-  MAX_POSSYNC_POINT_DIST,
   WEAPONS_HELD 
 } from "../config/Config";
 import {
   Weapon
 } from "./Weapon";
 import { World } from "./World";
-import { round } from "./helpers/Math";
 import {v4 as uuidv4} from "uuid";
 import { IUpdate } from "./helpers/IUpdate";
 import { PowerupTypeNames } from "./PowerUps";
@@ -26,7 +22,6 @@ import { Rect } from "./helpers/Rect";
 import { ITextComponent } from "./helpers/ITextComponent";
 import { RushDirections } from "./RushDirections";
 import { ITile } from "../config/MapLoader";
-import { CanvasGraph, Categories } from "../helpers-client/CanvasGraph";
 
 export abstract class Player<WorldType extends World<any>> {
   abstract handle_movementstate_changed(forceful : boolean);
