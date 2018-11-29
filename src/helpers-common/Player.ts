@@ -71,6 +71,7 @@ export abstract class Player<WorldType extends World<any>> {
 
   is_on_ground() : boolean {
     // @TODO create get_gravity_force and use it in this file instead of this evil hardcoding.
+    if (this.collision_rect.point_bottom_left().getY() + 1 >= TPZONE_BOTTOM) return true;
     return this.get_movement_collisions(new Vector(0, this.get_active_weapon().get_upgrades().gravmod > 1 ? -1 : 1)).length !== 0;
   }
 
@@ -223,12 +224,19 @@ export abstract class Player<WorldType extends World<any>> {
     
     for (let x = 0; x < Math.floor(Math.abs(delta_position.getX())); x += 0.5) {
       const vec = new Vector(Math.sign(delta_position.getX()), 0);
-      if (this.get_movement_collisions(vec).length === 0) this.position.mutadd(vec);
+      if (
+        this.get_movement_collisions(vec).length === 0 &&
+        TPZONE_LEFT < this.collision_rect.point_bottom_left().getX() + vec.getX() && this.collision_rect.point_bottom_right().getX() + vec.getX() < TPZONE_RIGHT
+      ) this.position.mutadd(vec);
     }
 
     for (let y = 0; y < Math.abs(delta_position.getY()); y++) {
       const vec = new Vector(0, Math.sign(delta_position.getY()));
-      if (this.get_movement_collisions(vec).length === 0) {
+      if (
+        this.get_movement_collisions(vec).length === 0 &&
+        TPZONE_BOTTOM > this.collision_rect.point_bottom_left().getY() + vec.getY() &&
+        TPZONE_TOP < this.collision_rect.point_top_left().getY() + vec.getY()
+      ) {
         this.position.mutadd(vec);
       } else {
         this.velocity.setY(0);

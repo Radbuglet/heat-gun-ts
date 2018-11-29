@@ -11,7 +11,7 @@ import { render_tablist } from "./TablistController";
 import { RushDirections } from "../../helpers-common/RushDirections";
 import { Rect } from "../../helpers-common/helpers/Rect";
 import { rainbow_color } from "../../helpers-client/color";
-import { WEAPONS_HELD, MAX_HEALTH } from "../../config/Config";
+import { WEAPONS_HELD, MAX_HEALTH, TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../config/Config";
 
 export abstract class GameWorld extends CanvasSubApplication {
     public local_player : ClientPlayer;
@@ -100,6 +100,14 @@ export abstract class GameWorld extends CanvasSubApplication {
             });
 
             this.world.render_world(visgroup, collided_dec_tile_index);
+
+            // Draw world bounding box
+            this.draw(() => {
+                ctx.strokeStyle = "#ff2828";
+                ctx.lineWidth = 10;
+                //ctx.setLineDash([10, 2]);
+                Rect.from_positions(new Vector(TPZONE_LEFT, TPZONE_TOP), new Vector(TPZONE_RIGHT, TPZONE_BOTTOM)).stroke_rect(ctx);
+            });
 
             this.camera.dettach(ctx);
         });
