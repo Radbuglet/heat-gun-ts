@@ -63,7 +63,7 @@ export abstract class GameWorld extends CanvasSubApplication {
 
     app_render(ctx : CanvasRenderingContext2D, width : number, height : number) {
         this.draw(() => {
-            this.camera.lookvec = this.local_player.position;
+            this.camera.lookvec = this.local_player.position.add(this.local_player.get_active_weapon().get_teleportation_vec(this.local_player.gun_look_direction));
 
             this.camera.attach(ctx, width, height);
 
@@ -80,21 +80,34 @@ export abstract class GameWorld extends CanvasSubApplication {
             this.world.players.forEach(player => player.render(this));
             this.draw(() => {
                 if (this.local_player.using_scope) {
-                    const raycaster = this.local_player.get_active_weapon().raycast_beam(this.local_player.gun_look_direction, 10);
+                    this.draw(() => {
+                        const raycaster = this.local_player.get_active_weapon().raycast_beam(this.local_player.gun_look_direction, 10);
 
-                    ctx.beginPath();
-                    raycaster.beam_path.forEach((pos, i) => {
-                        if (i === 0) {
-                            ctx.moveTo(pos.getX(), pos.getY());
-                        } else {
-                            ctx.lineTo(pos.getX(), pos.getY());
-                        }
+                        ctx.beginPath();
+                        raycaster.beam_path.forEach((pos, i) => {
+                            if (i === 0) {
+                                ctx.moveTo(pos.getX(), pos.getY());
+                            } else {
+                                ctx.lineTo(pos.getX(), pos.getY());
+                            }
+                        });
+
+                        ctx.globalAlpha = raycaster.collided_player ? 0.4 : 0.1;
+                        ctx.lineWidth = this.local_player.get_active_weapon().get_bullet_size();
+                        ctx.fillStyle = this.local_player.get_active_weapon().get_beam_color();
+                        ctx.stroke();
                     });
+                }
 
-                    ctx.globalAlpha = raycaster.collided_player ? 0.4 : 0.1;
-                    ctx.lineWidth = this.local_player.get_active_weapon().get_bullet_size();
-                    ctx.fillStyle = this.local_player.get_active_weapon().get_beam_color();
-                    ctx.stroke();
+                const active_weapon = this.local_player.get_active_weapon();
+
+                if (active_weapon.get_upgrades().teleportation > 0) {
+                    this.draw(() => {
+                        ctx.strokeStyle = "red";
+                        this.local_player.collision_rect.clone_and_perform(rect => {
+                            rect.top_left.mutadd(active_weapon.get_teleportation_vec(this.local_player.gun_look_direction));
+                        }).stroke_rect(ctx);
+                    });
                 }
             });
 
