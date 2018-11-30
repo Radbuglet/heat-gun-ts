@@ -21,6 +21,7 @@ export interface IWeaponStats {
     teleportation: number
     fire_rate: number
     gravmod: number
+    fricmod : number
 }
 
 export interface IWeapon {
@@ -52,7 +53,7 @@ export const configurable_traits: ITrait[] = [
         key: "fire_rate",
         name: "Faster Fire",
         maxval: 4,
-        cost: 4,
+        cost: 3,
     },
     {
         key: "additional_barrels",
@@ -76,7 +77,7 @@ export const configurable_traits: ITrait[] = [
         key: "additional_launching_power",
         name: "Additional proppelling",
         maxval: 5,
-        cost: 3
+        cost: 2
     },
     {
         key: "bullet_gravity",
@@ -100,7 +101,13 @@ export const configurable_traits: ITrait[] = [
         key: "gravmod",
         name: "Gravity--",
         maxval: 4,
-        cost: 4
+        cost: 2
+    },
+    {
+        key: "fricmod",
+        name: "Friction--",
+        maxval: 4,
+        cost: 2
     },
     {
         key: "teleportation",
@@ -125,7 +132,8 @@ export class Weapon {
             scope: 0,
             suck_mode: 0,
             teleportation: 0,
-            trail_color: 0
+            trail_color: 0,
+            fricmod: 0
         }
     }
 

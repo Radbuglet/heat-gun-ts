@@ -75,6 +75,14 @@ export abstract class Player<WorldType extends World<any>> {
     return this.get_movement_collisions(new Vector(0, this.get_active_weapon().get_upgrades().gravmod > 1 ? -1 : 1)).length !== 0;
   }
 
+  get_gravity_force() : number {
+    return 1.7 - this.get_active_weapon().get_upgrades().gravmod * 0.7;
+  }
+
+  get_friction_coef() : number {
+    return 0.825 + this.get_active_weapon().get_upgrades().fricmod * 0.025;
+  }
+
   rush(direction_enum_value : RushDirections) {
     const rush_power = 20;
 
@@ -202,7 +210,8 @@ export abstract class Player<WorldType extends World<any>> {
     const tick_multiplier = this.using_scope ? 0 : 0.8 + (this.get_active_weapon().get_upgrades().additional_launching_power * 0.06);
     ticks = ticks * tick_multiplier;
 
-    const FRICTION = 0.825;
+    const FRICTION = this.get_friction_coef();
+    const GRAVITY = this.get_gravity_force();
 
     const calculate_position_friction = (start_pos : number, start_vel : number, fric : number, time : number) => (start_vel / fric) * (1 - Math.pow(Math.E, -fric * time)) + start_pos
     const calculate_velocity_friction = (start_vel : number, fric : number, time : number) => start_vel * Math.pow(fric, time);
@@ -212,12 +221,12 @@ export abstract class Player<WorldType extends World<any>> {
 
     const delta_position = new Vector(
       calculate_position_friction(this.position.getX(), this.velocity.getX(), FRICTION, ticks),
-      calculate_position_gravity(this.position.getY(), this.velocity.getY(), 1.7, ticks)
+      calculate_position_gravity(this.position.getY(), this.velocity.getY(), GRAVITY, ticks)
     ).sub(this.position);
     
     const new_velocity = new Vector(
       calculate_velocity_friction(this.velocity.getX(), FRICTION, ticks),
-      calculate_velocity_gravity(this.velocity.getY(), 1.7, ticks)
+      calculate_velocity_gravity(this.velocity.getY(), GRAVITY, ticks)
     );
     
     this.velocity.copyOther(new_velocity);
