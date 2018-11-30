@@ -26,16 +26,23 @@ export class ClientSocket {
         this.underlying_socket.emit((name as number).toString(), ...args);
     }
 
-    clump_on(name : PacketNames, cb : (...args) => void) {
+    clump_on(name : PacketNames, removal_group : number, cb : (...args) => void) {
         if (!this.handlers.has(name)) this.handlers.set(name, []);
 
         this.handlers.get(name).push({
-            name, cb
+            name, removal_group, cb
+        });
+    }
+
+    unregister_group(removal_group : number) {
+        this.handlers.forEach((events, category) => {
+            this.handlers.set(category, events.filter(evt => evt.removal_group !== removal_group));
         });
     }
 }
 
 interface Handler {
     name : PacketNames
+    removal_group : number
     cb : (...args) => void
 }

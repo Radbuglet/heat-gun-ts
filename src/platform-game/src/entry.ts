@@ -10,6 +10,7 @@ import Vector, { ISerializedVector } from "../../helpers-common/helpers/Vector";
 import { PacketNames } from "../../config/ProtocolDefs";
 import { CanvasGraph } from "../../helpers-client/CanvasGraph";
 import { MainMenuSub, LoadingScreen } from "./MainMenuSub";
+import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 
 RunPlatform.set_platform(ExecMode.client);
 
@@ -36,8 +37,13 @@ export class MainGame extends CanvasApplication {
 
         this.socket = new ClientSocket(SocketIOClient());
 
-        this.socket.clump_on(PacketNames.state_change__to_game, (my_uuid : string, my_name : string, my_position : ISerializedVector) => {
+        this.socket.clump_on(PacketNames.state_change__to_game, SocketEventGroups.MAIN, (my_uuid : string, my_name : string, my_position : ISerializedVector) => {
             this.active_sub = new NetworkedGameWorld(this, loader, this.socket, my_uuid, my_name, Vector.deserialize(my_position));
+        });
+
+        this.socket.clump_on(PacketNames.state_change__to_death, SocketEventGroups.MAIN, () => {
+            this.socket.unregister_group(SocketEventGroups.GAME);
+            this.active_sub = new MainMenuSub(this);
         });
 
         this.socket.underlying_socket.on("disconnect", () => {
@@ -112,4 +118,9 @@ export class MainGame extends CanvasApplication {
             });
         }
     }
+}
+
+export enum SocketEventGroups {
+    MAIN = 0,
+    GAME
 }

@@ -43,7 +43,8 @@ export class SocketUser {
     }
     
     notify_kill_and_remove(personal_message : ITextComponent[], socket_disconnected = false) {
-        if (!socket_disconnected) this.send_packet(PacketNames.state_change__to_death, personal_message);
+        if (!socket_disconnected) this.send_packet_noqueue(PacketNames.state_change__to_death, personal_message);
+        console.log("Killed!", personal_message);
         this.remove_player_from_world();
     }
 
@@ -70,15 +71,17 @@ export class SocketUser {
     }
 
     send_packet(evt_name : PacketNames, ...args) {
-        const pktobj = {
-            evt_name, args
-        }
-
         if (this.is_queueing_packets) {
-            this.send_queue.push(pktobj);
+            this.send_queue.push({
+                evt_name, args
+            });
         } else {
-            this.__send_packet_clump([pktobj]);
+            this.send_packet_noqueue(evt_name, ...args);
         }
+    }
+
+    send_packet_noqueue(evt_name : PacketNames, ...args) {
+        this.__send_packet_clump([{ evt_name, args }]);
     }
 
     private __send_packet_clump(pkts : IPacket[]) {

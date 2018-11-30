@@ -8,17 +8,13 @@ import { PacketNames } from "../../config/ProtocolDefs";
 import { IWeapon } from "../../helpers-common/Weapon";
 import { RushDirections } from "../../helpers-common/RushDirections";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
+import { MainGame, SocketEventGroups } from "./entry";
 
 export class NetworkedGameWorld extends GameWorld {
-    constructor(canvas_application : CanvasApplication, map_loader : MapLoader, private socket : ClientSocket, my_uuid : string, my_name: string, my_spawn : Vector) {
-        super(canvas_application, map_loader, my_uuid, my_name, my_spawn);
+    constructor(private main_game : MainGame, map_loader : MapLoader, private socket : ClientSocket, my_uuid : string, my_name: string, my_spawn : Vector) {
+        super(main_game, map_loader, my_uuid, my_name, my_spawn);
 
-        socket.clump_on(PacketNames.state_change__to_game, (...data) => {
-            console.log("I just got created and I work perfectly fine!");
-        });
-
-        this.socket.clump_on(PacketNames.replicate_player_list, (own_uuid : string, other_users : {[uuid : string] : string}) => {
-            console.log(other_users);
+        this.socket.clump_on(PacketNames.replicate_player_list, SocketEventGroups.GAME, (own_uuid : string, other_users : {[uuid : string] : string}) => {
 
             this.world.players.forEach(player => {
                 if (!(player.uuid in other_users)) {
@@ -35,11 +31,11 @@ export class NetworkedGameWorld extends GameWorld {
             }
         });
 
-        this.socket.clump_on(PacketNames.send_message, (message : ITextComponent) => {
+        this.socket.clump_on(PacketNames.send_message, SocketEventGroups.GAME, (message : ITextComponent) => {
             // @TODO do!
         });
 
-        this.socket.clump_on(PacketNames.replicate_player_health_changed, (target_uuid : string, health : number) => {
+        this.socket.clump_on(PacketNames.replicate_player_health_changed, SocketEventGroups.GAME, (target_uuid : string, health : number) => {
             if (this.world.players.has(target_uuid)) {
                 const target_player = this.world.players.get(target_uuid);
 
@@ -47,7 +43,7 @@ export class NetworkedGameWorld extends GameWorld {
             }
         });
 
-        this.socket.clump_on(PacketNames.replicate_weapon_info_change, (target_uuid : string, weapon_info : IWeapon[]) => {
+        this.socket.clump_on(PacketNames.replicate_weapon_info_change, SocketEventGroups.GAME, (target_uuid : string, weapon_info : IWeapon[]) => {
             if (this.world.players.has(target_uuid)) {
                 const target_player = this.world.players.get(target_uuid);
 
@@ -57,7 +53,7 @@ export class NetworkedGameWorld extends GameWorld {
             }
         });
 
-        this.socket.clump_on(PacketNames.replicate_player_mov_changed, (
+        this.socket.clump_on(PacketNames.replicate_player_mov_changed, SocketEventGroups.GAME, (
             target_uuid : string,
             position : ISerializedVector,
             velocity : ISerializedVector,
@@ -79,7 +75,7 @@ export class NetworkedGameWorld extends GameWorld {
             }
         });
 
-        this.socket.clump_on(PacketNames.replicate_new_beam, ( orgin_player_uuid : string, path : ISerializedVector[], color : string, size : number ) => {
+        this.socket.clump_on(PacketNames.replicate_new_beam, SocketEventGroups.GAME, ( orgin_player_uuid : string, path : ISerializedVector[], color : string, size : number ) => {
             if (orgin_player_uuid === this.local_player.uuid) return; // We don't want to add the same beam twice!
 
             console.log({
@@ -92,7 +88,7 @@ export class NetworkedGameWorld extends GameWorld {
             });
         });
 
-        this.socket.clump_on(PacketNames.replicate_energy_change, (target_uuid : string, energy : number, total_energy : number) => {
+        this.socket.clump_on(PacketNames.replicate_energy_change, SocketEventGroups.GAME, (target_uuid : string, energy : number, total_energy : number) => {
             if (this.world.players.has(target_uuid)) {
                 const target_player = this.world.players.get(target_uuid);
 
