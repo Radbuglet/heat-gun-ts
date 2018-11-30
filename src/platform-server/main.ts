@@ -217,7 +217,9 @@ setInterval(() => {
 }, 1000 / 60);
 
 setInterval(() => {
+    world.queue_all_players_packets();
     world.replicate_everything(false);
+    world.unqueue_all_players_packets();
 }, 2000);
 
 server.listen(SERVER_PORT);
