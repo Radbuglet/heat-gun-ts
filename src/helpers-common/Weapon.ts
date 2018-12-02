@@ -321,6 +321,9 @@ export class Weapon {
                     }
                 });
 
+                damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35)).add(new Vector(0, -20)));
+                damaged_player.handle_movementstate_changed(true);
+
                 const gained_energy = damage / 4;
 
                 attacker.energy += gained_energy;
