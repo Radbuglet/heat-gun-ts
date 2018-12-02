@@ -188,6 +188,13 @@ socketserver.on("connection", socket => {
 
     socket.on("disconnect", () => {
         if (socket_user.is_playing()) {
+            world.broadcast_message([{
+                color: "darkred",
+                text: socket_user.player.name
+            }, {
+                color: "red",
+                text: " rage quit the arena!"
+            }]);
             socket_user.notify_kill_and_remove(null);
         }
     });
