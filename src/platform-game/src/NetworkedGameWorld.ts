@@ -96,6 +96,10 @@ export class NetworkedGameWorld extends GameWorld {
                 target_player.total_energy = total_energy;
             }
         });
+
+        this.socket.clump_on(PacketNames.send_message, SocketEventGroups.GAME, (message : ITextComponent[]) => {
+            this.add_message(message);
+        });
         
         this.socket.underlying_socket.on("custom_pong", (s) => {
             this.ping = Date.now() - s;

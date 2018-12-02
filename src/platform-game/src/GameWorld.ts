@@ -12,12 +12,15 @@ import { RushDirections } from "../../helpers-common/RushDirections";
 import { Rect } from "../../helpers-common/helpers/Rect";
 import { rainbow_color } from "../../helpers-client/color";
 import { WEAPONS_HELD, MAX_HEALTH, TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../config/Config";
+import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
+import { draw_text, limit_line_size } from "../../helpers-client/draw_text";
 
 export abstract class GameWorld extends CanvasSubApplication {
     public local_player : ClientPlayer;
     private camera : Camera = new Camera(new Vector(0, 0));
     public world : ClientWorld;
     private weapon_stats_menu;
+    private chat_log : ITextComponent[][] = [];
 
     private total_ticks = 0;
     private total_ms = 0;
@@ -34,6 +37,14 @@ export abstract class GameWorld extends CanvasSubApplication {
         this.local_player.uuid = my_uuid;
         this.local_player.position.copyOther(my_spawn);
         this.world.add_player(this.local_player);
+    }
+
+    add_message(msg : ITextComponent[]) {
+        this.chat_log.push(msg);
+
+        if (this.chat_log.length >= 20) {
+            this.chat_log.shift();
+        }
     }
     
     app_update(delta) {
@@ -135,6 +146,7 @@ export abstract class GameWorld extends CanvasSubApplication {
             const screen_rect = new Rect(new Vector(0, 0), new Vector(width, height));
             this.draw(() => { // Bottom part
                 const weaponbar_rect = Rect.from_positions(new Vector(0, height - 50), new Vector(width, height));
+                const container_rect = weaponbar_rect.get_percent_margin_rect(0.1);
                 
                 // Draw bar
                 this.draw(() => {
@@ -196,8 +208,6 @@ export abstract class GameWorld extends CanvasSubApplication {
 
                 // Weapon list
                 this.draw(() => {
-                    const container_rect = weaponbar_rect.get_percent_margin_rect(0.1);
-
                     const split_container_rect = container_rect.clone_and_perform(rect => {
                         rect.size.mutdiv(new Vector(this.local_player.weapons.length, 1));
                     });
@@ -236,8 +246,9 @@ export abstract class GameWorld extends CanvasSubApplication {
                 });
 
                 // HP Bar
+                const container_hpbar_rect = Rect.centered_around(weaponbar_rect.get_point(0.5, 0).sub(new Vector(0, 50)), new Vector(width * 0.3 + 150, 40));
+                
                 this.draw(() => {
-                    const container_hpbar_rect = Rect.centered_around(weaponbar_rect.get_point(0.5, 0).sub(new Vector(0, 50)), new Vector(width * 0.3 + 150, 40));
                     const hpbar_rect = container_hpbar_rect.clone_and_perform(rect => rect.size.mutsub(new Vector(170, 0)));
                     const hptext_rect = Rect.from_positions(hpbar_rect.point_top_right().add(new Vector(20, -5)), hpbar_rect.point_bottom_right().add(new Vector(170, 5)));
 
@@ -283,7 +294,10 @@ export abstract class GameWorld extends CanvasSubApplication {
                     });
                 });
 
-                
+                // Chat
+                const chat_start_x = 50;
+                const chat_lines = limit_line_size(this, "15px monospace", this.chat_log, (container_hpbar_rect.get_x() - 30) - chat_start_x);
+                draw_text(this, chat_start_x, weaponbar_rect.get_y() - 30 - (chat_lines.length * 17), "15px monospace", 17, chat_lines); 
             });
 
             this.draw(() => {
