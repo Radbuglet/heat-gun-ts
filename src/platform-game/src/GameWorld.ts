@@ -112,7 +112,11 @@ export abstract class GameWorld extends CanvasSubApplication {
                         ctx.stroke();
                     });
                 }
+            });
 
+            this.world.render_world(visgroup, collided_dec_tile_index);
+
+            this.draw(() => {
                 const active_weapon = this.local_player.get_active_weapon();
 
                 if (active_weapon.get_upgrades().teleportation > 0) {
@@ -124,8 +128,6 @@ export abstract class GameWorld extends CanvasSubApplication {
                     });
                 }
             });
-
-            this.world.render_world(visgroup, collided_dec_tile_index);
 
             // Draw world bounding box
             this.draw(() => {
