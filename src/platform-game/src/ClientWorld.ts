@@ -63,7 +63,7 @@ export class ClientWorld extends World<ClientPlayer> {
                 if (tile.bullet_phased) ctx.globalAlpha = 0.75;
 
                 if (tile.visgroup === dec_rendering_vis_group || tile.absolute_tile_index === singular_dec_norender_index) {
-                    ctx.globalAlpha = 0.1;
+                    ctx.globalAlpha = 0.6;
                 }
 
                 ctx.fillRect(tile.x, tile.y, tile.w, tile.h);
