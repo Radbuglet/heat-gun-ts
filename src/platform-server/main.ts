@@ -45,6 +45,8 @@ app.get("/map", (req, res) => {
     res.send(map_loader.get_raw_map_object());
 });
 
+app.get("/favicon.ico", (req, res) => res.sendFile(join(__dirname, 'favicon.ico')));
+
 app.use("/static/game", serveStatic(join(source_root_path, "platform-game/static")));
 app.use("/static/editor", serveStatic(join(source_root_path, "platform-editor/static")));
 
