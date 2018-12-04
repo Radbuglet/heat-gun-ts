@@ -5,9 +5,11 @@ import Vector from "../../helpers-common/helpers/Vector";
 import { torad } from "../../helpers-common/helpers/Math";
 import { MainGame } from "./entry";
 import { Player } from "../../helpers-common/Player";
+import { CloudHorizon } from "./CloudHorizon";
 
 export class MainMenuSub extends CanvasSubApplication {
     private bg_scroll_y : number = 0;
+    private cloud_horizon : CloudHorizon = new CloudHorizon(this);
 
     constructor(private main_app : MainGame) {
         super(main_app);
@@ -69,6 +71,8 @@ export class MainMenuSub extends CanvasSubApplication {
                 ctx.stroke();
             }
         });
+
+        this.cloud_horizon.draw();
 
         // Logo
         this.draw(() => {
