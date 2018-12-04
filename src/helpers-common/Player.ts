@@ -130,8 +130,6 @@ export abstract class Player<WorldType extends World<any>> {
       if (is_ok) {
         break;
       }
-
-      break;
     }
     console.log("Spawned player!");
   }
