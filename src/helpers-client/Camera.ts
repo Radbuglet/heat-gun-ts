@@ -1,7 +1,7 @@
 import Vector from "../helpers-common/helpers/Vector";
 
 export class Camera {
-    private zoom : number;
+    private zoom : number = 1;
     constructor(public lookvec : Vector) {}
 
     attach(ctx : CanvasRenderingContext2D, w : number, h : number) {
@@ -11,8 +11,12 @@ export class Camera {
       ctx.translate(-Math.floor(this.lookvec.getX()), -Math.floor(this.lookvec.getY()));
     }
 
-    setZoom(f) {
+    setZoom(f : number) {
       this.zoom = f;
+    }
+
+    getZoom() : number {
+      return this.zoom;
     }
 
     toWorldPos(pos, w, h) {
