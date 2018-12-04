@@ -143,9 +143,10 @@ export class LoadingScreen extends CanvasSubApplication {
 
     app_render(ctx : CanvasRenderingContext2D, width : number, height : number, ticks_passed : number) {
         this.draw(() => {
-            ctx.textBaseline = "top";
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
             ctx.font = "24px monospace";
-            ctx.fillText("Loading...", 0, 0);
+            ctx.fillText("Loading...", width / 2, height / 2);
         });
     }
 }
