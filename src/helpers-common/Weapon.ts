@@ -85,12 +85,12 @@ export const configurable_traits: ITrait[] = [
         maxval: 4,
         cost: 2
     },
-    /*{
+    {
         key: "scope",
         name: "Scope",
         maxval: 7,
         cost: 2
-    },*/
+    },
     {
         key: "trail_color",
         name: "Trail Color",

@@ -78,6 +78,12 @@ export abstract class GameWorld extends CanvasSubApplication {
     app_render(ctx : CanvasRenderingContext2D, width : number, height : number) {
         this.draw(() => {
             this.camera.lookvec = this.local_player.position.add(this.local_player.get_active_weapon().get_teleportation_vec(this.local_player.gun_look_direction));
+            this.camera.setZoom(
+                (
+                    this.camera.getZoom() +
+                    1 - this.local_player.get_active_weapon().get_upgrades().scope * 0.08
+                ) / 2
+            );
 
             this.camera.attach(ctx, width, height);
 
