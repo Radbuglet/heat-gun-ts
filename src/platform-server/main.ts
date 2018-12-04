@@ -158,6 +158,7 @@ socketserver.on("connection", socket => {
             const player = socket_user.player;
             if (slot !== player.selected_slot) {
                 player.selected_slot = slot;
+                socket_user.player.handle_slot_changed();
             }
 
             player.sync_pos(Vector.deserialize(position), () => {
