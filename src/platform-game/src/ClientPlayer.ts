@@ -19,6 +19,7 @@ export class ClientPlayer extends Player<ClientWorld> {
     handle_health_changed() {}
     handle_movementstate_changed() {}
     handle_powerupstate_changed() {}
+    handle_slot_changed() {}
     handle_player_shoot_gun(origin : Vector, direction : Vector) {
         this.world.particle_system.register_particle(new AmmoParticle(
             this.world.particle_system, this.world.app,

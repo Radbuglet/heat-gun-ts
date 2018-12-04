@@ -29,10 +29,6 @@ export class ServerPlayer extends Player<ServerWorld> {
         this.world.broadcast_packet(PacketNames.replicate_player_health_changed, this.uuid, this.health);
     }
 
-    handle_slot_changed() {
-        this.world.broadcast_packet(PacketNames.player_slot_changed, this.uuid, this.selected_slot);
-    }
-
     handle_player_shoot_gun() {
         // @TODO
     }
@@ -47,6 +43,10 @@ export class ServerPlayer extends Player<ServerWorld> {
 
     handle_powerupstate_changed() {
         
+    }
+
+    handle_slot_changed() {
+        this.world.broadcast_packet(PacketNames.replicate_slot_change, this.uuid, this.selected_slot);
     }
 
     send_message(message : ITextComponent[]) {

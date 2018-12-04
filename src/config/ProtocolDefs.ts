@@ -3,7 +3,6 @@ export enum PacketNames {
     send_message,
     replicate_player_mov_changed,
     replicate_player_health_changed,
-    player_slot_changed,
     state_change__to_game,
     state_change__to_death,
     replicate_player_list,
@@ -13,5 +12,6 @@ export enum PacketNames {
     modify_weapon_trait,
     replicate_weapon_info_change,
     replicate_energy_change,
-    perform_dash
+    perform_dash,
+    replicate_slot_change
 }

@@ -43,6 +43,7 @@ export abstract class Player<WorldType extends World<any>> {
   public current_power_up: string = null;
   public power_up_time_left: number = 0;
 
+  abstract handle_slot_changed();
   public selected_slot: number = 0;
   private regen_timer : number = 0;
 
@@ -198,6 +199,7 @@ export abstract class Player<WorldType extends World<any>> {
     this.handle_health_changed();
     this.handle_movementstate_changed(forceful);
     this.handle_powerupstate_changed();
+    this.handle_slot_changed();
   }
 
   activate_powerup() {
