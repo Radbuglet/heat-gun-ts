@@ -67,12 +67,14 @@ const world = new ServerWorld(map_loader);
 const connected_ips : Map<string, socketio.Socket> = new Map();
 
 socketserver.on("connection", socket => {
-    if (connected_ips.has(socket.handshake.address)) {
-        // @TODO kick message
-        connected_ips.get(socket.handshake.address).disconnect();
+    if (socket.handshake.address !== "::1") {
+        if (connected_ips.has(socket.handshake.address)) {
+            // @TODO kick message
+            connected_ips.get(socket.handshake.address).disconnect();
+        }
+    
+        connected_ips.set(socket.handshake.address, socket);   
     }
-
-    connected_ips.set(socket.handshake.address, socket);
 
     let socket_user : SocketUser = new SocketUser(socket, world);
 
