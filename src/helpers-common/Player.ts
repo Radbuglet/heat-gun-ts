@@ -22,6 +22,7 @@ import { Rect } from "./helpers/Rect";
 import { ITextComponent } from "./helpers/ITextComponent";
 import { RushDirections } from "./RushDirections";
 import { ITile } from "../config/MapLoader";
+import { RunPlatform } from "./helpers/RunPlatform";
 
 export abstract class Player<WorldType extends World<any>> {
   abstract handle_movementstate_changed(forceful : boolean);
@@ -149,7 +150,7 @@ export abstract class Player<WorldType extends World<any>> {
     }
 
     this.regen_timer += update_evt.ticks;
-    if (this.regen_timer > 100) {
+    if (this.regen_timer > 100 && RunPlatform.is_server()) {
       this.regen_timer = 0;
       let last_health = this.health;
       this.safe_set_health(this.health + 1);
