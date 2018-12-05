@@ -388,14 +388,16 @@ export class Weapon {
 
         if (already_verified_teleport || this.can_teleport_tpvec(tpvec)) this.player.position.mutadd(tpvec);
 
-        if (this.get_upgrades().teleportation === 0) {
-            this.player.velocity = aim_direction.mult(
-                new Vector(is_grounded ? 40 : 30).add(new Vector(this.get_upgrades().additional_launching_power * 1.5))
-            ).negate();
+        this.player.velocity = aim_direction.mult(
+            new Vector(is_grounded ? 40 : 30).add(new Vector(this.get_upgrades().additional_launching_power * 1.5))
+        ).negate();
 
-            if (this.get_upgrades().suck_mode) {
-                this.player.velocity.mutnegate();
-            }
+        if (this.get_upgrades().teleportation > 0) {
+            this.player.velocity.mutnegate();
+        }
+
+        if (this.get_upgrades().suck_mode > 0) {
+            this.player.velocity.mutnegate();
         }
 
         this.player.handle_movementstate_changed(false);
