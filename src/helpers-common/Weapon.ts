@@ -22,6 +22,7 @@ export interface IWeaponStats {
     fire_rate: number
     gravmod: number
     fricmod : number
+    slow_motion : number
 }
 
 export interface IWeapon {
@@ -66,6 +67,12 @@ export const configurable_traits: ITrait[] = [
         name: "Suck Mode",
         maxval: 1,
         cost: 10
+    },
+    {
+        key: "slow_motion",
+        name: "Slow Motion",
+        maxval: 4,
+        cost: 3
     },
     {
         key: "additional_size",
@@ -133,7 +140,8 @@ export class Weapon {
             suck_mode: 0,
             teleportation: 0,
             trail_color: 0,
-            fricmod: 0
+            fricmod: 0,
+            slow_motion: 0
         }
     }
 

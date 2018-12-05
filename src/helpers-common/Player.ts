@@ -209,7 +209,7 @@ export abstract class Player<WorldType extends World<any>> {
   }
 
   apply_physics(ticks : number) {
-    const tick_multiplier = this.using_scope ? 0 : 0.8 + (this.get_active_weapon().get_upgrades().additional_launching_power * 0.06);
+    const tick_multiplier = this.using_scope ? 0 : 0.8 + (this.get_active_weapon().get_upgrades().additional_launching_power * 0.06) - (0.1 * this.get_active_weapon().get_upgrades().slow_motion);
     ticks = ticks * tick_multiplier;
 
     const FRICTION = this.get_friction_coef();
