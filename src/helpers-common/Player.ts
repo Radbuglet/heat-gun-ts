@@ -23,6 +23,7 @@ import { ITextComponent } from "./helpers/ITextComponent";
 import { RushDirections } from "./RushDirections";
 import { ITile } from "../config/MapLoader";
 import { RunPlatform } from "./helpers/RunPlatform";
+import { clamp_num } from "./helpers/Math";
 
 export abstract class Player<WorldType extends World<any>> {
   abstract handle_movementstate_changed(forceful : boolean);
@@ -253,6 +254,19 @@ export abstract class Player<WorldType extends World<any>> {
         break;
       }
     }
+
+    this.position.setPair(
+      clamp_num(
+        TPZONE_LEFT,
+        this.position.getX(),
+        TPZONE_RIGHT - this.collision_rect.get_width()
+      ),
+      clamp_num(
+        TPZONE_TOP,
+        this.position.getY(),
+        TPZONE_BOTTOM - this.collision_rect.get_height()
+      )
+    );
   }
 
   static is_valid_username(username : string) : string {
