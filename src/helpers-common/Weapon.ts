@@ -64,7 +64,7 @@ export const configurable_traits: ITrait[] = [
     },
     {
         key: "suck_mode",
-        name: "Suck Mode",
+        name: "Reverse Direction",
         maxval: 1,
         cost: 10
     },
