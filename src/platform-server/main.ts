@@ -19,6 +19,7 @@ import { Weapon, configurable_traits } from "../helpers-common/Weapon";
 import { RunPlatform, ExecMode } from "../helpers-common/helpers/RunPlatform";
 import { readFileSync } from "fs";
 import { PacketNames } from "../config/ProtocolDefs";
+import { Leaderboard } from "./Leaderboard";
 
 const now = require("performance-now");
 
@@ -32,6 +33,8 @@ const map_loader = new MapLoader();
 map_loader.load_from_loaded_file(
     readFileSync(join(source_root_path, "config/map_data.json"), "utf-8"));
 
+Leaderboard.load_file(join(__dirname, "db", "leaderboard.json"));
+
 /*
     Create and configure express app
 */
@@ -43,6 +46,10 @@ app.get("/", (req, res) => {
 
 app.get("/map", (req, res) => {
     res.send(map_loader.get_raw_map_object());
+});
+
+app.get("/leaderboard", (req, res) => {
+    res.send(Leaderboard.data);
 });
 
 app.get("/favicon.ico", (req, res) => res.sendFile(join(__dirname, 'favicon.ico')));
@@ -243,6 +250,11 @@ setInterval(() => {
     world.replicate_everything(false);
     world.unqueue_all_players_packets();
 }, 2000);
+
+setInterval(() => {
+    Leaderboard.clean_up();
+    Leaderboard.save_to_active_file();
+}, 1000 * 10);
 
 server.listen(SERVER_PORT);
 console.log(`Server listening on port ${SERVER_PORT}`);

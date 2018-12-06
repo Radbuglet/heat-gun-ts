@@ -11,6 +11,7 @@ import { PacketNames } from "../../config/ProtocolDefs";
 import { CanvasGraph } from "../../helpers-client/CanvasGraph";
 import { MainMenuSub, LoadingScreen } from "./MainMenuSub";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
+import { LeaderboardLoader } from "./LeaderboardLoader";
 
 RunPlatform.set_platform(ExecMode.client);
 
@@ -27,23 +28,25 @@ interface KickScreenState {
 }
 
 export class MainGame extends CanvasApplication {
-    private active_sub : CanvasSubApplication = new MainMenuSub(this);
     private active_kick_screen : KickScreenState = null;
+    private leaderboard_loader : LeaderboardLoader = new LeaderboardLoader("/leaderboard");
+    private active_sub : CanvasSubApplication = new MainMenuSub(this, this.leaderboard_loader);
     
     private socket : ClientSocket;
 
-    constructor(canvas : HTMLCanvasElement, loader : MapLoader) {
+    constructor(canvas : HTMLCanvasElement, map_loader : MapLoader) {
         super(canvas);
 
         this.socket = new ClientSocket(SocketIOClient());
 
         this.socket.clump_on(PacketNames.state_change__to_game, SocketEventGroups.MAIN, (my_uuid : string, my_name : string, my_position : ISerializedVector) => {
-            this.active_sub = new NetworkedGameWorld(this, loader, this.socket, my_uuid, my_name, Vector.deserialize(my_position));
+            this.active_sub = new NetworkedGameWorld(this, map_loader, this.socket, my_uuid, my_name, Vector.deserialize(my_position));
         });
 
         this.socket.clump_on(PacketNames.state_change__to_death, SocketEventGroups.MAIN, () => {
             this.socket.unregister_group(SocketEventGroups.GAME);
-            this.active_sub = new MainMenuSub(this);
+            this.active_sub = new MainMenuSub(this, this.leaderboard_loader);
+            this.leaderboard_loader.load();
         });
 
         this.socket.underlying_socket.on("disconnect", () => {

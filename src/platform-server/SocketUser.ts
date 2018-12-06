@@ -4,6 +4,7 @@ import { ServerWorld } from "./ServerWorld";
 import { ITextComponent } from "../helpers-common/helpers/ITextComponent";
 import { LAGSWITCH_SVTOCL } from "../config/Config";
 import { PacketNames } from "../config/ProtocolDefs";
+import { Leaderboard } from "./Leaderboard";
 
 export class SocketUser {
     public player : ServerPlayer = null;
@@ -45,6 +46,7 @@ export class SocketUser {
     notify_kill_and_remove(personal_message : ITextComponent[], socket_disconnected = false) {
         if (!socket_disconnected) this.send_packet_noqueue(PacketNames.state_change__to_death, personal_message);
         console.log("Killed!", personal_message);
+        Leaderboard.log_record(this.player.name, this.player.total_energy);
         this.remove_player_from_world();
     }
 

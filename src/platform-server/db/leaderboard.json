@@ -1,0 +1,46 @@
+{
+  "categories": [
+    {
+      "name": "Daily",
+      "lasts_for_mins": 1440,
+      "scores": [
+        {
+          "username": "B",
+          "score": 28,
+          "expire_timestamp": 1544193606474
+        },
+        {
+          "username": "B",
+          "score": 26,
+          "expire_timestamp": 1544193616835
+        },
+        {
+          "username": "A",
+          "score": 18,
+          "expire_timestamp": 1544193573154
+        }
+      ]
+    },
+    {
+      "name": "Weekly",
+      "lasts_for_mins": 10080,
+      "scores": [
+        {
+          "username": "B",
+          "score": 28,
+          "expire_timestamp": 1544712006474
+        },
+        {
+          "username": "B",
+          "score": 26,
+          "expire_timestamp": 1544712016835
+        },
+        {
+          "username": "A",
+          "score": 18,
+          "expire_timestamp": 1544711973154
+        }
+      ]
+    }
+  ]
+}

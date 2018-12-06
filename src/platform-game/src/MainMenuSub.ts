@@ -6,12 +6,15 @@ import { torad } from "../../helpers-common/helpers/Math";
 import { MainGame } from "./entry";
 import { Player } from "../../helpers-common/Player";
 import { CloudHorizon } from "./CloudHorizon";
+import { ILbDBScore } from "../../helpers-common/LeaderboardScheme";
+import { LeaderboardLoader } from "./LeaderboardLoader";
 
 export class MainMenuSub extends CanvasSubApplication {
     private bg_scroll_y : number = 0;
     private cloud_horizon : CloudHorizon = new CloudHorizon(this);
+    private active_leaderboard_index : number = 0;
 
-    constructor(private main_app : MainGame) {
+    constructor(private main_app : MainGame, private leaderboard_loader : LeaderboardLoader) {
         super(main_app);
     }
 
@@ -37,6 +40,19 @@ export class MainMenuSub extends CanvasSubApplication {
                 this.main_app.request_spawn_player(localStorage.getItem("last_name"));
             }
         }
+
+        if (this.leaderboard_loader.has_loaded()) {
+            if (e.code === "ArrowLeft") {
+                this.active_leaderboard_index--;
+            }
+    
+            if (e.code === "ArrowRight") {
+                this.active_leaderboard_index++;
+            }
+    
+            if (this.active_leaderboard_index < 0) this.active_leaderboard_index = this.leaderboard_loader.data.categories.length - 1;
+            if (this.active_leaderboard_index >= this.leaderboard_loader.data.categories.length) this.active_leaderboard_index = 0;
+        }
     }
 
     app_keyup(e) {
@@ -58,21 +74,11 @@ export class MainMenuSub extends CanvasSubApplication {
     app_render(ctx : CanvasRenderingContext2D, width : number, height : number, ticks_passed : number) {
         const screen_rect = new Rect(new Vector(0, 0), new Vector(width, height));
         // Background Grid
-        this.draw(() => {
-            ctx.strokeStyle = "hsla(0, 100%, 63%)";
-            ctx.globalAlpha = 0.1;
-            ctx.lineWidth = 4;
-
-            for (let y = 0; y < (height - 1) * 2; y += height / 50) {
-                const actual_start_y = ((y + this.bg_scroll_y) % (height * 2)) - height;
-                ctx.beginPath();
-                ctx.moveTo(0, actual_start_y);
-                ctx.lineTo(width, actual_start_y + height);
-                ctx.stroke();
-            }
-        });
-
+        this.draw_grid();
         this.cloud_horizon.draw();
+
+        let logo_rect : Rect;
+        let space_to_play_start_y : number;
 
         // Logo
         this.draw(() => {
@@ -90,8 +96,8 @@ export class MainMenuSub extends CanvasSubApplication {
             ctx.font = logo_font_size + "px 'Bangers'";
 
             const logo_width = ctx.measureText(logo_text).width;
-            const logo_rect = new Rect(
-                screen_rect.get_point(0.5, 0.2).sub(new Vector(logo_width / 2, -logo_font_size / 2)),
+            logo_rect = new Rect(
+                screen_rect.get_point(0.5, 0.1).sub(new Vector(logo_width / 2, -logo_font_size / 2)),
                 new Vector(logo_width, logo_font_size)
             );
             
@@ -105,17 +111,144 @@ export class MainMenuSub extends CanvasSubApplication {
 
         // Space to play text
         this.draw(() => {
+            space_to_play_start_y = screen_rect.get_point(0.5, 0.8).getY() - 40;
+
             ctx.font = "40px 'Bangers'";
             ctx.fillStyle = "#bbb";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText("Press space to play", screen_rect.get_point(0.5, 0.7).getX(), screen_rect.get_point(0.5, 0.7).getY());
+            ctx.fillText("Press space to play", screen_rect.get_point(0.5, 0.8).getX(), screen_rect.get_point(0.5, 0.8).getY());
 
             ctx.fillStyle = "#ccc";
             ctx.font = "20px 'Bangers'";
-            ctx.fillText("Pro tip: Press enter to play with last name", screen_rect.get_point(0.5, 0.8).getX(), screen_rect.get_point(0.5, 0.8).getY());
+            ctx.fillText("Pro tip: Press enter to play with last name", screen_rect.get_point(0.5, 0.9).getX(), screen_rect.get_point(0.5, 0.9).getY());
+        });
 
+        // Leaderboard
+        if (this.leaderboard_loader.has_loaded()) {
+            this.draw(() => {
+                const lb_main_rect_1d = Rect.from_positions(
+                    logo_rect.get_point(0.5, 1).add(new Vector(0, 20)),
+                    new Vector(screen_rect.point_middle().getX(), space_to_play_start_y - 20)
+                );
+    
+                const lb_main_rect = Rect.centered_around(
+                    lb_main_rect_1d.point_middle(),
+                    new Vector(screen_rect.get_width() * 0.25, lb_main_rect_1d.get_height())
+                );
+    
+                // Grid
+                this.draw(() => {
+                    ctx.beginPath();
+                    ctx.rect(lb_main_rect.get_x(), lb_main_rect.get_y(), lb_main_rect.get_width(), lb_main_rect.get_height());
+                    ctx.closePath();
+                    ctx.clip();
+                    
+                    this.draw_grid(0.2);
+                });
+    
+                // Draw contents
+                this.draw(() => {
+                    let active_draw_location = lb_main_rect.get_point(0.5, 0).add(new Vector(0, 20));
+    
+                    // Category title
+                    this.draw(() => {
+                        ctx.fillStyle = "#ff0073";
+                        ctx.strokeStyle = "#c7005a";
+                        ctx.shadowColor = "#c7005a";
+                        ctx.shadowBlur = 5;
+                        ctx.lineWidth = 1;
+        
+                        ctx.font = "30px 'Bangers'";
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
 
+                        const text_str = "[⇠] " + this.leaderboard_loader.data.categories[this.active_leaderboard_index].name + " [⇢]";
+                        ctx.strokeText(text_str, active_draw_location.getX(), active_draw_location.getY());
+                        ctx.fillText(text_str, active_draw_location.getX(), active_draw_location.getY());
+        
+                        active_draw_location.mutadd(new Vector(0, 24));
+                    });
+    
+                    // Entries
+                    this.draw(() => {
+                        const scores : ILbDBScore[] = this.leaderboard_loader.data.categories[this.active_leaderboard_index].scores;
+                        const number_of_columns = 2;
+                        const full_space_rect = Rect.from_positions(new Vector(lb_main_rect.get_x(), active_draw_location.getY() + 4), lb_main_rect.point_bottom_right());
+                        const smaller_rect = full_space_rect.clone_and_perform(rect => {
+                            rect.size.setY(30);
+                            rect.size.mutmult(new Vector(1 / number_of_columns, 1));
+                            rect.size.mutsub(new Vector(2, 0));
+                            rect.top_left.mutadd(new Vector(1, 0));
+                        });
+    
+                        let current_column = 1;
+    
+                        scores.forEach((score : ILbDBScore, i : number) => {
+                            this.draw(() => {
+                                ctx.fillStyle = rainbow_color({
+                                    add_to_time: i * 10,
+                                    light: 20,
+                                    saturation: 50,
+                                    time_div: 20
+                                });
+                                ctx.globalAlpha = 0.7;
+                                smaller_rect.fill_rect(ctx);
+                            });
+    
+                            this.draw(() => {
+                                ctx.fillStyle = rainbow_color({
+                                    add_to_time: i * 10,
+                                    light: 80,
+                                    saturation: 50,
+                                    time_div: 20
+                                });
+                                ctx.font = "15px monospace";
+                                ctx.textAlign = "left";
+                                ctx.textBaseline = "middle";
+                                ctx.fillText((i + 1) + " - " + score.username, smaller_rect.get_margin_rect(4).get_point(0, 0.5).getX(), smaller_rect.get_margin_rect(4).get_point(0, 0.5).getY());
+                                
+                                ctx.fillStyle = rainbow_color({
+                                    add_to_time: i * 10,
+                                    light: 90,
+                                    saturation: 100,
+                                    time_div: 20
+                                });
+                                ctx.textAlign = "right";
+                                ctx.shadowBlur = 5;
+                                ctx.shadowColor = ctx.fillStyle;
+                                ctx.fillText(score.score.toString(), smaller_rect.get_margin_rect(4).get_point(1, 0.5).getX() - 4, smaller_rect.get_margin_rect(4).get_point(1, 0.5).getY());
+                            });
+    
+                            smaller_rect.top_left.mutadd(smaller_rect.size.isolate_x().add(new Vector(2, 0)));
+                            current_column += 1;
+                            if (current_column > number_of_columns) {
+                                current_column = 1;
+                                smaller_rect.top_left.setX(full_space_rect.get_x());
+                                smaller_rect.top_left.mutadd(smaller_rect.size.isolate_y().add(new Vector(0, 10)));
+                            }
+                        });
+                    });
+                });
+            });
+        }
+    }
+
+    draw_grid(alpha : number = 0.1, color : string = "hsla(0, 100%, 63%)") {
+        const width = this.getWidth();
+        const height = this.getHeight();
+        this.draw(ctx => {
+            ctx.strokeStyle = color;
+            ctx.globalAlpha = alpha;
+            ctx.lineWidth = 4;
+
+            for (let y = 0; y < (height - 1) * 2; y += height / 50) {
+                const actual_start_y = ((y + this.bg_scroll_y) % (height * 2)) - height;
+                ctx.beginPath();
+                ctx.moveTo(0, actual_start_y);
+                ctx.lineTo(width, actual_start_y + height);
+                ctx.stroke();
+            }
         });
     }
 }
