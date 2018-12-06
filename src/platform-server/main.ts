@@ -96,7 +96,7 @@ socketserver.on("connection", socket => {
                   },
                   {
                     color: "gray",
-                    text: " joined the area"
+                    text: " entered the area"
                   }
                 ]);
             });
