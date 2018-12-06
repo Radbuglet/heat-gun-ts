@@ -189,7 +189,7 @@ export default class Vector {
     }
 
     isolate_y() : Vector {
-      return new Vector(this.getY(), 0);
+      return new Vector(0, this.getY());
     }
 
     toString() : string {
