@@ -307,6 +307,26 @@ export class Weapon {
                         text: " damage to you!"
                       }
                     ]);
+
+                    const gained_energy = damage / 4;
+
+                    attacker.send_message([{
+                        color: "darkgreen",
+                        text: "You gained "
+                      },
+                      {
+                        color: "green",
+                        text: (Math.floor(gained_energy * 10) / 10).toString()
+                      },
+                      {
+                        color: "darkgreen",
+                        text: " energy!"
+                      },
+                      {
+                        color: "red",
+                        text: " Damage dealt: " + Math.floor(damage * 10) / 10
+                      }
+                    ]);
                     
                     damaged_player.damage_player(damage, () => {
                         return {
@@ -335,29 +355,9 @@ export class Weapon {
                     damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35)).add(new Vector(0, -20)));
                     damaged_player.handle_movementstate_changed(true);
     
-                    const gained_energy = damage / 4;
-    
                     attacker.energy += gained_energy;
                     attacker.total_energy += gained_energy;
                     this.player.handle_energy_changed();
-    
-                    attacker.send_message([{
-                        color: "darkgreen",
-                        text: "You gained "
-                      },
-                      {
-                        color: "green",
-                        text: (Math.floor(gained_energy * 10) / 10).toString()
-                      },
-                      {
-                        color: "darkgreen",
-                        text: " energy!"
-                      },
-                      {
-                        color: "red",
-                        text: " Damage dealt: " + Math.floor(damage * 10) / 10
-                      }
-                    ]);
                 }
             }
 
