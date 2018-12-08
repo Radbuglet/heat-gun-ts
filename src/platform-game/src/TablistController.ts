@@ -28,7 +28,7 @@ export function render_tablist(app : GameWorld, ping : number) {
     
             app.draw(() => {
                 const tablist_interior = tablist_rect.get_percent_margin_rect(0.1);
-                const leaderboard = new Array(...app.world.players.values()).sort((a, b) => b.energy - a.energy);
+                const leaderboard = new Array(...app.world.players.values()).sort((a, b) => b.total_energy - a.total_energy);
                 let your_place = leaderboard.indexOf(app.local_player) + 1;
                 let drawing_y_level = tablist_interior.get_y();
     
