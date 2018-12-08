@@ -34,6 +34,7 @@ export abstract class Player<WorldType extends World<any>> {
   public can_use_rush: boolean = true;
 
   abstract handle_health_changed();
+  abstract handle_damaged(attacker : this, amount : number);
   public health: number = MAX_HEALTH;
 
   abstract handle_energy_changed();

@@ -13,5 +13,6 @@ export enum PacketNames {
     replicate_weapon_info_change,
     replicate_energy_change,
     perform_dash,
-    replicate_slot_change
+    replicate_slot_change,
+    replicate_player_damaged
 }

@@ -279,7 +279,7 @@ export class Weapon {
             
             const raycaster = this.raycast_beam(bullet_direction);
             this.player.handle_player_shoot_gun(this.player.collision_rect.point_middle(), bullet_direction);
-            if (raycaster.collided_player !== null && RunPlatform.is_server()) {
+            if (raycaster.collided_player !== null) {
                 const damaged_player = raycaster.collided_player;
                 const attacker = this.player;
                 
@@ -288,77 +288,79 @@ export class Weapon {
                         (this.get_upgrades().additional_callibur * 1.5) + (this.get_upgrades().additional_barrels * 7), 3)
                         / (this.get_upgrades().additional_barrels + 1) * this.get_fire_rate_multiplier());
                 
-                damaged_player.send_message([{
-                    color: "red",
-                    text: attacker.name
-                  }, {
-                    color: "darkred",
-                    text: " did "
-                  },
-                  {
-                    color: "red",
-                    text: (Math.floor(damage * 10) / 10).toString()
-                  },
-                  {
-                    color: "darkred",
-                    text: " damage to you!"
-                  }
-                ]);
+                damaged_player.handle_damaged(attacker, damage);
                 
-                damaged_player.damage_player(damage, () => {
-                    return {
-                        personal_message: [
-                            {
-                                color: "red",
-                                text: "You were killed by "
-                            },
-                            {
-                                color: "black",
-                                text: attacker.name
-                            }
-                        ],
-                        public_message: [{
-                            color: "darkred",
-                            text: damaged_player.name
-                          },
-                          {
-                            color: "#ee1a1a",
-                            text: " was killed by " + attacker.name
-                          }
-                        ]
-                    }
-                });
-
-                damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35)).add(new Vector(0, -20)));
-                damaged_player.handle_movementstate_changed(true);
-
-                const gained_energy = damage / 4;
-
-                attacker.energy += gained_energy;
-                attacker.total_energy += gained_energy;
-                this.player.handle_energy_changed();
-
-                attacker.send_message([{
-                    color: "darkgreen",
-                    text: "You gained "
-                  },
-                  {
-                    color: "green",
-                    text: (Math.floor(gained_energy * 10) / 10).toString()
-                  },
-                  {
-                    color: "darkgreen",
-                    text: " energy!"
-                  },
-                  {
-                    color: "red",
-                    text: " Damage dealt: " + Math.floor(damage * 10) / 10
-                  }
-                ]);
+                if (RunPlatform.is_server()) {
+                    damaged_player.send_message([{
+                        color: "red",
+                        text: attacker.name
+                      }, {
+                        color: "darkred",
+                        text: " did "
+                      },
+                      {
+                        color: "red",
+                        text: (Math.floor(damage * 10) / 10).toString()
+                      },
+                      {
+                        color: "darkred",
+                        text: " damage to you!"
+                      }
+                    ]);
+                    
+                    damaged_player.damage_player(damage, () => {
+                        return {
+                            personal_message: [
+                                {
+                                    color: "red",
+                                    text: "You were killed by "
+                                },
+                                {
+                                    color: "black",
+                                    text: attacker.name
+                                }
+                            ],
+                            public_message: [{
+                                color: "darkred",
+                                text: damaged_player.name
+                              },
+                              {
+                                color: "#ee1a1a",
+                                text: " was killed by " + attacker.name
+                              }
+                            ]
+                        }
+                    });
+    
+                    damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35)).add(new Vector(0, -20)));
+                    damaged_player.handle_movementstate_changed(true);
+    
+                    const gained_energy = damage / 4;
+    
+                    attacker.energy += gained_energy;
+                    attacker.total_energy += gained_energy;
+                    this.player.handle_energy_changed();
+    
+                    attacker.send_message([{
+                        color: "darkgreen",
+                        text: "You gained "
+                      },
+                      {
+                        color: "green",
+                        text: (Math.floor(gained_energy * 10) / 10).toString()
+                      },
+                      {
+                        color: "darkgreen",
+                        text: " energy!"
+                      },
+                      {
+                        color: "red",
+                        text: " Damage dealt: " + Math.floor(damage * 10) / 10
+                      }
+                    ]);
+                }
             }
 
-            // @TODO power ups and toggleable
-            // @TODO beams
             this.player.world.add_gun_beams(
                 this.player,
                 raycaster.beam_path,

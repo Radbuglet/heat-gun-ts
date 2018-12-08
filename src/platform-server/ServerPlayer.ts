@@ -3,10 +3,15 @@ import { ServerWorld } from "./ServerWorld";
 import { ITextComponent } from "../helpers-common/helpers/ITextComponent";
 import { SocketUser } from "./SocketUser";
 import { PacketNames } from "../config/ProtocolDefs";
+import { World } from "../helpers-common/World";
 
 export class ServerPlayer extends Player<ServerWorld> {
     constructor(public user : SocketUser, world : ServerWorld, name : string) {
         super(world, name);
+    }
+
+    handle_damaged(attacker : Player<World<any>>, damage : number) {
+        this.user.send_packet(PacketNames.replicate_player_damaged, attacker.uuid, this.uuid, damage);
     }
 
     // @TODO add good replication

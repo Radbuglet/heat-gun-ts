@@ -4,8 +4,8 @@ import Vector from "../../helpers-common/helpers/Vector";
 import { rainbow_color } from "../../helpers-client/color";
 import { MAX_HEALTH } from "../../config/Config";
 import { ClientWorld } from "./ClientWorld";
-import { AmmoParticle } from "../../helpers-client/ParticleSystem";
-import { ITrait, configurable_traits } from "../../helpers-common/Weapon";
+import { AmmoParticle, BloodParticle } from "./Particles";
+import { World } from "../../helpers-common/World";
 
 export class ClientPlayer extends Player<ClientWorld> {
     public gun_look_direction : Vector = null;
@@ -19,6 +19,24 @@ export class ClientPlayer extends Player<ClientWorld> {
     handle_health_changed() {}
     handle_movementstate_changed() {}
     handle_powerupstate_changed() {}
+    handle_damaged(attacker : Player<World<any>>, damage : number) {
+        for (let x = 0; x < damage * 2; x++) {
+            this.world.particle_system.register_particle(new BloodParticle(
+                this.world.particle_system, this.world.app,
+                this.collision_rect.point_middle(), new Vector(Math.random() - 0.5, -Math.random()).mult(new Vector(15)), Math.floor(Math.random() * 10 + 5)
+            ));
+        }
+
+        if (this.health - damage <= 0) {
+            for (let x = 0; x < 20; x++) {
+                this.world.particle_system.register_particle(new AmmoParticle(
+                    this.world.particle_system, this.world.app,
+                    this.collision_rect.point_middle(), new Vector(Math.random() - 0.5, -Math.random()).mult(new Vector(15)))
+                );
+            }
+        }
+    }
+
     handle_slot_changed() {}
     handle_player_shoot_gun(origin : Vector, direction : Vector) {
         this.world.particle_system.register_particle(new AmmoParticle(

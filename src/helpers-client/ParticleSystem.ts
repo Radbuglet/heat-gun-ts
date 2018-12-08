@@ -88,37 +88,3 @@ export abstract class SquareParticle extends Particle {
     abstract get_color_border() : string;
     abstract get_size_border() : number;
 }
-
-
-// @TODO create custom particles and use them!
-
-// @TODO rename and move somewhere
-export class AmmoParticle extends SquareParticle {
-    constructor(system : ParticleSystem, app : CanvasSubApplication, position : Vector, velocity : Vector) {
-        super(system, app, position, velocity, new Vector(0, 1), 1000); // @TODO check if lifetime is working
-    }
-
-    get_color() {
-        return "yellow";
-    }
-
-    get_opacity() {
-        return 1;
-    }
-
-    get_color_border() {
-        return "black";
-    }
-
-    get_size_border() {
-        return 1;
-    }
-
-    get_size() {
-        return 10;
-    }
-
-    get_rotation() {
-        return (this.life_counter / this.life_max) * 360 * 5;
-    }
-}

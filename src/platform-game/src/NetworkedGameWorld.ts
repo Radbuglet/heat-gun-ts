@@ -107,6 +107,13 @@ export class NetworkedGameWorld extends GameWorld {
                 target_player.selected_slot = slot;
             }
         });
+
+        this.socket.clump_on(PacketNames.replicate_player_damaged, SocketEventGroups.GAME, (attacker : string, target_uuid : string, damage : number) => {
+            if (this.world.players.has(target_uuid) && attacker !== this.local_player.uuid) {
+                const target_player = this.world.players.get(target_uuid);
+                target_player.handle_damaged(null, damage);
+            }
+        });
         
         this.socket.underlying_socket.on("custom_pong", (s) => {
             this.ping = Date.now() - s;
