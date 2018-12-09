@@ -125,6 +125,38 @@ export class WeaponStatsMenu {
                     });
                 });
             });
+
+            // Scroll bar
+            this.app.draw(() => {
+                const scroll_rect = Rect.from_positions(new Vector(width - 10, 10), new Vector(width, height - 10));
+                const unit_rect = scroll_rect.clone_and_perform(rect => {
+                    rect.size.mutdiv(new Vector(1, configurable_traits.length));
+                });
+                
+                configurable_traits.forEach((trait, i) => {
+                    if (trait !== null) {
+                        this.app.draw(() => {
+                            ctx.fillStyle = "#313131";
+    
+                            if (i === this.weapon_stat_edit_index) {
+                                ctx.fillStyle = "#BDBDBD";
+                            }
+    
+                            if (Rect.from_positions(unit_rect.point_top_left().sub(new Vector(200, 0)), unit_rect.point_bottom_right()).testcollision(Rect.centered_around(this.app.get_mouse_position(), new Vector(1)))) {
+                                ctx.fillStyle = "#fff";
+    
+                                if (this.app.is_mouse_down()) {
+                                    this.weapon_stat_edit_index = i;
+                                }
+                            }
+                            
+                            unit_rect.fill_rect(ctx);
+                        });   
+                    }
+
+                    unit_rect.top_left.mutadd(unit_rect.size.isolate_y());
+                });
+            });
         });
     }
 
