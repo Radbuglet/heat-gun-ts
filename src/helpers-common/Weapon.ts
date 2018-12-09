@@ -240,7 +240,7 @@ export class Weapon {
                 (this.get_upgrades().additional_launching_power * 1)
             ) * this.get_firerate_multiplier() +
             (
-                (this.get_upgrades().teleportation * 4)
+                (this.get_upgrades().teleportation * 15)
             )
         );
     }
