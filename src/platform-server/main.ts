@@ -90,6 +90,7 @@ socketserver.on("connection", socket => {
             world.wrapped_queue_packets(() => {
                 socket_user.play(username);
 
+                world.broadcast_message([]);
                 world.broadcast_message([{
                     color: "#ee1a1a",
                     text: username
@@ -99,6 +100,7 @@ socketserver.on("connection", socket => {
                     text: " entered the area"
                   }
                 ]);
+                world.broadcast_message([]);
             });
         }
     });
@@ -210,6 +212,7 @@ socketserver.on("connection", socket => {
         connected_ips.delete(socket.handshake.address);
 
         if (socket_user.is_playing()) {
+            world.broadcast_message([]);
             world.broadcast_message([{
                 color: "darkred",
                 text: socket_user.player.name
@@ -217,6 +220,7 @@ socketserver.on("connection", socket => {
                 color: "red",
                 text: " rage quit the arena!"
             }]);
+            world.broadcast_message([]);
             socket_user.notify_kill_and_remove(null);
         }
     });

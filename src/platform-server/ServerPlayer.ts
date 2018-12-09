@@ -16,7 +16,9 @@ export class ServerPlayer extends Player<ServerWorld> {
 
     // @TODO add good replication
     handle_death(death_info : IDeathHandlerInfo, socket_disconnected = false) {
+        this.world.broadcast_message([]);
         this.world.broadcast_message(death_info.public_message);
+        this.world.broadcast_message([]);
         this.user.notify_kill_and_remove(death_info.personal_message, socket_disconnected);
     }
 
