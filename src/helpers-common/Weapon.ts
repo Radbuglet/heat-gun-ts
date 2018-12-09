@@ -63,48 +63,9 @@ export const configurable_traits: ITrait[] = [
         maxval: 3,
         cost: 7
     },
-    {
-        key: "suck_mode",
-        name: "Reverse Direction",
-        maxval: 1,
-        cost: 10
-    },
-    {
-        key: "slow_motion",
-        name: "Slow Motion",
-        maxval: 4,
-        cost: 3
-    },
-    {
-        key: "additional_size",
-        name: "Bigger bullet size",
-        maxval: 5,
-        cost: 3
-    },
-    {
-        key: "additional_launching_power",
-        name: "Additional proppelling",
-        maxval: 5,
-        cost: 2
-    },
-    {
-        key: "bullet_gravity",
-        name: "Bullet Gravity",
-        maxval: 4,
-        cost: 2
-    },
-    {
-        key: "scope",
-        name: "Scope",
-        maxval: 7,
-        cost: 2
-    },
-    {
-        key: "trail_color",
-        name: "Trail Color",
-        maxval: 10,
-        cost: 0
-    },
+
+    null,
+
     {
         key: "gravmod",
         name: "Gravity--",
@@ -115,6 +76,54 @@ export const configurable_traits: ITrait[] = [
         key: "fricmod",
         name: "Friction--",
         maxval: 4,
+        cost: 2
+    },
+    {
+        key: "additional_launching_power",
+        name: "Additional proppelling",
+        maxval: 5,
+        cost: 2
+    },
+    {
+        key: "slow_motion",
+        name: "Slow Motion",
+        maxval: 4,
+        cost: 3
+    },
+    {
+        key: "suck_mode",
+        name: "Reverse Direction",
+        maxval: 1,
+        cost: 10
+    },
+
+    null,
+
+    {
+        key: "additional_size",
+        name: "Bigger bullet size",
+        maxval: 5,
+        cost: 3
+    },
+    {
+        key: "bullet_gravity",
+        name: "Bullet Gravity",
+        maxval: 4,
+        cost: 2
+    },
+    {
+        key: "trail_color",
+        name: "Trail Color",
+        maxval: 10,
+        cost: 0
+    },
+
+    null,
+
+    {
+        key: "scope",
+        name: "Scope",
+        maxval: 7,
         cost: 2
     },
     {

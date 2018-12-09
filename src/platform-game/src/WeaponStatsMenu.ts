@@ -84,39 +84,41 @@ export class WeaponStatsMenu {
                     const trait_elem_width = width * (1 - (0.3 * 2));
 
                     configurable_traits.forEach((trait_data, i) => {
-                        if (Math.abs(i - this.weapon_stat_edit_index) < 5 || i > this.weapon_stat_edit_index) {
-                            const is_selected = i === this.weapon_stat_edit_index;
+                        if (Math.abs(i - this.weapon_stat_edit_index) < 3 || i > this.weapon_stat_edit_index) {
+                            if (trait_data !== null) {
+                                const is_selected = i === this.weapon_stat_edit_index;
 
-                            ctx.fillStyle = is_selected ? "#5e5e5e" : "#3f3d3fdd";
-                            ctx.strokeStyle = this.app.local_player.energy >= trait_data.cost ? "#e8e8e8" : "red";
+                                ctx.fillStyle = is_selected ? "#5e5e5e" : "#3f3d3fdd";
+                                ctx.strokeStyle = this.app.local_player.energy >= trait_data.cost ? "#e8e8e8" : "red";
 
-                            ctx.shadowBlur = 20;
-                            ctx.shadowColor = "#000";
+                                ctx.shadowBlur = 20;
+                                ctx.shadowColor = "#000";
 
-                            ctx.fillRect(trait_elem_x, active_element_y, trait_elem_width, trait_elem_height);
-                            ctx.strokeRect(trait_elem_x, active_element_y, trait_elem_width, trait_elem_height);
+                                ctx.fillRect(trait_elem_x, active_element_y, trait_elem_width, trait_elem_height);
+                                ctx.strokeRect(trait_elem_x, active_element_y, trait_elem_width, trait_elem_height);
 
-                            ctx.fillStyle = "#fff";
-                            ctx.font = "20px monospace";
-                            ctx.textAlign = "left";
-                            ctx.textBaseline = "top";
-                            ctx.fillText(trait_data.name, trait_elem_x + 10, active_element_y + 10);
+                                ctx.fillStyle = "#fff";
+                                ctx.font = "20px monospace";
+                                ctx.textAlign = "left";
+                                ctx.textBaseline = "top";
+                                ctx.fillText(trait_data.name, trait_elem_x + 10, active_element_y + 10);
 
-                            ctx.fillStyle = "#f41f1f";
-                            ctx.textAlign = "right";
-                            ctx.shadowBlur = 0;
-                            ctx.fillText(trait_data.cost + " energy per upgrade", trait_elem_x + trait_elem_width - 10, active_element_y + 10);
+                                ctx.fillStyle = "#f41f1f";
+                                ctx.textAlign = "right";
+                                ctx.shadowBlur = 0;
+                                ctx.fillText(trait_data.cost + " energy per upgrade", trait_elem_x + trait_elem_width - 10, active_element_y + 10);
 
-                            ctx.shadowBlur = 20;
-                            ctx.shadowColor = "red";
-                            ctx.textAlign = "left";
-                            ctx.textBaseline = "bottom";
+                                ctx.shadowBlur = 20;
+                                ctx.shadowColor = "red";
+                                ctx.textAlign = "left";
+                                ctx.textBaseline = "bottom";
 
-                            ctx.fillText(("[x] ".repeat(
-                                this.app.local_player.get_active_weapon().get_trait_value(trait_data)
-                            )) + ("[ ] ".repeat(
-                                trait_data.maxval - this.app.local_player.get_active_weapon().get_trait_value(trait_data)
-                            )), trait_elem_x + 10, active_element_y + trait_elem_height - 10);
+                                ctx.fillText(("[x] ".repeat(
+                                    this.app.local_player.get_active_weapon().get_trait_value(trait_data)
+                                )) + ("[ ] ".repeat(
+                                    trait_data.maxval - this.app.local_player.get_active_weapon().get_trait_value(trait_data)
+                                )), trait_elem_x + 10, active_element_y + trait_elem_height - 10);
+                            }
 
                             active_element_y += trait_elem_height + 40;
                         }
@@ -134,10 +136,17 @@ export class WeaponStatsMenu {
     
             if (e.code === "ArrowUp") {
                 this.weapon_stat_edit_index -= 1;
+
+                while (configurable_traits[this.weapon_stat_edit_index] === null) {
+                    this.weapon_stat_edit_index -= 1;
+                }
             }
     
             if (e.code === "ArrowDown") {
                 this.weapon_stat_edit_index += 1;
+                while (configurable_traits[this.weapon_stat_edit_index] === null) {
+                    this.weapon_stat_edit_index += 1;
+                }
             }
     
             const last_stat_index = configurable_traits.length - 1;
