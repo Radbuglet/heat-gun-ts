@@ -287,6 +287,7 @@ export class Weapon {
             this.player.get_active_weapon().shot_cooldown = 15;
             this.player.handle_slot_changed();
         }
+
         for (let i = 0; i < this.get_upgrades().additional_barrels + 1; i++) {
             const direction_innac : number = (Math.random() - 0.75) * ((this.get_upgrades().additional_barrels + this.get_upgrades().additional_size * 0.025) / 5);
             const bullet_direction = new Vector(
@@ -431,7 +432,11 @@ export class Weapon {
     }
 
     get_teleportation_vec(aim_direction : Vector) : Vector {
-        return aim_direction.mult(new Vector(this.get_upgrades().teleportation * 100));
+        const tpvec = aim_direction.mult(new Vector(this.get_upgrades().teleportation * 100));
+        if (this.get_upgrades().suck_mode > 0) {
+            tpvec.mutnegate();
+        }
+        return tpvec;
     }
 
     static is_valid_slot_index(slot : number) : boolean {
