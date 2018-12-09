@@ -23,6 +23,7 @@ export interface IWeaponStats {
     gravmod: number
     fricmod : number
     slow_motion : number
+    slot_on_shoot : number
 }
 
 export interface IWeapon {
@@ -121,6 +122,12 @@ export const configurable_traits: ITrait[] = [
         name: "Teleportation",
         maxval: 4,
         cost: 4
+    },
+    {
+        key: "slot_on_shoot",
+        name: "Shot slot change (0 = disabled)",
+        maxval: 3,
+        cost: 0
     }
 ];
 
@@ -141,7 +148,8 @@ export class Weapon {
             teleportation: 0,
             trail_color: 0,
             fricmod: 0,
-            slow_motion: 0
+            slow_motion: 0,
+            slot_on_shoot: 0
         }
     }
 
@@ -197,6 +205,10 @@ export class Weapon {
             this.player.handle_energy_changed();
             this.change_trait_value(trait, -1);
         }
+    }
+
+    get_next_slot() : number {
+        return this.get_upgrades().slot_on_shoot > 0 ? this.get_upgrades().slot_on_shoot - 1 : null;
     }
 
     update(update_evt: IUpdate) {
@@ -270,6 +282,11 @@ export class Weapon {
         this.shot_cooldown = this.get_cooldown_when_shooting();
         this.set_ammo(this.get_ammo() - 1);
 
+        if (RunPlatform.is_client() && this.get_next_slot() !== null) {
+            this.player.selected_slot = this.get_next_slot();
+            this.player.get_active_weapon().shot_cooldown = 15;
+            this.player.handle_slot_changed();
+        }
         for (let i = 0; i < this.get_upgrades().additional_barrels + 1; i++) {
             const direction_innac : number = (Math.random() - 0.75) * ((this.get_upgrades().additional_barrels + this.get_upgrades().additional_size * 0.025) / 5);
             const bullet_direction = new Vector(
@@ -285,7 +302,7 @@ export class Weapon {
                 
                 const damage = Math.ceil(Math.max(
                     4 +
-                        (this.get_upgrades().additional_callibur * 1.5) + (this.get_upgrades().additional_barrels * 7), 3)
+                        (this.get_upgrades().additional_callibur * (this.get_upgrades().slot_on_shoot === 0 ? 2 : 0.5)) + (this.get_upgrades().additional_barrels * 7), 3)
                         / (this.get_upgrades().additional_barrels + 1) * this.get_fire_rate_multiplier());
                 
                 damaged_player.handle_damaged(attacker, damage);
