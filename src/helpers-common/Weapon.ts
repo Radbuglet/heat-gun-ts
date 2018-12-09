@@ -303,7 +303,7 @@ export class Weapon {
                 
                 const damage = Math.ceil(Math.max(
                     4 +
-                        (this.get_upgrades().additional_callibur * (this.get_upgrades().slot_on_shoot === 0 ? 2 : 0.5)) + (this.get_upgrades().additional_barrels * 7), 3)
+                        (this.get_upgrades().additional_callibur * (this.get_upgrades().slot_on_shoot === 0 ? 2 : 1)) + (this.get_upgrades().additional_barrels * 7), 3)
                         / (this.get_upgrades().additional_barrels + 1) * this.get_fire_rate_multiplier());
                 
                 damaged_player.handle_damaged(attacker, damage);
