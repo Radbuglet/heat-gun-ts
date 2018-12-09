@@ -64,5 +64,5 @@ module.exports.build_and_run = series(
 );
 
 module.exports.watch = function(cb) {
-    watch(['src/**/*.ts', 'src/**/*.html'], { events: 'all', ignoreInitial: false }, module.exports.build_and_run);
+    watch(['src/**/*.ts', 'src/**/*.html', 'src/**/*.html', 'src/config/map_data.json'], { events: 'all', ignoreInitial: false }, module.exports.build_and_run);
 }
