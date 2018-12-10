@@ -1,6 +1,3 @@
-// @TODO leaderboards
-// @TODO:MAJOR Replicate things in world!
-
 import * as express from "express";
 import { static as serveStatic } from "express";
 import * as socketio from "socket.io";
@@ -71,18 +68,7 @@ const socketserver = socketio(server);
 
 const world = new ServerWorld(map_loader);
 
-const connected_ips : Map<string, socketio.Socket> = new Map();
-
 socketserver.on("connection", socket => {
-    if (socket.handshake.address !== "::1") {
-        if (connected_ips.has(socket.handshake.address)) {
-            // @TODO kick message
-            connected_ips.get(socket.handshake.address).disconnect();
-        }
-    
-        connected_ips.set(socket.handshake.address, socket);   
-    }
-
     let socket_user : SocketUser = new SocketUser(socket, world);
 
     socket.on((PacketNames.play as number).toString(), (username : string) => {
@@ -209,8 +195,6 @@ socketserver.on("connection", socket => {
     });
 
     socket.on("disconnect", () => {
-        connected_ips.delete(socket.handshake.address);
-
         if (socket_user.is_playing()) {
             world.broadcast_message([]);
             world.broadcast_message([{
