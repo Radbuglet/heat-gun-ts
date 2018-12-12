@@ -245,7 +245,7 @@ export class Weapon {
     }
 
     get_pullup_cooldown_max() : number {
-        return 0 + (this.get_upgrades().additional_callibur * 5) + (this.get_upgrades().additional_barrels * 5);
+        return 10 + (this.get_upgrades().additional_callibur * 5) + (this.get_upgrades().additional_barrels * 5);
     }
 
     is_selected() {
