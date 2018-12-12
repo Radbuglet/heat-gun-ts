@@ -47,7 +47,8 @@ export abstract class Player<WorldType extends World<any>> {
   public power_up_time_left: number = 0;
 
   abstract handle_slot_changed();
-  public selected_slot: number = 0;
+  private selected_slot: number = 0;
+  public gun_pullup_cooldown : number = 0;
   private regen_timer : number = 0;
 
   abstract handle_player_shoot_gun(origin : Vector, gun_direction : Vector);
@@ -67,6 +68,17 @@ export abstract class Player<WorldType extends World<any>> {
 
   get_active_weapon() {
     return this.weapons[this.selected_slot];
+  }
+
+  get_selected_slot() : number {
+    return this.selected_slot;
+  }
+
+  select_slot(slot : number) {
+    if (this.selected_slot !== slot) {
+      this.selected_slot = slot;
+      this.gun_pullup_cooldown = this.get_active_weapon().get_pullup_cooldown_max();
+    }
   }
 
   get_movement_collisions(vec : Vector, return_raw_collisions = false) : ITile[] {
@@ -146,6 +158,8 @@ export abstract class Player<WorldType extends World<any>> {
     this.apply_physics(1 /*Math.floor(update_evt.ticks * 100) / 100*/);
     this.collision_rect.top_left = this.position;
     this.sync_controller.record_position(this.position);
+
+    this.gun_pullup_cooldown = Math.max(0, this.gun_pullup_cooldown - update_evt.ticks);
 
     if (!this.can_use_rush && (this.is_on_ground() || this.current_power_up === PowerupTypeNames.InfiniteDashes)) {
       this.can_use_rush = true;

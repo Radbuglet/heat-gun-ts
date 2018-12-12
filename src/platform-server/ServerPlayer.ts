@@ -53,7 +53,7 @@ export class ServerPlayer extends Player<ServerWorld> {
     }
 
     handle_slot_changed() {
-        this.world.broadcast_packet(PacketNames.replicate_slot_change, this.uuid, this.selected_slot);
+        this.world.broadcast_packet(PacketNames.replicate_slot_change, this.uuid, this.get_selected_slot());
     }
 
     send_message(message : ITextComponent[]) {

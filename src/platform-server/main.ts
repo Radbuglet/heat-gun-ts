@@ -103,7 +103,7 @@ socketserver.on("connection", socket => {
             socket_user.is_playing() // Gameplay checks
         ) {
             world.wrapped_queue_packets(() => {
-                socket_user.player.selected_slot = new_slot;
+                socket_user.player.select_slot(new_slot);
                 socket_user.player.handle_slot_changed();
             });
         }
@@ -151,8 +151,8 @@ socketserver.on("connection", socket => {
             socket_user.is_playing() // Gameplay checks
         ) {
             const player = socket_user.player;
-            if (slot !== player.selected_slot) {
-                player.selected_slot = slot;
+            if (slot !== player.get_selected_slot()) {
+                player.select_slot(slot);
                 socket_user.player.handle_slot_changed();
             }
 

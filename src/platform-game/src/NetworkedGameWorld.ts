@@ -104,7 +104,7 @@ export class NetworkedGameWorld extends GameWorld {
         this.socket.clump_on(PacketNames.replicate_slot_change, SocketEventGroups.GAME, (target_uuid : string, slot : number) => {
             if (this.world.players.has(target_uuid) && target_uuid !== this.local_player.uuid) {
                 const target_player = this.world.players.get(target_uuid);
-                target_player.selected_slot = slot;
+                target_player.select_slot(slot);
             }
         });
 
@@ -129,7 +129,7 @@ export class NetworkedGameWorld extends GameWorld {
     }
 
     handle_shot(look_direction : Vector) {
-        this.socket.emit(PacketNames.shoot_gun, look_direction.getdeg(), this.local_player.selected_slot, this.local_player.position.serialize());
+        this.socket.emit(PacketNames.shoot_gun, look_direction.getdeg(), this.local_player.get_selected_slot(), this.local_player.position.serialize());
     }
 
     handle_scope(bool : boolean) {

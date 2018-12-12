@@ -222,7 +222,7 @@ export abstract class GameWorld extends CanvasSubApplication {
 
                     this.local_player.weapons.forEach((weapon, i) => {
                         const this_weapon_rect = split_container_rect.clone_and_perform(rect => {
-                            rect.top_left.mutsub(new Vector(0, i === this.local_player.selected_slot ? 7 : 0));
+                            rect.top_left.mutsub(new Vector(0, i === this.local_player.get_selected_slot() ? 7 : 0));
                         });
 
                         ctx.fillStyle = weapon.theme_color;
@@ -245,9 +245,19 @@ export abstract class GameWorld extends CanvasSubApplication {
                         });
 
 
-                        total_bar_rect.clone_and_perform(rect => {
-                            rect.size.mutmult(new Vector(1 - (weapon.shot_cooldown / weapon.get_cooldown_when_shooting()), 1));
-                        }).fill_rect(ctx);
+                        if (weapon.get_pullup_cooldown() > 0 && weapon.is_selected()) {
+                            this.draw(() => {
+                                ctx.shadowColor = "red";
+                                ctx.fillStyle = "red";
+                                total_bar_rect.clone_and_perform(rect => {
+                                    rect.size.mutmult(new Vector(weapon.get_pullup_cooldown() / weapon.get_pullup_cooldown_max(), 1));
+                                }).fill_rect(ctx);
+                            });
+                        } else {
+                            total_bar_rect.clone_and_perform(rect => {
+                                rect.size.mutmult(new Vector(1 - (weapon.shot_cooldown / weapon.get_cooldown_when_shooting()), 1));
+                            }).fill_rect(ctx);
+                        }
 
                         split_container_rect.top_left.mutadd(split_container_rect.size.isolate_x());
                     });
@@ -388,9 +398,9 @@ export abstract class GameWorld extends CanvasSubApplication {
             }
         }
 
-        if (e.code === "Digit1") this.local_player.selected_slot = 0;
-        if (e.code === "Digit2") this.local_player.selected_slot = 1;
-        if (e.code === "Digit3") this.local_player.selected_slot = 2;
+        if (e.code === "Digit1") this.local_player.select_slot(0);
+        if (e.code === "Digit2") this.local_player.select_slot(1);
+        if (e.code === "Digit3") this.local_player.select_slot(2);
 
         if (e.code === "KeyR") this.direction_negate_mode = !this.direction_negate_mode;
 

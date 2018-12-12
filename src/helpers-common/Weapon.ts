@@ -184,8 +184,8 @@ export class Weapon {
         return this.replicated_data.ammo;
     }
 
-    get_firerate_multiplier(): number {
-        return 1 - (this.get_upgrades().fire_rate * 0.1);
+    get_firerate_multiplier(is_for_pistol : boolean): number {
+        return 1 - (this.get_upgrades().fire_rate * (is_for_pistol ? 0.1 : 0.2));
     }
 
     get_trait_value(trait: ITrait): number {
@@ -237,18 +237,31 @@ export class Weapon {
     }
 
     can_shoot() {
-        return !this.has_shot_cooldown() && this.get_ammo() > 0;
+        return !this.has_shot_cooldown() && this.get_ammo() > 0 && this.player.gun_pullup_cooldown === 0;
+    }
+
+    get_pullup_cooldown() : number {
+        return this.player.gun_pullup_cooldown;
+    }
+
+    get_pullup_cooldown_max() : number {
+        return 0 + (this.get_upgrades().additional_callibur * 5) + (this.get_upgrades().additional_barrels * 5);
+    }
+
+    is_selected() {
+        return this === this.player.get_active_weapon();
     }
 
     get_cooldown_when_shooting() : number {
         return (
             (
-                15 +
-                (this.get_upgrades().additional_callibur * 12) +
-                (this.get_upgrades().additional_barrels * 5) +
-                (this.get_upgrades().additional_launching_power * 1)
-            ) * this.get_firerate_multiplier() +
-            (
+                (15 * this.get_firerate_multiplier(true)) +
+                (
+                    (this.get_upgrades().additional_callibur * 12) +
+                    (this.get_upgrades().additional_barrels * 5) +
+                    (this.get_upgrades().additional_launching_power * 1)
+                ) * this.get_firerate_multiplier(false)
+            ) + (
                 (this.get_upgrades().teleportation * 15)
             )
         );
@@ -292,8 +305,7 @@ export class Weapon {
         this.set_ammo(this.get_ammo() - 1);
 
         if (RunPlatform.is_client() && this.get_next_slot() !== null) {
-            this.player.selected_slot = this.get_next_slot();
-            this.player.get_active_weapon().shot_cooldown = 15;
+            this.player.select_slot(this.get_next_slot());
             this.player.handle_slot_changed();
         }
 
@@ -311,9 +323,12 @@ export class Weapon {
                 const attacker = this.player;
                 
                 const damage = Math.ceil(Math.max(
-                    4 +
-                        (this.get_upgrades().additional_callibur * (this.get_upgrades().slot_on_shoot === 0 ? 2 : 1)) + (this.get_upgrades().additional_barrels * 7), 3)
-                        / (this.get_upgrades().additional_barrels + 1) * this.get_fire_rate_multiplier());
+                    (4 * this.get_firerate_multiplier(false))
+                    +
+                    (
+                        ((this.get_upgrades().additional_callibur * 2) + (this.get_upgrades().additional_barrels * 7))
+                        / (this.get_upgrades().additional_barrels + 1)
+                    ) * this.get_firerate_multiplier(false), 3));
                 
                 damaged_player.handle_damaged(attacker, damage);
                 
@@ -405,10 +420,6 @@ export class Weapon {
 
     get_bullet_size() {
         return 10 + this.get_upgrades().additional_size * 3;
-    }
-
-    get_fire_rate_multiplier() : number {
-        return 1 - (0.1 * this.get_upgrades().fire_rate);
     }
 
     apply_forces(aim_direction : Vector, already_verified_teleport = false) {

@@ -92,6 +92,7 @@ export class ClientPlayer extends Player<ClientWorld> {
                     this.gun_look_direction.mult(new Vector(this.get_active_weapon().shot_cooldown))
                 );
                 ctx.lineWidth = 10;
+                ctx.globalAlpha = 1 - (this.get_active_weapon().get_pullup_cooldown() / this.get_active_weapon().get_pullup_cooldown_max());
     
                 app.draw(() => {
                     ctx.strokeStyle = "#aaa";

@@ -64,7 +64,7 @@ export class WeaponStatsMenu {
                         const weapon_rect = new Rect(new Vector(page_begin_x + weapon_width * i, active_element_y), new Vector(weapon_width, weapon_height));
 
                         this.app.draw(() => {
-                            ctx.fillStyle = rainbow_color({ light: i === this.app.local_player.selected_slot ? 70 : 20, saturation: i === this.app.local_player.selected_slot ? 100 : 10, time_div: 20 });
+                            ctx.fillStyle = rainbow_color({ light: i === this.app.local_player.get_selected_slot() ? 70 : 20, saturation: i === this.app.local_player.get_selected_slot() ? 100 : 10, time_div: 20 });
                             ctx.fillRect(weapon_rect.get_x(), weapon_rect.get_y(), weapon_rect.get_width(), weapon_rect.get_height());
 
                             ctx.strokeStyle = rainbow_color({ light: 10, saturation: 20, time_div: 20 });
@@ -193,12 +193,12 @@ export class WeaponStatsMenu {
     
             if (e.code === "ArrowLeft") {
                 this.app.local_player.get_active_weapon().downgrade_trait(this.get_selected_trait());
-                this.stat_changed_handler(this.app.local_player.selected_slot, this.weapon_stat_edit_index, false);
+                this.stat_changed_handler(this.app.local_player.get_selected_slot(), this.weapon_stat_edit_index, false);
             }
     
             if (e.code === "ArrowRight") {
                 this.app.local_player.get_active_weapon().upgrade_trait(this.get_selected_trait());
-                this.stat_changed_handler(this.app.local_player.selected_slot, this.weapon_stat_edit_index, true);
+                this.stat_changed_handler(this.app.local_player.get_selected_slot(), this.weapon_stat_edit_index, true);
             }
         }
 
