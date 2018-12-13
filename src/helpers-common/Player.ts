@@ -155,7 +155,7 @@ export abstract class Player<WorldType extends World<any>> {
   }
 
   update(update_evt : IUpdate) {
-    this.apply_physics(1 /*Math.floor(update_evt.ticks * 100) / 100*/);
+    this.apply_physics(/*1*/ Math.floor(update_evt.ticks * 100) / 100);
     this.collision_rect.top_left = this.position;
     this.sync_controller.record_position(this.position);
 
