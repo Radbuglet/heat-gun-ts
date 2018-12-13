@@ -319,13 +319,13 @@ export abstract class GameWorld extends CanvasSubApplication {
             });
 
             this.draw(() => {
-                ctx.fillStyle = "red";
+                ctx.fillStyle = "#008f32";
+
                 ctx.font = "20px monospace";
                 ctx.textBaseline = "top";
-                ctx.textAlign = "left";
-                ctx.fillText("HP: " + this.local_player.health + "/" + MAX_HEALTH + " | Energy: " + this.local_player.energy + " | Score: " + this.local_player.total_energy, 0, 0);
-
-                ctx.fillText("Press F to upgrade your weapon, Tab to view tablist", 0, 25);
+                ctx.textAlign = "center";
+                ctx.fillText("Press F to upgrade your weapon, Tab to view tablist", width / 2, height - 200);
+                ctx.fillText("Energy: " + this.local_player.energy + " | Score: " + this.local_player.total_energy, width / 2, height - 170);
             });
         });
 
