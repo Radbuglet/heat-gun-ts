@@ -8,13 +8,15 @@ import { Player } from "../../helpers-common/Player";
 import { CloudHorizon } from "./CloudHorizon";
 import { ILbDBScore } from "../../helpers-common/LeaderboardScheme";
 import { LeaderboardLoader } from "./LeaderboardLoader";
+import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
+import { draw_text } from "../../helpers-client/draw_text";
 
 export class MainMenuSub extends CanvasSubApplication {
     private bg_scroll_y : number = 0;
     private cloud_horizon : CloudHorizon = new CloudHorizon(this);
     private active_leaderboard_index : number = 0;
 
-    constructor(private main_app : MainGame, private leaderboard_loader : LeaderboardLoader) {
+    constructor(private main_app : MainGame, private leaderboard_loader : LeaderboardLoader, private death_message : ITextComponent[] = null) {
         super(main_app);
     }
 
@@ -231,6 +233,14 @@ export class MainMenuSub extends CanvasSubApplication {
                         });
                     });
                 });
+            });
+        }
+
+        // Death message
+        if (this.death_message !== null) {
+            this.draw(() => {
+                ctx.fillStyle = "red";
+                draw_text(this, width / 2, space_to_play_start_y + 90, "24px bangers", 24 + 4, [this.death_message], true);
             });
         }
     }

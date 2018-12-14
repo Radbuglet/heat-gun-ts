@@ -75,9 +75,9 @@ export class MainGame extends CanvasApplication {
             this.active_sub = new NetworkedGameWorld(this, this.map_loader, this.socket, my_uuid, my_name, Vector.deserialize(my_position));
         });
 
-        this.socket.clump_on(PacketNames.state_change__to_death, SocketEventGroups.MAIN, () => {
+        this.socket.clump_on(PacketNames.state_change__to_death, SocketEventGroups.MAIN, (death_msg : ITextComponent[]) => {
             this.socket.unregister_group(SocketEventGroups.GAME);
-            this.active_sub = new MainMenuSub(this, this.leaderboard_loader);
+            this.active_sub = new MainMenuSub(this, this.leaderboard_loader, death_msg);
             this.leaderboard_loader.load();
         });
 

@@ -43,7 +43,7 @@ export function limit_line_size(app : CanvasApplicationInterface, font : string,
     return new_text;
 }
 
-export function draw_text(app : CanvasApplicationInterface, x : number, y : number, font : string, line_break_size : number, text_lines : ITextComponent[][]) {
+export function draw_text(app : CanvasApplicationInterface, x : number, y : number, font : string, line_break_size : number, text_lines : ITextComponent[][], centered : boolean = false) {
     app.draw(ctx => {
         ctx.font = font;
         ctx.textAlign = "start";
@@ -52,7 +52,10 @@ export function draw_text(app : CanvasApplicationInterface, x : number, y : numb
         let drawing_y = y;
 
         text_lines.forEach(text_line => {
-            let drawing_x = x;
+            let line_width = 0;
+            text_line.forEach((text_part) => {line_width += ctx.measureText(text_part.text).width});
+
+            let drawing_x = centered ? x - line_width / 2 : x;
 
             text_line.forEach((text_part : ITextComponent) => {
                 app.draw(ctx => {

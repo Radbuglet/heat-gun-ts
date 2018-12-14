@@ -380,7 +380,16 @@ export class Weapon {
                                 {
                                     color: "black",
                                     text: attacker.name
+                                },
+                                {
+                                    color: "red",
+                                    text: ". Your score was "
+                                },
+                                {
+                                    color: "black",
+                                    text: damaged_player.total_energy.toString()
                                 }
+
                             ],
                             public_message: [{
                                 color: "darkred",
