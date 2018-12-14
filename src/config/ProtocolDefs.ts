@@ -14,5 +14,6 @@ export enum PacketNames {
     replicate_energy_change,
     perform_dash,
     replicate_slot_change,
-    replicate_player_damaged
+    replicate_player_damaged,
+    validate_captcha
 }

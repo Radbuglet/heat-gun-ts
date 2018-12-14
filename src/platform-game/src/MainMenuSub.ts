@@ -19,6 +19,7 @@ export class MainMenuSub extends CanvasSubApplication {
     }
 
     app_keydown(e : KeyboardEvent) {
+        if (!this.main_app.has_authenticated()) return;
         if (e.code === "Space") {
             const name = prompt("Name", localStorage.getItem("last_name") || "");
 

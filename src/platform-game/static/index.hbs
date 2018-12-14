@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Heat Gun</title>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+</head>
+<body>
+    <script src="static/game/bundle.js"></script>
+
+    {{#if recaptcha_sitekey}}
+        <div id="captcha-screen">
+            <div class="g-recaptcha" data-sitekey="{{recaptcha_sitekey}}" data-callback="__recaptcha_cb"></div>
+        </div>
+        <script>
+            function __recaptcha_cb(token) {
+                document.getElementById("captcha-screen").style.display = "none";
+                window.heatgun_global_hooks.captcha_validated(token);
+            }
+        </script>
+    {{^}}
+        <script>
+            window.heatgun_global_hooks.captcha_validated(null);
+        </script>
+    {{/if}}
+
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Bangers');
+        @import url('https://fonts.googleapis.com/css?family=Press+Start+2P');
+    
+        body {
+          user-select: none;
+          margin: 0;
+          overflow: hidden;
+          font-family: "Press Start 2P", monospace;
+        }
+
+        #game {
+            background: #fff; /*radial-gradient(rgb(255, 255, 255), rgb(222, 228, 232));*/
+        }
+
+        #captcha-screen {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(30, 33, 36, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #fff;
+            z-index: 1;
+        }
+      </style>
+</body>
+</html>

@@ -27,6 +27,8 @@ export abstract class CanvasApplicationInterface {
 
   abstract get_pointer_mode() : string;
   abstract set_pointer_mode(s : string);
+
+  abstract get_canvas() : HTMLCanvasElement;
 }
 
 export abstract class CanvasSubApplication extends CanvasApplicationInterface {
@@ -92,6 +94,10 @@ export abstract class CanvasSubApplication extends CanvasApplicationInterface {
 
   set_pointer_mode(s : string) {
     this.main.set_pointer_mode(s);
+  }
+
+  get_canvas() {
+    return this.main.get_canvas();
   }
 }
 
@@ -172,6 +178,10 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
 
     startup() {
       this.tick();
+    }
+
+    get_canvas() {
+      return this.canvas;
     }
 
     abstract app_keydown(e : KeyboardEvent);

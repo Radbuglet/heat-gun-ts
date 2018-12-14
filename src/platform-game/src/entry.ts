@@ -16,11 +16,36 @@ import { LeaderboardLoader } from "./LeaderboardLoader";
 RunPlatform.set_platform(ExecMode.client);
 
 const loader = new MapLoader();
-loader.load_from_url("/map", () => {
-    console.log("Loaded!");
+let main_game : MainGame = null;
+let submitted_captcha_token = undefined;
 
-    new MainGame(document.getElementById("game") as HTMLCanvasElement, loader);
+loader.load_from_url("/map", () => {
+    console.log("Loaded map!");
+
+    const canvas = document.createElement('canvas');
+    document.body.appendChild(canvas);
+
+    main_game = new MainGame(canvas, loader);
+    
+    if (submitted_captcha_token !== undefined) {
+        main_game.set_up_socket(submitted_captcha_token);
+    }
 });
+
+declare global {
+    interface Window { heatgun_global_hooks: any; }
+}
+
+window.heatgun_global_hooks = {
+    captcha_validated: function(captcha_token : string) {
+        console.log("Captcha validation token recieved!");
+        if (main_game !== null) {
+            main_game.set_up_socket(captcha_token);
+        } else {
+            submitted_captcha_token = captcha_token;
+        }
+    }
+}
 
 interface KickScreenState {
     top : string
@@ -32,15 +57,22 @@ export class MainGame extends CanvasApplication {
     private leaderboard_loader : LeaderboardLoader = new LeaderboardLoader("/leaderboard");
     private active_sub : CanvasSubApplication = new MainMenuSub(this, this.leaderboard_loader);
     
-    private socket : ClientSocket;
+    private socket : ClientSocket = null;
 
-    constructor(canvas : HTMLCanvasElement, map_loader : MapLoader) {
+    constructor(canvas : HTMLCanvasElement, private map_loader : MapLoader) {
         super(canvas);
+        this.startup();
+    }
 
+    set_up_socket(captcha_token : string) {
         this.socket = new ClientSocket(SocketIOClient());
+        if (captcha_token !== null) {
+            console.log("Sending captcha token");
+            this.socket.emit(PacketNames.validate_captcha, captcha_token);
+        }
 
         this.socket.clump_on(PacketNames.state_change__to_game, SocketEventGroups.MAIN, (my_uuid : string, my_name : string, my_position : ISerializedVector) => {
-            this.active_sub = new NetworkedGameWorld(this, map_loader, this.socket, my_uuid, my_name, Vector.deserialize(my_position));
+            this.active_sub = new NetworkedGameWorld(this, this.map_loader, this.socket, my_uuid, my_name, Vector.deserialize(my_position));
         });
 
         this.socket.clump_on(PacketNames.state_change__to_death, SocketEventGroups.MAIN, () => {
@@ -57,8 +89,10 @@ export class MainGame extends CanvasApplication {
 
             this.socket.underlying_socket.disconnect();
         });
+    }
 
-        this.startup();
+    has_authenticated() {
+        return this.socket !== null;
     }
 
     request_spawn_player(name : string) {

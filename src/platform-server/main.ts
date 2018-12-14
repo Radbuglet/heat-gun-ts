@@ -17,6 +17,9 @@ import { RunPlatform, ExecMode } from "../helpers-common/helpers/RunPlatform";
 import { readFileSync } from "fs";
 import { PacketNames } from "../config/ProtocolDefs";
 import { Leaderboard } from "./Leaderboard";
+import { compile } from "handlebars";
+import { post } from 'request';
+import { recaptcha_credentials } from "../config/Credentials";
 
 const now = require("performance-now");
 
@@ -37,8 +40,11 @@ Leaderboard.load_file(join(__dirname, "db", "leaderboard.json"));
 */
 const app = express();
 
+const game_page_template = compile(readFileSync(join(source_root_path, "platform-game/static/index.hbs"), "utf-8"));
 app.get("/", (req, res) => {
-    res.sendFile(join(source_root_path, "platform-game/static/index.html"));
+    res.send(game_page_template(recaptcha_credentials.enabled ? {
+        recaptcha_sitekey: recaptcha_credentials.pub
+    } : {}));
 });
 
 app.get("/map", (req, res) => {
@@ -70,8 +76,14 @@ const world = new ServerWorld(map_loader);
 
 socketserver.on("connection", socket => {
     let socket_user : SocketUser = new SocketUser(socket, world);
+    let captcha_validated = false;
 
     socket.on((PacketNames.play as number).toString(), (username : string) => {
+        if (recaptcha_credentials.enabled && !captcha_validated) {
+            socket.disconnect();
+            return;
+        }
+
         if (typeof username === "string" && ServerPlayer.is_valid_username(username) === null && !socket_user.is_playing()) {
             world.wrapped_queue_packets(() => {
                 socket_user.play(username);
@@ -87,6 +99,23 @@ socketserver.on("connection", socket => {
                   }
                 ]);
                 world.broadcast_message([]);
+            });
+        }
+    });
+
+    socket.on((PacketNames.validate_captcha as number).toString(), (token : string) => {
+        if (recaptcha_credentials.enabled && typeof token === "string" && token.length <= 1000 && !socket_user.is_playing() && !captcha_validated) {
+            post("https://www.google.com/recaptcha/api/siteverify", {
+                formData: {
+                    secret: "6LfDx38UAAAAAMJfcGeJ7QeU7A3ukXday3pDF3A5",
+                    response: token
+                }
+            }, function(err, resp, body) {
+                if (!err && resp.statusCode === 200 && JSON.parse(body.toString()).success) {
+                    captcha_validated = true;
+                } else {
+                    socket.disconnect();
+                }
             });
         }
     });
@@ -195,6 +224,7 @@ socketserver.on("connection", socket => {
     });
 
     socket.on("disconnect", () => {
+        console.log("Socket disconnected!");
         if (socket_user.is_playing()) {
             world.broadcast_message([]);
             world.broadcast_message([{
