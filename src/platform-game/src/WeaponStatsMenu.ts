@@ -157,6 +157,19 @@ export class WeaponStatsMenu {
                     unit_rect.top_left.mutadd(unit_rect.size.isolate_y());
                 });
             });
+
+            this.app.draw(ctx => {
+                const text = "← → - downgrade/upgrade    ↑ ↓ - previous/next upgrade";
+                ctx.textAlign = "left";
+                ctx.textBaseline = "bottom";
+                ctx.font = "20px monospace";
+
+                ctx.fillStyle = "red";
+                Rect.from_positions(new Vector(20 - 5, height - 30 - 25), new Vector(20 + ctx.measureText(text).width + 5, height - 30 + 5)).fill_rect(ctx);
+
+                ctx.fillStyle = "#fff";
+                ctx.fillText(text, 20, height - 30);
+            })
         });
     }
 
