@@ -19,6 +19,8 @@ const loader = new MapLoader();
 let main_game : MainGame = null;
 let submitted_captcha_token = undefined;
 
+window.onbeforeunload = function() { return "Just making sure..." };
+
 loader.load_from_url("/map", () => {
     console.log("Loaded map!");
 
