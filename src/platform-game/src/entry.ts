@@ -36,6 +36,10 @@ declare global {
     interface Window { heatgun_global_hooks: any; }
 }
 
+enum CSSStateAttributes {
+    is_in_menu = "is_in_menu"
+}
+
 window.heatgun_global_hooks = {
     captcha_validated: function(captcha_token : string) {
         console.log("Captcha validation token recieved!");
@@ -61,6 +65,7 @@ export class MainGame extends CanvasApplication {
 
     constructor(canvas : HTMLCanvasElement, private map_loader : MapLoader) {
         super(canvas);
+        this.change_css_state(CSSStateAttributes.is_in_menu, "yes");
         this.startup();
     }
 
@@ -73,19 +78,21 @@ export class MainGame extends CanvasApplication {
 
         this.socket.clump_on(PacketNames.state_change__to_game, SocketEventGroups.MAIN, (my_uuid : string, my_name : string, my_position : ISerializedVector) => {
             this.active_sub = new NetworkedGameWorld(this, this.map_loader, this.socket, my_uuid, my_name, Vector.deserialize(my_position));
+            this.change_css_state(CSSStateAttributes.is_in_menu, "no");
         });
 
         this.socket.clump_on(PacketNames.state_change__to_death, SocketEventGroups.MAIN, (death_msg : ITextComponent[]) => {
             this.socket.unregister_group(SocketEventGroups.GAME);
             this.active_sub = new MainMenuSub(this, this.leaderboard_loader, death_msg);
+            this.change_css_state(CSSStateAttributes.is_in_menu, "yes");
             this.leaderboard_loader.load();
         });
 
         this.socket.underlying_socket.on("disconnect", () => {
-            this.active_kick_screen = {
+            this.set_kick_screen({
                 top: "The server has abandonned you!",
                 message: "It closed your socket and you're now very lonely in such a networked world."
-            }
+            });
 
             this.socket.underlying_socket.disconnect();
         });
@@ -93,6 +100,15 @@ export class MainGame extends CanvasApplication {
 
     has_authenticated() {
         return this.socket !== null;
+    }
+
+    set_kick_screen(state : KickScreenState) {
+        this.active_kick_screen = state;
+        this.change_css_state(CSSStateAttributes.is_in_menu, "no");
+    }
+
+    change_css_state(attr : CSSStateAttributes, val : string) {
+        document.body.setAttribute(attr, val);
     }
 
     request_spawn_player(name : string) {

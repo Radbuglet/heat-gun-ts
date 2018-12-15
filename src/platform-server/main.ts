@@ -5,7 +5,7 @@ import { createServer } from "http";
 
 import { join } from "path";
 
-import { SERVER_PORT, GAME_VERSION } from "../config/Config";
+import { SERVER_PORT, GAME_VERSION, discord_invite_url } from "../config/Config";
 import { MapLoader } from "../config/MapLoader";
 import { ServerWorld } from "./ServerWorld";
 import { ServerPlayer } from "./ServerPlayer";
@@ -42,9 +42,10 @@ const app = express();
 
 const game_page_template = compile(readFileSync(join(source_root_path, "platform-game/static/index.hbs"), "utf-8"));
 app.get("/", (req, res) => {
-    res.send(game_page_template(recaptcha_credentials.enabled ? {
-        recaptcha_sitekey: recaptcha_credentials.pub
-    } : {}));
+    res.send(game_page_template({
+        discord_invite_url: discord_invite_url,
+        recaptcha_sitekey: recaptcha_credentials.enabled ? recaptcha_credentials.pub : null
+    }));
 });
 
 app.get("/map", (req, res) => {
