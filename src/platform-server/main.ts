@@ -56,6 +56,10 @@ app.get("/leaderboard", (req, res) => {
     res.send(Leaderboard.data);
 });
 
+app.get("/playercount", (req, res) => {
+    res.send(world.players.size.toString());
+});
+
 app.get("/favicon.ico", (req, res) => res.sendFile(join(__dirname, 'favicon.ico')));
 
 app.use("/static/game", serveStatic(join(source_root_path, "platform-game/static")));
