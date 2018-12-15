@@ -225,7 +225,6 @@ socketserver.on("connection", socket => {
     });
 
     socket.on("disconnect", () => {
-        console.log("Socket disconnected!");
         if (socket_user.is_playing()) {
             world.broadcast_message([]);
             world.broadcast_message([{
