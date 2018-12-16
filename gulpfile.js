@@ -20,7 +20,7 @@ function build_client_platform(platform_name, output_folder_path) {
             //.pipe(sourcemaps.init())
             .pipe(webpackStream({
                 stats: 'errors-only',
-                mode: "development",
+                mode: "production",
                 output: {
                     filename: "bundle.js"
                 },
