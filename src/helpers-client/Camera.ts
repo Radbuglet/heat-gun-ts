@@ -19,7 +19,7 @@ export class Camera {
       return this.zoom;
     }
 
-    toWorldPos(pos, w, h) {
+    toWorldPos(pos, w, h) : Vector {
       return pos.add(this.lookvec).sub(new Vector(w / 2, h / 2));
     }
 

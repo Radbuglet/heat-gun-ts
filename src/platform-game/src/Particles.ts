@@ -1,9 +1,9 @@
 import { ParticleSystem, SquareParticle } from "../../helpers-client/ParticleSystem";
-import { CanvasSubApplication } from "../../helpers-client/CanvasApplication";
+import { CanvasApplicationInterface } from "../../helpers-client/CanvasApplication";
 import Vector from "../../helpers-common/helpers/Vector";
 
 export class AmmoParticle extends SquareParticle {
-    constructor(system : ParticleSystem, app : CanvasSubApplication, position : Vector, velocity : Vector) {
+    constructor(system : ParticleSystem, app : CanvasApplicationInterface, position : Vector, velocity : Vector) {
         super(system, app, position, velocity, new Vector(0, 1), 1000);
     }
 
@@ -34,7 +34,7 @@ export class AmmoParticle extends SquareParticle {
 
 
 export class BloodParticle extends SquareParticle {
-    constructor(system : ParticleSystem, app : CanvasSubApplication, position : Vector, velocity : Vector, private size : number) {
+    constructor(system : ParticleSystem, app : CanvasApplicationInterface, position : Vector, velocity : Vector, private size : number) {
         super(system, app, position, velocity, new Vector(0, 1), 1000);
     }
 

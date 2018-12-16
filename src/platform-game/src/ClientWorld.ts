@@ -1,16 +1,25 @@
 import { World } from "../../helpers-common/World";
 import { ClientPlayer } from "./ClientPlayer";
-import { CanvasApplication, CanvasSubApplication } from "../../helpers-client/CanvasApplication";
-import { Layers, OneWayDirections, MapLoader } from "../../config/MapLoader";
+import { CanvasApplicationInterface } from "../../helpers-client/CanvasApplication";
+import { Layers, OneWayDirections, MapLoader, ITile } from "../../config/MapLoader";
 import { rainbow_color } from "../../helpers-client/color";
 import { Axis } from "../../helpers-common/helpers/Axis";
 import { ParticleSystem } from "../../helpers-client/ParticleSystem";
 import { IUpdate } from "../../helpers-common/helpers/IUpdate";
+import { TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../config/Config";
+import Vector from "../../helpers-common/helpers/Vector";
+import { Rect } from "../../helpers-common/helpers/Rect";
+
+export interface IEditorRenderParams {
+    hovered_objects : ITile[]
+    selected_object : ITile
+    x_ray : boolean
+}
 
 export class ClientWorld extends World<ClientPlayer> {
     public particle_system : ParticleSystem = new ParticleSystem();
 
-    constructor(loader : MapLoader, public app : CanvasSubApplication) {
+    constructor(loader : MapLoader, public app : CanvasApplicationInterface) {
         super(loader);
     }
 
@@ -49,10 +58,14 @@ export class ClientWorld extends World<ClientPlayer> {
         })
     }
 
-    render_world(dec_rendering_vis_group : string, singular_dec_norender_index : number) {
+    fix_tile_indices() {
+        this.tiles.forEach((tile, i) => {tile.absolute_tile_index = i});
+    }
+
+    render_world(dec_rendering_vis_group : string, singular_dec_norender_index : number, editor_rendering_params : IEditorRenderParams) {
         this.tiles.forEach(tile => {
             this.app.draw((ctx) => {
-                if (tile.layer === Layers.obj) {
+                if (tile.layer === Layers.obj || tile.force_original_color) {
                     ctx.fillStyle = tile.color;
                 } else {
                     ctx.fillStyle = rainbow_color({
@@ -62,11 +75,19 @@ export class ClientWorld extends World<ClientPlayer> {
 
                 if (tile.bullet_phased) ctx.globalAlpha = 0.75;
 
+                if (editor_rendering_params !== null && editor_rendering_params.x_ray) {
+                    ctx.globalAlpha -= 0.5;
+                }
+
                 if (tile.visgroup === dec_rendering_vis_group || tile.absolute_tile_index === singular_dec_norender_index) {
                     ctx.globalAlpha = 0.6;
                 }
 
-                ctx.fillRect(tile.x, tile.y, tile.w, tile.h);
+                if (editor_rendering_params !== null && editor_rendering_params.selected_object !== tile && editor_rendering_params.hovered_objects.find(hovered_tile => hovered_tile === tile)) {
+                    ctx.fillStyle = "red";   
+                }
+
+                ctx.fillRect(tile.rect.get_x(), tile.rect.get_y(), tile.rect.get_width(), tile.rect.get_height());
             });
 
             if (typeof tile.one_way === "number") {
@@ -98,6 +119,14 @@ export class ClientWorld extends World<ClientPlayer> {
                       ctx.closePath();
                 });
             }
+        });
+    }
+
+    render_bounding_box() {
+        this.app.draw(ctx => {
+            ctx.strokeStyle = "#ff2828";
+            ctx.lineWidth = 10;
+            Rect.from_positions(new Vector(TPZONE_LEFT, TPZONE_TOP), new Vector(TPZONE_RIGHT, TPZONE_BOTTOM)).stroke_rect(ctx);
         });
     }
 }

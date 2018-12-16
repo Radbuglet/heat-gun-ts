@@ -120,7 +120,7 @@ export abstract class GameWorld extends CanvasSubApplication {
                 }
             });
 
-            this.world.render_world(visgroup, collided_dec_tile_index);
+            this.world.render_world(visgroup, collided_dec_tile_index, null);
 
             this.draw(() => {
                 const active_weapon = this.local_player.get_active_weapon();
@@ -135,13 +135,7 @@ export abstract class GameWorld extends CanvasSubApplication {
                 }
             });
 
-            // Draw world bounding box
-            this.draw(() => {
-                ctx.strokeStyle = "#ff2828";
-                ctx.lineWidth = 10;
-                //ctx.setLineDash([10, 2]);
-                Rect.from_positions(new Vector(TPZONE_LEFT, TPZONE_TOP), new Vector(TPZONE_RIGHT, TPZONE_BOTTOM)).stroke_rect(ctx);
-            });
+            this.world.render_bounding_box();
 
             this.camera.dettach(ctx);
         });

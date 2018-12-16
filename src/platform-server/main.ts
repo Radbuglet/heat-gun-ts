@@ -48,6 +48,10 @@ app.get("/", (req, res) => {
     }));
 });
 
+app.get("/editor", (req, res) => {
+    res.sendFile(join(source_root_path, "platform-editor/static/index.html"));
+});
+
 app.get("/map", (req, res) => {
     res.send(map_loader.get_raw_map_object());
 });

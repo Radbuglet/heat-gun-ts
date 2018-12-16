@@ -1,5 +1,5 @@
 import { IUpdate } from "../helpers-common/helpers/IUpdate";
-import { CanvasApplication, CanvasSubApplication } from "./CanvasApplication";
+import { CanvasApplicationInterface } from "./CanvasApplication";
 import Vector from "../helpers-common/helpers/Vector";
 import { todeg } from "../helpers-common/helpers/Math";
 
@@ -48,7 +48,7 @@ export abstract class SquareParticle extends Particle {
 
     protected life_counter : number = 0;
 
-    constructor(system : ParticleSystem, private canvas_app : CanvasSubApplication, initial_position : Vector, initial_velocity : Vector, protected gravity_force : Vector, protected life_max : number) {
+    constructor(system : ParticleSystem, private canvas_app : CanvasApplicationInterface, initial_position : Vector, initial_velocity : Vector, protected gravity_force : Vector, protected life_max : number) {
         super(system);
         this.position = initial_position.clone();
         this.velocity = initial_velocity.clone();

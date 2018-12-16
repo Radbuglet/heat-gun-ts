@@ -26,3 +26,9 @@ export function calculate_ticks(delta : number, frame_rate : number = 60) {
     return delta / ((1 / frame_rate) * 1000);
     //return 1;
 }
+
+export function wrap_num(num : number, max : number) {
+    if (num >= max) return 0;
+    if (num < 0) return max - 1;
+    return num;
+}

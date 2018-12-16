@@ -28,6 +28,7 @@ export interface ITile {
   bouncy?: boolean
   reflective?: boolean
   toggleable?: boolean
+  force_original_color? : boolean
   one_way?: OneWayDirections
 
   visgroup?: string
