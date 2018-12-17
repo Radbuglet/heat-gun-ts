@@ -14,6 +14,7 @@ import { rainbow_color } from "../../helpers-client/color";
 import { WEAPONS_HELD, MAX_HEALTH, TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../config/Config";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { draw_text, limit_line_size } from "../../helpers-client/draw_text";
+import { CloudHorizon } from "./CloudHorizon";
 
 export abstract class GameWorld extends CanvasSubApplication {
     public local_player : ClientPlayer;
@@ -21,6 +22,8 @@ export abstract class GameWorld extends CanvasSubApplication {
     public world : ClientWorld;
     private weapon_stats_menu;
     private chat_log : ITextComponent[][] = [];
+
+    private cloud_horizon : CloudHorizon = new CloudHorizon(this);
 
     private total_ticks = 0;
     private total_ms = 0;
@@ -84,7 +87,8 @@ export abstract class GameWorld extends CanvasSubApplication {
                     1 - this.local_player.get_active_weapon().get_upgrades().scope * 0.08
                 ) / 2
             );
-
+            
+            this.cloud_horizon.draw();
             this.camera.attach(ctx, width, height);
 
             let visgroup = "";
