@@ -96,7 +96,7 @@ export abstract class Player<WorldType extends World<any>> {
   }
 
   get_friction_coef() : number {
-    return 0.825 + this.get_active_weapon().get_upgrades().fricmod * 0.025;
+    return 0.85 + this.get_active_weapon().get_upgrades().fricmod * 0.025;
   }
 
   rush(direction_enum_value : RushDirections) {
