@@ -166,7 +166,7 @@ export abstract class Player<WorldType extends World<any>> {
     }
 
     this.regen_timer += update_evt.ticks;
-    if (this.regen_timer > 200 && RunPlatform.is_server()) {
+    if (this.regen_timer > 100 && RunPlatform.is_server()) {
       this.regen_timer = 0;
       let last_health = this.health;
       this.safe_set_health(this.health + 1);
