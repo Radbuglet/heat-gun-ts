@@ -1,7 +1,7 @@
 import { World } from "../../helpers-common/World";
 import { ClientPlayer } from "./ClientPlayer";
 import { CanvasApplicationInterface } from "../../helpers-client/CanvasApplication";
-import { Layers, OneWayDirections, MapLoader, ITile } from "../../config/MapLoader";
+import { Layers, OneWayDirections, MapLoader, ITile } from "../../helpers-common/MapLoader";
 import { rainbow_color } from "../../helpers-client/color";
 import { Axis } from "../../helpers-common/helpers/Axis";
 import { ParticleSystem } from "../../helpers-client/ParticleSystem";

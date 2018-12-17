@@ -6,7 +6,7 @@ import { createServer } from "http";
 import { join } from "path";
 
 import { SERVER_PORT, GAME_VERSION, discord_invite_url } from "../config/Config";
-import { MapLoader } from "../config/MapLoader";
+import { MapLoader } from "../helpers-common/MapLoader";
 import { ServerWorld } from "./ServerWorld";
 import { ServerPlayer } from "./ServerPlayer";
 import { SocketUser } from "./SocketUser";
@@ -15,7 +15,7 @@ import Vector, { ISerializedVector } from "../helpers-common/helpers/Vector";
 import { Weapon, configurable_traits } from "../helpers-common/Weapon";
 import { RunPlatform, ExecMode } from "../helpers-common/helpers/RunPlatform";
 import { readFileSync } from "fs";
-import { PacketNames } from "../config/ProtocolDefs";
+import { PacketNames } from "../helpers-common/ProtocolDefs";
 import { Leaderboard } from "./Leaderboard";
 import { compile } from "handlebars";
 import { post } from 'request';

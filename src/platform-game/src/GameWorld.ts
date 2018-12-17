@@ -4,7 +4,7 @@ import { Camera } from "../../helpers-client/Camera";
 import Vector from "../../helpers-common/helpers/Vector";
 import { ClientWorld } from "./ClientWorld";
 import { WeaponStatsMenu } from "./WeaponStatsMenu";
-import { MapLoader, Layers } from "../../config/MapLoader";
+import { MapLoader, Layers } from "../../helpers-common/MapLoader";
 import { calculate_ticks, torad } from "../../helpers-common/helpers/Math";
 import { ExecMode } from "../../helpers-common/helpers/RunPlatform";
 import { render_tablist } from "./TablistController";

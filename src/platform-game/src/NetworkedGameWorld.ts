@@ -1,10 +1,10 @@
 import { GameWorld } from "./GameWorld";
 import { CanvasApplication } from "../../helpers-client/CanvasApplication";
-import { MapLoader } from "../../config/MapLoader";
+import { MapLoader } from "../../helpers-common/MapLoader";
 import { ClientSocket } from "./ClientSocket";
 import Vector, { ISerializedVector } from "../../helpers-common/helpers/Vector";
 import { ClientPlayer } from "./ClientPlayer";
-import { PacketNames } from "../../config/ProtocolDefs";
+import { PacketNames } from "../../helpers-common/ProtocolDefs";
 import { IWeapon } from "../../helpers-common/Weapon";
 import { RushDirections } from "../../helpers-common/RushDirections";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";

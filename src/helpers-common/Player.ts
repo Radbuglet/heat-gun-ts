@@ -21,7 +21,7 @@ import { ServerPosRollbacker } from "./helpers/ServerSyncPosController";
 import { Rect } from "./helpers/Rect";
 import { ITextComponent } from "./helpers/ITextComponent";
 import { RushDirections } from "./RushDirections";
-import { ITile } from "../config/MapLoader";
+import { ITile } from "./MapLoader";
 import { RunPlatform } from "./helpers/RunPlatform";
 import { clamp_num } from "./helpers/Math";
 

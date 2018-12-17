@@ -1,4 +1,4 @@
-import { PacketNames } from "../../config/ProtocolDefs";
+import { PacketNames } from "../../helpers-common/ProtocolDefs";
 
 export class ClientSocket {
     private handlers : Map<PacketNames, Handler[]> = new Map();

@@ -1,5 +1,5 @@
-import { Rect } from "../helpers-common/helpers/Rect";
-import Vector from "../helpers-common/helpers/Vector";
+import { Rect } from "./helpers/Rect";
+import Vector from "./helpers/Vector";
 
 export enum Layers {
   obj = "obj",

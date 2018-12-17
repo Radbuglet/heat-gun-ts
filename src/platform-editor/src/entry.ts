@@ -1,5 +1,5 @@
 import { CanvasApplication } from "../../helpers-client/CanvasApplication";
-import { MapLoader, ITile, Layers, OneWayDirections } from "../../config/MapLoader";
+import { MapLoader, ITile, Layers, OneWayDirections } from "../../helpers-common/MapLoader";
 import { ClientWorld } from "../../platform-game/src/ClientWorld";
 import { Camera } from "../../helpers-client/Camera";
 import Vector from "../../helpers-common/helpers/Vector";

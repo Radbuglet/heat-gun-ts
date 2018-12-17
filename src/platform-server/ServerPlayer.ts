@@ -2,7 +2,7 @@ import { Player, IDeathHandlerInfo } from "../helpers-common/Player";
 import { ServerWorld } from "./ServerWorld";
 import { ITextComponent } from "../helpers-common/helpers/ITextComponent";
 import { SocketUser } from "./SocketUser";
-import { PacketNames } from "../config/ProtocolDefs";
+import { PacketNames } from "../helpers-common/ProtocolDefs";
 import { World } from "../helpers-common/World";
 
 export class ServerPlayer extends Player<ServerWorld> {

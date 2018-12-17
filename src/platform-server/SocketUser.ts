@@ -3,7 +3,7 @@ import { ServerPlayer, IPacket } from "./ServerPlayer";
 import { ServerWorld } from "./ServerWorld";
 import { ITextComponent } from "../helpers-common/helpers/ITextComponent";
 import { LAGSWITCH_SVTOCL } from "../config/Config";
-import { PacketNames } from "../config/ProtocolDefs";
+import { PacketNames } from "../helpers-common/ProtocolDefs";
 import { Leaderboard } from "./Leaderboard";
 
 export class SocketUser {

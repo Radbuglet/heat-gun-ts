@@ -1,13 +1,13 @@
 // THIS FILE IS PURELY A TEST!
 
-import { MapLoader, Layers } from "../../config/MapLoader";
+import { MapLoader, Layers } from "../../helpers-common/MapLoader";
 import { CanvasApplication, CanvasSubApplication } from "../../helpers-client/CanvasApplication";
 import { ExecMode, RunPlatform } from "../../helpers-common/helpers/RunPlatform";
 import { NetworkedGameWorld } from "./NetworkedGameWorld";
 import * as SocketIOClient from "socket.io-client";
 import { ClientSocket } from "./ClientSocket";
 import Vector, { ISerializedVector } from "../../helpers-common/helpers/Vector";
-import { PacketNames } from "../../config/ProtocolDefs";
+import { PacketNames } from "../../helpers-common/ProtocolDefs";
 import { CanvasGraph } from "../../helpers-client/CanvasGraph";
 import { MainMenuSub, LoadingScreen } from "./MainMenuSub";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";

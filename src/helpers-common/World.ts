@@ -1,5 +1,5 @@
 import Vector from "./helpers/Vector";
-import { ITile, Layers, OneWayDirections, MapLoader } from "../config/MapLoader";
+import { ITile, Layers, OneWayDirections, MapLoader } from "./MapLoader";
 import { Player } from "./Player";
 import { IUpdate } from "./helpers/IUpdate";
 

@@ -2,7 +2,7 @@ import { World, IBeam } from "../helpers-common/World";
 import { ServerPlayer } from "./ServerPlayer";
 import { ITextComponent } from "../helpers-common/helpers/ITextComponent";
 import { Player } from "../helpers-common/Player";
-import { PacketNames } from "../config/ProtocolDefs";
+import { PacketNames } from "../helpers-common/ProtocolDefs";
 
 export class ServerWorld extends World<ServerPlayer> {
     /*
