@@ -437,7 +437,7 @@ export class Weapon {
         if (already_verified_teleport || this.can_teleport_tpvec(tpvec)) this.player.position.mutadd(tpvec);
 
         this.player.velocity = aim_direction.mult(
-            new Vector(is_grounded ? 40 : 30).add(new Vector(this.get_upgrades().additional_launching_power * 1.5))
+            new Vector(is_grounded ? 40 : 30).add(new Vector(this.get_upgrades().additional_launching_power * 2.5))
         ).negate();
 
         if (this.get_upgrades().teleportation > 0) {
