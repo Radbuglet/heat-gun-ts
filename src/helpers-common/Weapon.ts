@@ -61,7 +61,7 @@ export const configurable_traits: ITrait[] = [
         key: "additional_barrels",
         name: "Additional Barrels",
         maxval: 3,
-        cost: 7
+        cost: 10
     },
 
     null,
@@ -130,7 +130,7 @@ export const configurable_traits: ITrait[] = [
         key: "teleportation",
         name: "Teleportation",
         maxval: 4,
-        cost: 4
+        cost: 3
     },
     {
         key: "slot_on_shoot",
@@ -258,8 +258,7 @@ export class Weapon {
                 (15 * this.get_firerate_multiplier(true)) +
                 (
                     (this.get_upgrades().additional_callibur * 12) +
-                    (this.get_upgrades().additional_barrels * 5) +
-                    (this.get_upgrades().additional_launching_power * 1)
+                    (this.get_upgrades().additional_barrels * 60)
                 ) * this.get_firerate_multiplier(false)
             ) + (
                 (this.get_upgrades().teleportation * 15)
