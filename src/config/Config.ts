@@ -2,7 +2,7 @@ import Vector from "../helpers-common/helpers/Vector";
 
 export const MAX_HEALTH = 25;
 export const WEAPONS_HELD = 3;
-export const DEFAULT_ENERGY = 18;
+export const DEFAULT_ENERGY = 20;
 
 export const TPZONE_TOP = -4000;
 export const TPZONE_BOTTOM = 1700;
