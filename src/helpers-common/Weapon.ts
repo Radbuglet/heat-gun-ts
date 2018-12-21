@@ -48,7 +48,7 @@ export const configurable_traits: ITrait[] = [
     {
         key: "additional_callibur",
         name: "Additional callibur",
-        maxval: 6,
+        maxval: 7,
         cost: 4
     },
     {
@@ -94,7 +94,7 @@ export const configurable_traits: ITrait[] = [
         key: "suck_mode",
         name: "Reverse Direction",
         maxval: 1,
-        cost: 10
+        cost: 5
     },
 
     null,
@@ -108,7 +108,7 @@ export const configurable_traits: ITrait[] = [
     {
         key: "bullet_gravity",
         name: "Bullet Gravity",
-        maxval: 4,
+        maxval: 5,
         cost: 2
     },
     {
@@ -124,7 +124,7 @@ export const configurable_traits: ITrait[] = [
         key: "scope",
         name: "Scope",
         maxval: 7,
-        cost: 2
+        cost: 0
     },
     {
         key: "teleportation",
@@ -258,7 +258,7 @@ export class Weapon {
                 (15 * this.get_firerate_multiplier(true)) +
                 (
                     (this.get_upgrades().additional_callibur * 12) +
-                    (this.get_upgrades().additional_barrels * 60)
+                    (this.get_upgrades().additional_barrels * 100)
                 ) * this.get_firerate_multiplier(false)
             ) + (
                 (this.get_upgrades().teleportation * 15)
