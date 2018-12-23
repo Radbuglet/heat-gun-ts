@@ -429,7 +429,7 @@ export class Application extends CanvasApplication {
 
     // Helpers
     get_world_mouse_pos() {
-        return this.camera.toWorldPos(this.get_mouse_position(), this.getWidth(), this.getHeight())
+        return this.camera.toWorldPos(this.get_mouse_position(), this.getResolutionWidth(), this.getResolutionHeight())
     }
 
     get_hovered_objects() : ITile[] {
@@ -456,7 +456,7 @@ export class Application extends CanvasApplication {
 
     get_new_tile_rect() : Rect {
         return Rect.centered_around(
-            this.camera.toWorldPos(new Rect(new Vector(0, 0), new Vector(this.getWidth(), this.getHeight())).point_middle(), this.getWidth(), this.getHeight()).div(new Vector(this.opt_grid)).floor().mult(new Vector(this.opt_grid)),
+            this.camera.toWorldPos(new Rect(new Vector(0, 0), new Vector(this.getResolutionWidth(), this.getResolutionHeight())).point_middle(), this.getResolutionWidth(), this.getResolutionHeight()).div(new Vector(this.opt_grid)).floor().mult(new Vector(this.opt_grid)),
             new Vector(100)
         );
     }

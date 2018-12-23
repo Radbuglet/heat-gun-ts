@@ -246,8 +246,8 @@ export class MainMenuSub extends CanvasSubApplication {
     }
 
     draw_grid(alpha : number = 0.1, color : string = "hsla(0, 100%, 63%)") {
-        const width = this.getWidth();
-        const height = this.getHeight();
+        const width = this.getResolutionWidth();
+        const height = this.getResolutionHeight();
         this.draw(ctx => {
             ctx.strokeStyle = color;
             ctx.globalAlpha = alpha;

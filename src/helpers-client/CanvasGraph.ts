@@ -21,8 +21,8 @@ export class CanvasGraph {
         app.draw(ctx => {
             ctx.strokeStyle = "black";
             ctx.beginPath();
-            ctx.moveTo(0, app.getHeight() / 2);
-            ctx.lineTo(app.getWidth(), app.getHeight() / 2);
+            ctx.moveTo(0, app.getResolutionHeight() / 2);
+            ctx.lineTo(app.getResolutionWidth(), app.getResolutionHeight() / 2);
 
             ctx.stroke();
         });
@@ -34,9 +34,9 @@ export class CanvasGraph {
                 ctx.strokeStyle = category;
                 category_values.forEach((y, x) => {
                     if (x === 0) {
-                        ctx.moveTo(x, app.getHeight() / 2 - y * 5);
+                        ctx.moveTo(x, app.getResolutionHeight() / 2 - y * 5);
                     } else {
-                        ctx.lineTo(x, app.getHeight() / 2 - y * 5);
+                        ctx.lineTo(x, app.getResolutionHeight() / 2 - y * 5);
                     }
                 });
 

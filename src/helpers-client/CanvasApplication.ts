@@ -2,6 +2,8 @@ import Vector from "../helpers-common/helpers/Vector";
 import { calculate_ticks } from "../helpers-common/helpers/Math";
 import { CanvasGraph, Categories } from "./CanvasGraph";
 
+const target_resolution_width = 2048;
+
 export abstract class CanvasApplicationInterface {
   abstract app_keydown(e : KeyboardEvent);
   abstract app_keyup(e : KeyboardEvent);
@@ -14,8 +16,8 @@ export abstract class CanvasApplicationInterface {
 
   abstract draw(fn : (ctx : CanvasRenderingContext2D) => void)
   abstract resizecanvas();
-  abstract getWidth() : number;
-  abstract getHeight() : number;
+  abstract getResolutionWidth() : number;
+  abstract getResolutionHeight() : number;
 
   abstract get_keys_down() : Map<string, boolean>;
   abstract get_mouse_position() : Vector;
@@ -52,12 +54,12 @@ export abstract class CanvasSubApplication extends CanvasApplicationInterface {
     this.main.resizecanvas();
   }
 
-  getWidth() : number {
-    return this.main.getWidth();
+  getResolutionWidth() : number {
+    return this.main.getResolutionWidth();
   }
 
-  getHeight() : number {
-    return this.main.getHeight();
+  getResolutionHeight() : number {
+    return this.main.getResolutionHeight();
   }
 
   get_keys_down() : Map<string, boolean> {
@@ -152,7 +154,8 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
       this.pointer_mode = m;
     }
 
-    protected pixel_ratio : number;
+    private pixel_ratio : number;
+    private resolution_sf : number;
 
     protected fps_cap : number = 10000;
 
@@ -209,8 +212,8 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
     }
 
     private mousemoved_handler(e : MouseEvent) {
-      this.mouse_position.setX(e.clientX);
-      this.mouse_position.setY(e.clientY);
+      this.mouse_position.setX(e.clientX * this.pixel_ratio / this.resolution_sf);
+      this.mouse_position.setY(e.clientY * this.pixel_ratio / this.resolution_sf);
     }
 
     private mouse_down_handler(e : MouseEvent) {
@@ -246,8 +249,10 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
   
         this.canvas.style.width = window.innerWidth + "px";
         this.canvas.style.height = window.innerHeight + "px";
-  
-        this.ctx.scale(pixel_ratio, pixel_ratio);
+
+        this.resolution_sf = this.canvas.width / target_resolution_width;
+
+        this.ctx.scale(this.resolution_sf, this.resolution_sf);
         this.pixel_ratio = pixel_ratio;
       }
 
@@ -277,9 +282,8 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
 
       this.app_update(dt, ticks_passed);
       this.draw(() => {
-        //this.ctx.scale(this.pixel_ratio, this.pixel_ratio);
-        this.ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
-        this.app_render(this.ctx, this.getWidth(), this.getHeight(), ticks_passed);
+        this.ctx.clearRect(0, 0, this.getResolutionWidth(), this.getResolutionHeight());
+        this.app_render(this.ctx, this.getResolutionWidth(), this.getResolutionHeight(), ticks_passed);
       });
 
       if (this.pointer_mode !== this.canvas.style.cursor) {
@@ -291,11 +295,11 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
       window.requestAnimationFrame(this.tick.bind(this));
     }
 
-    getWidth() {
-      return this.canvas.width / this.pixel_ratio;
+    getResolutionWidth() {
+      return this.canvas.width / this.resolution_sf;
     }
 
-    getHeight() {
-      return this.canvas.height / this.pixel_ratio;
+    getResolutionHeight() {
+      return this.canvas.height / this.resolution_sf;
     }
   }

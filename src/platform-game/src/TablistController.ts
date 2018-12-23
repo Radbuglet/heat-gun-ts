@@ -7,7 +7,7 @@ export function render_tablist(app : GameWorld, ping : number) {
         app.draw(() => {
             const tablist_rect = new Rect(
                 new Vector(0, 0),
-                new Vector(app.getWidth(), app.getHeight())
+                new Vector(app.getResolutionWidth(), app.getResolutionHeight())
             ).get_percent_margin_rect(0.1);
     
             app.draw(() => {

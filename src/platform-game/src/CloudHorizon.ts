@@ -34,7 +34,7 @@ class CloudLayer {
 
     draw() {
         this.app.draw(ctx => {
-            const height = this.app.getHeight();
+            const height = this.app.getResolutionHeight();
 
             ctx.fillStyle = this.color;
 

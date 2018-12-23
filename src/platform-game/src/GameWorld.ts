@@ -59,7 +59,7 @@ export abstract class GameWorld extends CanvasSubApplication {
             delta, ticks, exec_mode: ExecMode.client, total_ms: this.total_ms, total_ticks: this.total_ticks
         }
 
-        this.local_player.gun_look_direction = this.get_mouse_position().sub(new Vector(this.getWidth() / 2, this.getHeight() / 2)).normalized();
+        this.local_player.gun_look_direction = this.get_mouse_position().sub(new Vector(this.getResolutionWidth() / 2, this.getResolutionHeight() / 2)).normalized();
 
         if (this.direction_negate_mode) this.local_player.gun_look_direction.mutnegate();
         this.world.update(event);
@@ -80,7 +80,7 @@ export abstract class GameWorld extends CanvasSubApplication {
 
     app_render(ctx : CanvasRenderingContext2D, width : number, height : number) {
         this.draw(() => {
-            this.camera.lookvec = this.local_player.position.add(this.local_player.get_active_weapon().get_teleportation_vec(this.local_player.gun_look_direction));
+            this.camera.lookvec = this.local_player.collision_rect.point_middle().add(this.local_player.get_active_weapon().get_teleportation_vec(this.local_player.gun_look_direction));
             this.camera.setZoom(
                 (
                     this.camera.getZoom() +
@@ -337,17 +337,17 @@ export abstract class GameWorld extends CanvasSubApplication {
 
     draw_localizer(side : LocalizerSides) {
         this.draw(ctx => {
-            const x_level = side === LocalizerSides.left ? 0 : this.getWidth() - 0;
+            const x_level = side === LocalizerSides.left ? 0 : this.getResolutionWidth() - 0;
             ctx.strokeStyle = rainbow_color({ time_div: 20, saturation: 20, light: 40 });
             ctx.lineWidth = 4;
             ctx.beginPath();
             ctx.moveTo(x_level, 0);
-            for (let y = 0; y < this.getHeight(); y += 20) {
+            for (let y = 0; y < this.getResolutionHeight(); y += 20) {
                 let magnitude = 3;
                 this.world.players.forEach(player => {
                     if (player !== this.local_player && side === LocalizerSides.left ? player.position.getX() < this.local_player.position.getX() : player.position.getX() > this.local_player.position.getX()) {
                         const player_dist = Math.abs(player.position.getX() - this.local_player.position.getX());
-                        const axis_dist = Math.abs(player.position.getY() - this.camera.toWorldPos(new Vector(x_level, y), this.getWidth(), this.getHeight()).getY());
+                        const axis_dist = Math.abs(player.position.getY() - this.camera.toWorldPos(new Vector(x_level, y), this.getResolutionWidth(), this.getResolutionHeight()).getY());
 
                         magnitude += Math.max(
                             (-Math.pow(axis_dist / 100, 2) + 40) + (-Math.pow(player_dist / 400, 2) + 50),

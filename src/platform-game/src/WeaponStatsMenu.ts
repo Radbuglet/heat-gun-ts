@@ -20,8 +20,8 @@ export class WeaponStatsMenu {
     render() {
         if (!this.changing_weapon_stats) return;
 
-        const width = this.app.getWidth();
-        const height = this.app.getHeight();
+        const width = this.app.getResolutionWidth();
+        const height = this.app.getResolutionHeight();
         this.app.draw(ctx => {
             this.app.draw(() => {
                 ctx.fillStyle = "#000";
