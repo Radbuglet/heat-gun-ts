@@ -65,6 +65,7 @@ export class ClientWorld extends World<ClientPlayer> {
     render_world(dec_rendering_vis_group : string, singular_dec_norender_index : number, editor_rendering_params : IEditorRenderParams) {
         this.tiles.forEach(tile => {
             this.app.draw((ctx) => {
+                ctx.imageSmoothingEnabled = false;
                 if (tile.layer === Layers.obj || tile.force_original_color) {
                     ctx.fillStyle = tile.color;
                 } else {
@@ -87,7 +88,7 @@ export class ClientWorld extends World<ClientPlayer> {
                     ctx.fillStyle = "red";   
                 }
 
-                ctx.fillRect(tile.rect.get_x(), tile.rect.get_y(), tile.rect.get_width(), tile.rect.get_height());
+                ctx.fillRect(tile.rect.get_x() - 1, tile.rect.get_y() - 1, tile.rect.get_width() + 1, tile.rect.get_height() + 1);
             });
 
             if (typeof tile.one_way === "number") {
