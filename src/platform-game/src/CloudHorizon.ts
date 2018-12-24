@@ -34,6 +34,7 @@ class CloudLayer {
 
     draw() {
         this.app.draw(ctx => {
+            ctx.lineCap = "round";
             const height = this.app.getResolutionHeight();
 
             ctx.fillStyle = this.color;
