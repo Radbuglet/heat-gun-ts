@@ -88,7 +88,14 @@ export class ClientWorld extends World<ClientPlayer> {
                     ctx.fillStyle = "red";   
                 }
 
-                ctx.fillRect(tile.rect.get_x() - 1, tile.rect.get_y() - 1, tile.rect.get_width() + 1, tile.rect.get_height() + 1);
+                const matrix = ctx.getTransform();
+                ctx.resetTransform();
+                ctx.fillRect(
+                    Math.floor((tile.rect.get_x() * matrix.a) + matrix.e),
+                    Math.floor((tile.rect.get_y() * matrix.d) + matrix.f),
+                    Math.ceil(tile.rect.get_width() * matrix.a),
+                    Math.ceil(tile.rect.get_height() * matrix.d)
+                );
             });
 
             if (typeof tile.one_way === "number") {
