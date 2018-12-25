@@ -13,7 +13,7 @@ import { Rect } from "../../helpers-common/helpers/Rect";
 import { rainbow_color } from "../../helpers-client/color";
 import { WEAPONS_HELD, MAX_HEALTH, TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../config/Config";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
-import { draw_text, limit_line_size } from "../../helpers-client/draw_text";
+import { draw_text, limit_line_size, left_right_alignment, get_line_size } from "../../helpers-client/draw_text";
 import { CloudHorizon } from "./CloudHorizon";
 
 export abstract class GameWorld extends CanvasSubApplication {
@@ -22,6 +22,7 @@ export abstract class GameWorld extends CanvasSubApplication {
     public world : ClientWorld;
     private weapon_stats_menu;
     private chat_log : ITextComponent[][] = [];
+    private show_sidebar : boolean = true;
 
     private cloud_horizon : CloudHorizon = new CloudHorizon(this);
 
@@ -316,15 +317,166 @@ export abstract class GameWorld extends CanvasSubApplication {
                 draw_text(this, chat_start_x, weaponbar_rect.get_y() - 30 - (chat_lines.length * 17), "15px monospace", 17, chat_lines); 
             });
 
-            this.draw(() => {
-                ctx.fillStyle = "#008f32";
-
-                ctx.font = "20px monospace";
-                ctx.textBaseline = "top";
-                ctx.textAlign = "center";
-                ctx.fillText("Press F to upgrade your weapon, Tab to view tablist", width / 2, height - 200);
-                ctx.fillText("Energy: " + this.local_player.energy + " | Score: " + this.local_player.total_energy, width / 2, height - 170);
-            });
+            // HUD
+            if (this.show_sidebar) {
+                this.draw(() => {
+                    ctx.fillStyle = "#008f32";
+    
+                    const theme_rainbow = rainbow_color({
+                        light: 80,
+                        saturation: 100,
+                        time_div: 20
+                    });
+    
+                    const theme_dark = "#3f3d3fdd";
+    
+                    const theme_red = "#FF5555";
+    
+                    const leaderboard_data = this.get_leaderboard();
+    
+                    const font_family = "20px monospace";
+    
+                    const leaderboard_header_line = [
+                        {
+                            bg: theme_rainbow,
+                            color: theme_dark,
+                            text: " >>> Leaderboard            " + (leaderboard_data.indexOf(this.local_player) + 1) + " / " + this.world.players.size + " "
+                        }
+                    ];
+    
+                    draw_text(this, 10, 10, font_family, 20,
+                        [
+                            leaderboard_header_line
+                        ].concat(
+                            leaderboard_data.slice(0, 5).map((player, i) => {
+                                return [].concat(left_right_alignment(this, font_family, [
+                                    {
+                                        color: "#fff",
+                                        bg: theme_red,
+                                        text: " " + (i + 1) + " "
+                                    },
+                                    {
+                                        bg: theme_dark,
+                                        color: player === this.local_player ? "#fff" : theme_red,
+                                        text: " " + player.name + " "
+                                    }
+                                ], [
+                                    {
+                                        bg: theme_red,
+                                        color: "#fff",
+                                        text: " " + player.total_energy + " "
+                                    }
+                                ], {
+                                    bg: theme_dark,
+                                    color: "",
+                                    text: ""
+                                }, get_line_size(this, font_family, leaderboard_header_line)));
+                            })
+                        ).concat([
+                            [],
+                            [
+                                {
+                                    color: theme_red,
+                                    bg: theme_dark,
+                                    text: " ENERGY: "
+                                },
+                                {
+                                    bg: theme_dark,
+                                    color: theme_rainbow,
+                                    text: this.local_player.energy.toString() + " "
+                                },
+                                {
+                                    color: theme_red,
+                                    bg: theme_dark,
+                                    text: " / "
+                                },
+                                {
+                                    bg: theme_dark,
+                                    color: theme_rainbow,
+                                    text: this.local_player.total_energy.toString() + " "
+                                }
+                            ],
+                            [
+                                {
+                                    color: theme_red,
+                                    bg: theme_dark,
+                                    text: " PING: "
+                                },
+                                {
+                                    color: (
+                                        this.ping < 50 ? "lime" :
+                                            (
+                                                this.ping < 125 ? "green" :
+                                                (
+                                                this.ping < 250 ? "yellow" : "red"
+                                                )
+                                            )
+                                    ),
+                                    bg: theme_dark,
+                                    text: this.ping.toString() + "ms "
+                                },
+                            ],
+                            [
+                                {
+                                    color: theme_red,
+                                    bg: theme_dark,
+                                    text: " FPS: "
+                                },
+                                {
+                                    color: (
+                                        this.get_fps() >= 55 ? "lime" :
+                                            (
+                                                this.get_fps() > 50 ? "green" :
+                                                (
+                                                    this.get_fps() > 30 ? "yellow" :
+                                                    (
+                                                        this.get_fps() > 15 ? "orange" : "red"
+                                                    )
+                                                )
+                                            )
+                                    ),
+                                    bg: theme_dark,
+                                    text: this.get_fps() + " "
+                                }
+                            ],
+                            [],
+                            [
+                                {
+                                    bg: "",
+                                    color: theme_red,
+                                    text: "Press F to upgrade your weapon"
+                                }
+                            ],
+                            [
+                                {
+                                    bg: "",
+                                    color: theme_red,
+                                    text: "Press Tab to view tablist"
+                                }
+                            ],
+                            [
+                                {
+                                    bg: "",
+                                    color: "#5555FF",
+                                    text: "Press Z to toggle sidebar"
+                                }
+                            ]
+                        ])
+                    );
+                });
+            } else {
+                this.draw(() => {
+                    draw_text(this, 10, 10, "20px monospace", 20, [
+                        [
+                            {
+                                color: "#5555FF",
+                                text: "Press Z to toggle sidebar"
+                            }
+                        ]
+                    ])
+                });
+            }
+            
         });
 
         if (this.get_keys_down().get("Tab") && !this.weapon_stats_menu.changing_weapon_stats) {
@@ -333,6 +485,10 @@ export abstract class GameWorld extends CanvasSubApplication {
 
         // Weapon stats UI
         this.weapon_stats_menu.render();
+    }
+
+    get_leaderboard() {
+        return new Array(...this.world.players.values()).sort((a, b) => b.total_energy - a.total_energy);
     }
 
     draw_localizer(side : LocalizerSides) {
@@ -393,6 +549,10 @@ export abstract class GameWorld extends CanvasSubApplication {
             if (e.code === "Space" && !this.local_player.using_scope) {
                 this.local_player.using_scope = true;   
                 this.handle_scope(true);
+            }
+
+            if (e.code === "KeyZ") {
+                this.show_sidebar = !this.show_sidebar;
             }
         }
 
