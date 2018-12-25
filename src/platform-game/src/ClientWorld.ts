@@ -90,12 +90,8 @@ export class ClientWorld extends World<ClientPlayer> {
 
                 const matrix = ctx.getTransform();
                 ctx.resetTransform();
-                ctx.fillRect(
-                    Math.floor((tile.rect.get_x() * matrix.a) + matrix.e),
-                    Math.floor((tile.rect.get_y() * matrix.d) + matrix.f),
-                    Math.ceil(tile.rect.get_width() * matrix.a),
-                    Math.ceil(tile.rect.get_height() * matrix.d)
-                );
+                const process_point = (pt) => pt.mult(new Vector(matrix.a, matrix.d)).add(new Vector(matrix.e, matrix.f)).floor();
+                Rect.from_positions(process_point(tile.rect.point_top_left()), process_point(tile.rect.point_bottom_right())).fill_rect(ctx);
             });
 
             if (typeof tile.one_way === "number") {
