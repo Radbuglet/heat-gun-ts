@@ -33,6 +33,8 @@ export function limit_line_size(app : CanvasApplicationInterface, font : string,
     
                 // Commit the latest component
                 new_text[new_text.length - 1].push(latest_component);
+
+                current_width_px += component.space_size_after || 0;
             });
 
             new_text.push([]); // Reinsert original line breaks
@@ -59,7 +61,7 @@ export function draw_text(app : CanvasApplicationInterface, x : number, y : numb
 
             text_line.forEach((text_part : ITextComponent) => {
                 app.draw(ctx => {
-                    const text_part_width = ctx.measureText(text_part.text).width;
+                    const text_part_width = ctx.measureText(text_part.text).width + (text_part.space_size_after || 0);
 
                     if (text_part.bg) {
                         ctx.fillStyle = text_part.bg;
@@ -76,4 +78,23 @@ export function draw_text(app : CanvasApplicationInterface, x : number, y : numb
             drawing_y += line_break_size;
         });
     });
+}
+
+export function get_line_size(app : CanvasApplicationInterface, font_family : string, text : ITextComponent[]) : number {
+    let width = 0;
+
+    app.draw(ctx => {
+        ctx.font = font_family;
+        text.forEach(part => {
+            width += ctx.measureText(part.text).width + (part.space_size_after || 0);
+        });
+    });
+
+    return width;
+}
+
+export function left_right_alignment(app : CanvasApplicationInterface, font : string, left_text : ITextComponent[], right_text : ITextComponent[], spacer_component : ITextComponent, width : number) : ITextComponent[] {
+    const my_spacer_component = {...spacer_component};
+    my_spacer_component.space_size_after = width - get_line_size(app, font, left_text) - get_line_size(app, font, right_text);
+    return left_text.concat([my_spacer_component]).concat(right_text);
 }
