@@ -28,7 +28,7 @@ export function render_tablist(app : GameWorld, ping : number) {
     
             app.draw(() => {
                 const tablist_interior = tablist_rect.get_percent_margin_rect(0.1);
-                const leaderboard = new Array(...app.world.players.values()).sort((a, b) => b.total_energy - a.total_energy);
+                const leaderboard = app.get_leaderboard();
                 let your_place = leaderboard.indexOf(app.local_player) + 1;
                 let drawing_y_level = tablist_interior.get_y();
     
@@ -52,8 +52,9 @@ export function render_tablist(app : GameWorld, ping : number) {
                             
                             app.draw(() => {
                                 ctx.font = "30px monospace";
-                                ctx.fillText("th place", drawing_x_level, drawing_y_level);
-                                drawing_x_level += ctx.measureText("th place").width;
+                                const ordinal = ordinal_suffix_of(your_place);
+                                ctx.fillText(ordinal + " place", drawing_x_level, drawing_y_level);
+                                drawing_x_level += ctx.measureText(ordinal + " place").width;
                             });
                         });
     
@@ -161,4 +162,19 @@ export function render_tablist(app : GameWorld, ping : number) {
             });
         });
     });
+}
+
+function ordinal_suffix_of(i : number) : string {
+    var j = i % 10,
+        k = i % 100;
+    if (j == 1 && k != 11) {
+        return "st";
+    }
+    if (j == 2 && k != 12) {
+        return "nd";
+    }
+    if (j == 3 && k != 13) {
+        return "rd";
+    }
+    return "th";
 }
