@@ -5,6 +5,8 @@ import { IUpdate } from "./helpers/IUpdate";
 
 import { CollisionFace, Rect } from "./helpers/Rect";
 import { BeamRaycaster } from "./BeamRaycaster";
+import { MapChunker } from "./MapChunker";
+import { TPZONE_LEFT, TPZONE_RIGHT, TPZONE_TOP, TPZONE_BOTTOM } from "../config/Config";
 
 export interface ITileCollided {
     tile: ITile
@@ -20,12 +22,16 @@ export interface IBeam {
 }
 
 export abstract class World<PlayerClass extends Player<any>> {
-    public tiles: ITile[] = null;
+    public tiles : ITile[] = null;
+    public map_chunker : MapChunker = null;
     public players: Map<string, PlayerClass> = new Map();
     public beams : IBeam[] = [];
 
     constructor(map_loader: MapLoader) {
         this.tiles = map_loader.clone_map_object();
+        console.log("Chunking map...");
+        this.map_chunker = new MapChunker(this.tiles, TPZONE_LEFT, TPZONE_RIGHT, 200);
+        console.log("Finished chunking map!");
     }
 
     abstract replicate_player_added();
@@ -71,18 +77,7 @@ export abstract class World<PlayerClass extends Player<any>> {
     }
 
     get_tile_collisions(rect : Rect, foreground_no_ignore: boolean = false): ITile[] {
-        // @TODO map chunking
-        const collided_tiles: ITile[] = [];
-
-        this.tiles.forEach(tile => {
-            if (tile.layer === Layers.obj || (foreground_no_ignore && tile.layer === Layers.dec)) {
-                if (rect.testcollision(tile.rect) && collided_tiles.length < 4) {
-                    collided_tiles.push(tile);
-                }
-            }
-        });
-
-        return collided_tiles;
+        return this.map_chunker.get_tiles_in_rect(rect).filter(tile => (tile.layer === Layers.obj || (foreground_no_ignore && tile.layer === Layers.dec)) && rect.testcollision(tile.rect));
     }
 
     get_movement_collisions(rect : Rect, vec: Vector, return_raw_collisions = false, one_way_do_inside_check : boolean = true): ITile[] { // @TODO make a helper somewhere else
