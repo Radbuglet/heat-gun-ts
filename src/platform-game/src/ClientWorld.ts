@@ -62,8 +62,8 @@ export class ClientWorld extends World<ClientPlayer> {
         this.tiles.forEach((tile, i) => {tile.absolute_tile_index = i});
     }
 
-    render_world(dec_rendering_vis_group : string, singular_dec_norender_index : number, editor_rendering_params : IEditorRenderParams) {
-        this.tiles.forEach(tile => {
+    render_world(vision_rect : Rect, dec_rendering_vis_group : string, singular_dec_norender_index : number, editor_rendering_params : IEditorRenderParams) {
+        this.map_chunker.get_tiles_in_rect(vision_rect).forEach(tile => {
             this.app.draw((ctx) => {
                 ctx.imageSmoothingEnabled = false;
                 if (tile.layer === Layers.obj || tile.force_original_color) {

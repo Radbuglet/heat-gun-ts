@@ -18,7 +18,7 @@ import { CloudHorizon } from "./CloudHorizon";
 
 export abstract class GameWorld extends CanvasSubApplication {
     public local_player : ClientPlayer;
-    private camera : Camera = new Camera(new Vector(0, 0));
+    private camera : Camera = new Camera(new Vector(0, 0), this);
     public world : ClientWorld;
     private weapon_stats_menu;
     private chat_log : ITextComponent[][] = [];
@@ -90,7 +90,7 @@ export abstract class GameWorld extends CanvasSubApplication {
             );
             
             this.cloud_horizon.draw();
-            this.camera.attach(ctx, width, height);
+            this.camera.attach();
 
             let visgroup = "";
             let collided_dec_tile_index = null;
@@ -125,7 +125,7 @@ export abstract class GameWorld extends CanvasSubApplication {
                 }
             });
 
-            this.world.render_world(visgroup, collided_dec_tile_index, null);
+            this.world.render_world(this.camera.get_view_rect(), visgroup, collided_dec_tile_index, null);
 
             this.draw(() => {
                 const active_weapon = this.local_player.get_active_weapon();
@@ -142,7 +142,7 @@ export abstract class GameWorld extends CanvasSubApplication {
 
             this.world.render_bounding_box();
 
-            this.camera.dettach(ctx);
+            this.camera.dettach();
         });
 
         // Draw localizers
@@ -503,7 +503,7 @@ export abstract class GameWorld extends CanvasSubApplication {
                 this.world.players.forEach(player => {
                     if (player !== this.local_player && side === LocalizerSides.left ? player.position.getX() < this.local_player.position.getX() : player.position.getX() > this.local_player.position.getX()) {
                         const player_dist = Math.abs(player.position.getX() - this.local_player.position.getX());
-                        const axis_dist = Math.abs(player.position.getY() - this.camera.toWorldPos(new Vector(x_level, y), this.getResolutionWidth(), this.getResolutionHeight()).getY());
+                        const axis_dist = Math.abs(player.position.getY() - this.camera.toWorldPos(new Vector(x_level, y)).getY());
 
                         magnitude += Math.max(
                             (-Math.pow(axis_dist / 100, 2) + 40) + (-Math.pow(player_dist / 400, 2) + 50),
