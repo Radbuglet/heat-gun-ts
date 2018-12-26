@@ -1,4 +1,5 @@
 import Vector from "../helpers-common/helpers/Vector";
+import { CanvasApplicationInterface } from "./CanvasApplication";
 
 export class Camera {
     private zoom : number = 1;
@@ -19,8 +20,8 @@ export class Camera {
       return this.zoom;
     }
 
-    toWorldPos(pos, w, h) : Vector {
-      return pos.add(this.lookvec).sub(new Vector(w / 2, h / 2));
+    toWorldPos(pos) : Vector {
+      return pos.sub(new Vector(this.app.getResolutionWidth() / 2, this.app.getResolutionHeight() / 2)).div(new Vector(this.zoom)).add(this.lookvec.floor());
     }
 
     dettach(ctx) {
