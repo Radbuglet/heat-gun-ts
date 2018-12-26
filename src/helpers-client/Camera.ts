@@ -26,5 +26,11 @@ export class Camera {
 
     dettach(ctx) {
       ctx.restore();
+    get_view_rect() : Rect {
+      return Rect.from_positions(
+        this.toWorldPos(new Vector(0, 0)),
+        this.toWorldPos(new Vector(this.app.getResolutionWidth(), this.app.getResolutionHeight()))
+      );
+    }
     }
   }
