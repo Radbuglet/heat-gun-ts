@@ -5,7 +5,7 @@ import { Camera } from "../../helpers-client/Camera";
 import Vector from "../../helpers-common/helpers/Vector";
 import { Rect } from "../../helpers-common/helpers/Rect";
 import { rainbow_color } from "../../helpers-client/color";
-import { wrap_num } from "../../helpers-common/helpers/Math";
+import { wrap_num, clamp_num } from "../../helpers-common/helpers/Math";
 
 const loader = new MapLoader();
 
@@ -53,7 +53,7 @@ interface ICreateObjConfirmState {
 
 export class Application extends CanvasApplication {
     private static_world : ClientWorld = new ClientWorld(this.loader, this);
-    private camera : Camera = new Camera(new Vector(0, 0));
+    private camera : Camera = new Camera(new Vector(0, 0), this);
 
     private look_pan_state : ILookPanState = null;
     private dragging_movepart_state : IHandleMoveState = null;
@@ -86,11 +86,15 @@ export class Application extends CanvasApplication {
         super(canvas);
 
         this.startup();
+
+        this.get_canvas().addEventListener("wheel", (e) => {
+            this.camera.setZoom(clamp_num(0.01, this.camera.getZoom() + e.deltaY / 1000, 5));
+        });
     }
 
     app_update() {
         if (this.look_pan_state !== null) {
-            this.camera.lookvec.copyOther(this.look_pan_state.start_camera_position.add(this.look_pan_state.start_mouse_position.sub(this.get_mouse_position())));
+            this.camera.lookvec.copyOther(this.look_pan_state.start_camera_position.add(this.look_pan_state.start_mouse_position.sub(this.get_mouse_position()).div(new Vector(this.camera.getZoom()))));
         }
 
         if (this.currently_selected_object !== null) {
@@ -143,8 +147,8 @@ export class Application extends CanvasApplication {
 
     app_render(ctx : CanvasRenderingContext2D, width : number, height : number, ticks_passed : number) {
         this.draw(() => {
-            this.camera.attach(ctx, width, height);
-            this.static_world.render_world(null, -1, {
+            this.camera.attach();
+            this.static_world.render_world(this.camera.get_view_rect(), null, -1, {
                 hovered_objects: this.get_hovered_objects(),
                 selected_object: this.currently_selected_object,
                 x_ray: this.x_ray_mode
@@ -220,7 +224,7 @@ export class Application extends CanvasApplication {
             
             this.static_world.render_bounding_box();
 
-            this.camera.dettach(ctx);
+            this.camera.dettach();
         });
 
         this.draw(() => {
@@ -429,7 +433,7 @@ export class Application extends CanvasApplication {
 
     // Helpers
     get_world_mouse_pos() {
-        return this.camera.toWorldPos(this.get_mouse_position(), this.getResolutionWidth(), this.getResolutionHeight())
+        return this.camera.toWorldPos(this.get_mouse_position());
     }
 
     get_hovered_objects() : ITile[] {
@@ -456,7 +460,7 @@ export class Application extends CanvasApplication {
 
     get_new_tile_rect() : Rect {
         return Rect.centered_around(
-            this.camera.toWorldPos(new Rect(new Vector(0, 0), new Vector(this.getResolutionWidth(), this.getResolutionHeight())).point_middle(), this.getResolutionWidth(), this.getResolutionHeight()).div(new Vector(this.opt_grid)).floor().mult(new Vector(this.opt_grid)),
+            this.camera.toWorldPos(new Rect(new Vector(0, 0), new Vector(this.getResolutionWidth(), this.getResolutionHeight())).point_middle()).div(new Vector(this.opt_grid)).floor().mult(new Vector(this.opt_grid)),
             new Vector(100)
         );
     }
