@@ -285,12 +285,12 @@ export abstract class GameWorld extends CanvasSubApplication {
                             ctx.fillStyle = x <= this.local_player.health ? rainbow_color({
                                 time_div: 20, light: 50, saturation: 100, add_to_time: x * 4
                             }) : "#2b2b2b";
-                            cloned_sectioned_hpbar_rect.fill_rect(ctx);
+                            cloned_sectioned_hpbar_rect.fill_rect_pixelfixed(ctx);
     
                             ctx.fillStyle = x <= this.local_player.health ? rainbow_color({
                                 time_div: 20, light: 30, saturation: 100, add_to_time: x * 4
                             }) : "#191919";
-                            Rect.from_positions(cloned_sectioned_hpbar_rect.point_bottom_left(), cloned_sectioned_hpbar_rect.point_bottom_right().sub(new Vector(0, 10))).fill_rect(ctx);
+                            Rect.from_positions(cloned_sectioned_hpbar_rect.point_bottom_left(), cloned_sectioned_hpbar_rect.point_bottom_right().sub(new Vector(0, 10))).fill_rect_pixelfixed(ctx);
     
                             sectioned_hpbar_rect.top_left.mutadd(sectioned_hpbar_rect.size.isolate_x());
                         }

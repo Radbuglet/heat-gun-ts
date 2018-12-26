@@ -88,10 +88,7 @@ export class ClientWorld extends World<ClientPlayer> {
                     ctx.fillStyle = "red";   
                 }
 
-                const matrix = ctx.getTransform();
-                ctx.resetTransform();
-                const process_point = (pt) => pt.mult(new Vector(matrix.a, matrix.d)).add(new Vector(matrix.e, matrix.f)).floor();
-                Rect.from_positions(process_point(tile.rect.point_top_left()), process_point(tile.rect.point_bottom_right())).fill_rect(ctx);
+                tile.rect.fill_rect_pixelfixed(ctx);
             });
 
             if (typeof tile.one_way === "number") {

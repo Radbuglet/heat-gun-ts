@@ -138,4 +138,29 @@ export class Rect {
     stroke_rect(ctx : CanvasRenderingContext2D) {
         ctx.strokeRect(this.top_left.getX(), this.top_left.getY(), this.get_width(), this.get_height());
     }
+
+    pixelfixed(transform_matrix : SVGMatrix) {
+        const process_point = (pt) => pt.mult(new Vector(transform_matrix.a, transform_matrix.d)).add(new Vector(transform_matrix.e, transform_matrix.f)).floor();
+        return Rect.from_positions(process_point(this.point_top_left()), process_point(this.point_bottom_right()));
+    }
+
+    fill_rect_pixelfixed(ctx : CanvasRenderingContext2D) {
+        ctx.save();
+        const matrix = ctx.getTransform();
+        ctx.resetTransform();
+
+        this.pixelfixed(matrix).fill_rect(ctx);
+
+        ctx.restore();
+    }
+
+    stroke_rect_pixelfixed(ctx : CanvasRenderingContext2D) {
+        ctx.save();
+        const matrix = ctx.getTransform();
+        ctx.resetTransform();
+
+        this.pixelfixed(matrix).stroke_rect(ctx);
+
+        ctx.restore();
+    }
 }

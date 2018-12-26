@@ -1,5 +1,7 @@
 import { ITextComponent } from "../helpers-common/helpers/ITextComponent";
 import { CanvasApplicationInterface } from "./CanvasApplication";
+import { Rect } from "../helpers-common/helpers/Rect";
+import Vector from "../helpers-common/helpers/Vector";
 
 // @TODO remove newline_after flag and implement in a different way
 export function limit_line_size(app : CanvasApplicationInterface, font : string, text : ITextComponent[][], max_line_size : number) : ITextComponent[][] {
@@ -65,7 +67,7 @@ export function draw_text(app : CanvasApplicationInterface, x : number, y : numb
 
                     if (text_part.bg) {
                         ctx.fillStyle = text_part.bg;
-                        ctx.fillRect(drawing_x, drawing_y, text_part_width, line_break_size);
+                        new Rect(new Vector(drawing_x, drawing_y), new Vector(text_part_width, line_break_size)).fill_rect_pixelfixed(ctx);
                     }
                     
                     ctx.fillStyle = text_part.color;
