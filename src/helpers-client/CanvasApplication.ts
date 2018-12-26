@@ -1,6 +1,5 @@
 import Vector from "../helpers-common/helpers/Vector";
 import { calculate_ticks } from "../helpers-common/helpers/Math";
-import { CanvasGraph, Categories } from "./CanvasGraph";
 
 const target_resolution_width = 2048;
 
@@ -31,6 +30,7 @@ export abstract class CanvasApplicationInterface {
   abstract set_pointer_mode(s : string);
 
   abstract get_canvas() : HTMLCanvasElement;
+  abstract get_ctx() : CanvasRenderingContext2D;
 }
 
 export abstract class CanvasSubApplication extends CanvasApplicationInterface {
@@ -100,6 +100,10 @@ export abstract class CanvasSubApplication extends CanvasApplicationInterface {
 
   get_canvas() {
     return this.main.get_canvas();
+  }
+
+  get_ctx() {
+    return this.main.get_ctx();
   }
 }
 
@@ -301,5 +305,9 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
 
     getResolutionHeight() {
       return this.canvas.height / this.resolution_sf;
+    }
+
+    get_ctx() {
+      return this.ctx;
     }
   }
