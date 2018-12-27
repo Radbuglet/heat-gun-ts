@@ -23,29 +23,23 @@ import { RushDirections } from "./RushDirections";
 import { ITile } from "./MapLoader";
 import { RunPlatform } from "./helpers/RunPlatform";
 import { clamp_num } from "./helpers/Math";
+import { ServerPlayer } from "../platform-server/ServerPlayer";
 
-export abstract class Player<WorldType extends World<any>> {
-  abstract handle_movementstate_changed(forceful : boolean);
-  
+export class Player<WorldType extends World<any>> {
   public position: Vector = new Vector(10, 10);
   public velocity: Vector = new Vector(0, 0);
   public using_scope: boolean = false;
   public can_use_rush: boolean = true;
 
-  abstract handle_health_changed();
-  abstract handle_damaged(attacker : this, amount : number);
   public health: number = MAX_HEALTH;
 
-  abstract handle_energy_changed();
   public energy: number = DEFAULT_ENERGY;
   public total_energy: number = DEFAULT_ENERGY;
 
-  abstract handle_slot_changed();
   private selected_slot: number = 0;
   public gun_pullup_cooldown : number = 0;
   private regen_timer : number = 0;
 
-  abstract handle_player_shoot_gun(origin : Vector, gun_direction : Vector);
   public weapons: Weapon[] = new Array(WEAPONS_HELD).fill(null).map((_, i) => new Weapon(this, [
     "rgb(123, 255, 0)",
     "rgb(187, 233, 0)",
@@ -114,7 +108,7 @@ export abstract class Player<WorldType extends World<any>> {
     
     if (!this.is_on_ground()) this.can_use_rush = false;
 
-    this.handle_movementstate_changed(false);
+    if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__movementstate_changed(false);
   }
 
   spawn() {
@@ -144,8 +138,7 @@ export abstract class Player<WorldType extends World<any>> {
   }
 
   safe_set_health(new_health : number) {
-    this.health = Math.min(new_health, MAX_HEALTH) // @TODO round
-    // @TODO calls!
+    this.health = Math.min(new_health, MAX_HEALTH);
   }
 
   update(update_evt : IUpdate) {
@@ -164,7 +157,7 @@ export abstract class Player<WorldType extends World<any>> {
       this.regen_timer = 0;
       let last_health = this.health;
       this.safe_set_health(this.health + 1);
-      if (last_health !== this.health) this.handle_health_changed();
+      if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__health_changed();
     }
 
     this.weapons.forEach(weapon => weapon.update(update_evt));
@@ -192,22 +185,11 @@ export abstract class Player<WorldType extends World<any>> {
 
   damage_player(amount : number, death_info_handler : () => IDeathHandlerInfo) {
     this.safe_set_health(this.health - amount);
-    this.handle_health_changed();
+    if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__health_changed();
 
     if (this.health <= 0) {
-      this.handle_death(death_info_handler());
+      if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__death(death_info_handler());
     }
-  }
-
-  abstract handle_death(info : IDeathHandlerInfo);
-
-  abstract send_message(message : ITextComponent[]);
-
-  replicate_own_state(forceful : boolean) {
-    this.handle_energy_changed();
-    this.handle_health_changed();
-    this.handle_movementstate_changed(forceful);
-    this.handle_slot_changed();
   }
 
   apply_physics(ticks : number) {

@@ -7,6 +7,9 @@ import { CollisionFace, Rect } from "./helpers/Rect";
 import { BeamRaycaster } from "./BeamRaycaster";
 import { MapChunker } from "./MapChunker";
 import { TPZONE_LEFT, TPZONE_RIGHT, TPZONE_TOP, TPZONE_BOTTOM } from "../config/Config";
+import { RunPlatform } from "./helpers/RunPlatform";
+import { ServerWorld } from "../platform-server/ServerWorld";
+import { ServerPlayer } from "../platform-server/ServerPlayer";
 
 export interface ITileCollided {
     tile: ITile
@@ -34,19 +37,19 @@ export abstract class World<PlayerClass extends Player<any>> {
         console.log("Finished chunking map!");
     }
 
-    abstract replicate_player_added();
-    abstract replicate_player_removed();
-    abstract replicate_new_beam(orgin_player : Player<any>, beam : IBeam);
-
     add_player(player: PlayerClass) {
         this.players.set(player.uuid, player);
-        this.replicate_player_added();
-        player.replicate_own_state(true);
+        
+        if (RunPlatform.is_server()) {
+            (this as unknown as ServerWorld).replicate_player_added();
+            (player as unknown as ServerPlayer).replicate_own_state(true);
+        }
     }
 
     remove_player(player: PlayerClass) {
         this.players.delete(player.uuid);
-        this.replicate_player_removed();
+        
+        if (RunPlatform.is_server()) (this as unknown as ServerWorld).replicate_player_removed();
     }
 
     update(update_evt: IUpdate) {
@@ -143,6 +146,6 @@ export abstract class World<PlayerClass extends Player<any>> {
             path_lerping: false,
             delete_flag: false
         });
-        this.replicate_new_beam(origin_player, this.beams[new_beam_index - 1]);
+        if (RunPlatform.is_server()) (this as unknown as ServerWorld).replicate_new_beam(origin_player, this.beams[new_beam_index - 1]);
     }
 }

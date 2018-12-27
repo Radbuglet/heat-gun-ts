@@ -142,7 +142,7 @@ socketserver.on("connection", socket => {
         ) {
             world.wrapped_queue_packets(() => {
                 socket_user.player.select_slot(new_slot);
-                socket_user.player.handle_slot_changed();
+                socket_user.player.replicate__slot_changed();
             });
         }
     });
@@ -175,7 +175,7 @@ socketserver.on("connection", socket => {
             player.sync_pos(Vector.deserialize(position), () => {
                 world.wrapped_queue_packets(() => {
                     player.using_scope = new_scope_state;
-                    player.handle_movementstate_changed(false);
+                    player.replicate__movementstate_changed(false);
                 });
             });
         }
@@ -191,7 +191,7 @@ socketserver.on("connection", socket => {
             const player = socket_user.player;
             if (slot !== player.get_selected_slot()) {
                 player.select_slot(slot);
-                socket_user.player.handle_slot_changed();
+                socket_user.player.replicate__slot_changed();
             }
 
             player.sync_pos(Vector.deserialize(position), () => {
@@ -217,7 +217,7 @@ socketserver.on("connection", socket => {
                 } else {
                     weapon.downgrade_trait(configurable_traits[trait_index]);
                 }
-                player.handle_weaponinfo_changed();
+                player.replicate__weaponinfo_changed();
             });
         }
     });

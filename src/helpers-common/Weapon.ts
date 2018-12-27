@@ -1,12 +1,13 @@
 import { Player } from "./Player";
 import { IUpdate } from "./helpers/IUpdate";
-import { PowerupTypeNames } from "./PowerUps";
 import Vector from "./helpers/Vector";
 import { BeamRaycaster } from "./BeamRaycaster";
 import { num_in_range } from "./helpers/Math";
 import { WEAPONS_HELD } from "../config/Config";
 import { RunPlatform } from "./helpers/RunPlatform";
 import { ServerWorld } from "../platform-server/ServerWorld";
+import { ServerPlayer } from "../platform-server/ServerPlayer";
+import { ClientPlayer } from "../platform-game/src/ClientPlayer";
 
 export interface IWeaponStats {
     additional_ground_ammo: number
@@ -203,16 +204,18 @@ export class Weapon {
     upgrade_trait(trait: ITrait) {
         if (this.player.energy >= trait.cost && !this.is_trait_maxed_out(trait)) {
             this.player.energy -= trait.cost;
-            this.player.handle_energy_changed();
             this.change_trait_value(trait, 1);
+
+            if (RunPlatform.is_server()) (this.player as unknown as ServerPlayer).replicate__energy_changed();
         }
     }
 
     downgrade_trait(trait: ITrait) {
         if (this.get_trait_value(trait) > 0) {
             this.player.energy += trait.cost;
-            this.player.handle_energy_changed();
             this.change_trait_value(trait, -1);
+
+            if (RunPlatform.is_server()) (this.player as unknown as ServerPlayer).replicate__energy_changed();
         }
     }
 
@@ -305,7 +308,7 @@ export class Weapon {
 
         if (RunPlatform.is_client() && this.get_next_slot() !== null) {
             this.player.select_slot(this.get_next_slot());
-            this.player.handle_slot_changed();
+            if (RunPlatform.is_server()) (this.player as unknown as ServerPlayer).replicate__slot_changed()
         }
 
         for (let i = 0; i < this.get_upgrades().additional_barrels + 1; i++) {
@@ -316,7 +319,7 @@ export class Weapon {
             );
             
             const raycaster = this.raycast_beam(bullet_direction);
-            this.player.handle_player_shoot_gun(this.player.collision_rect.point_middle(), bullet_direction);
+            if (RunPlatform.is_client()) (this.player as unknown as ClientPlayer).particlehandle__player_shoot_bullet(this.player.collision_rect.point_middle(), bullet_direction);
             if (raycaster.collided_player !== null) {
                 const damaged_player = raycaster.collided_player;
                 const attacker = this.player;
@@ -329,10 +332,17 @@ export class Weapon {
                         / (this.get_upgrades().additional_barrels + 1)
                     ) * this.get_firerate_multiplier(false), 3));
                 
-                damaged_player.handle_damaged(attacker, damage);
+                if (RunPlatform.is_client()) (damaged_player as unknown as ClientPlayer).particlehandle__damaged(attacker, damage);
+                    
+                damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35)).add(new Vector(0, -20)));
                 
+                if (RunPlatform.is_server()) (damaged_player as unknown as ServerPlayer).replicate__movementstate_changed(true);
+
                 if (RunPlatform.is_server()) {
-                    damaged_player.send_message([{
+                    const damaged_player_server = damaged_player as unknown as ServerPlayer;
+                    const attacker_player_server = attacker as unknown as ServerPlayer;
+
+                    damaged_player_server.send_message([{
                         color: "red",
                         text: attacker.name
                       }, {
@@ -351,7 +361,7 @@ export class Weapon {
 
                     const gained_energy = damage / 4;
 
-                    attacker.send_message([{
+                    attacker_player_server.send_message([{
                         color: "darkgreen",
                         text: "You gained "
                       },
@@ -402,12 +412,9 @@ export class Weapon {
                         }
                     });
     
-                    damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35)).add(new Vector(0, -20)));
-                    damaged_player.handle_movementstate_changed(true);
-    
                     attacker.energy += gained_energy;
                     attacker.total_energy += gained_energy;
-                    this.player.handle_energy_changed();
+                    attacker_player_server.replicate__energy_changed();
                 }
             }
 
@@ -448,7 +455,7 @@ export class Weapon {
             this.player.velocity.mutnegate();
         }
 
-        this.player.handle_movementstate_changed(false);
+        if (RunPlatform.is_server()) (this.player as unknown as ServerPlayer).replicate__movementstate_changed(false);
     }
 
     can_teleport_tpvec(tp_vec : Vector) {

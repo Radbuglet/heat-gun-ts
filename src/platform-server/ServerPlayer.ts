@@ -10,19 +10,26 @@ export class ServerPlayer extends Player<ServerWorld> {
         super(world, name);
     }
 
-    handle_damaged(attacker : Player<World<any>>, damage : number) {
+  replicate_own_state(forceful : boolean) {
+    this.replicate__energy_changed();
+    this.replicate__health_changed();
+    this.replicate__movementstate_changed(forceful);
+    this.replicate__slot_changed();
+  }
+
+    replicate__damaged(attacker : Player<World<any>>, damage : number) {
         this.user.send_packet(PacketNames.replicate_player_damaged, attacker.uuid, this.uuid, damage);
     }
 
     // @TODO add good replication
-    handle_death(death_info : IDeathHandlerInfo, socket_disconnected = false) {
+    replicate__death(death_info : IDeathHandlerInfo, socket_disconnected = false) {
         this.world.broadcast_message([]);
         this.world.broadcast_message(death_info.public_message);
         this.world.broadcast_message([]);
         this.user.notify_kill_and_remove(death_info.personal_message, socket_disconnected);
     }
 
-    handle_movementstate_changed(forceful : boolean) {
+    replicate__movementstate_changed(forceful : boolean) {
         this.world.broadcast_packet(PacketNames.replicate_player_mov_changed,
             this.uuid,
             this.position.serialize(),
@@ -32,23 +39,19 @@ export class ServerPlayer extends Player<ServerWorld> {
             forceful);
     }
 
-    handle_health_changed() {
+    replicate__health_changed() {
         this.world.broadcast_packet(PacketNames.replicate_player_health_changed, this.uuid, this.health);
     }
 
-    handle_player_shoot_gun() {
-        // @TODO
-    }
-
-    handle_weaponinfo_changed() {
+    replicate__weaponinfo_changed() {
         this.world.broadcast_packet(PacketNames.replicate_weapon_info_change, this.uuid, this.weapons.map(weapon => weapon.replicated_data));
     }
 
-    handle_energy_changed() {
+    replicate__energy_changed() {
         this.world.broadcast_packet(PacketNames.replicate_energy_change, this.uuid, this.energy, this.total_energy);
     }
 
-    handle_slot_changed() {
+    replicate__slot_changed() {
         this.world.broadcast_packet(PacketNames.replicate_slot_change, this.uuid, this.get_selected_slot());
     }
 

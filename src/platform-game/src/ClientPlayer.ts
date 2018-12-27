@@ -14,11 +14,7 @@ export class ClientPlayer extends Player<ClientWorld> {
         super(world, name);
     }
 
-    handle_death() {}
-    handle_energy_changed() {}
-    handle_health_changed() {}
-    handle_movementstate_changed() {}
-    handle_damaged(attacker : Player<World<any>>, damage : number, is_confirmed : boolean) {
+    particlehandle__damaged(attacker : Player<World<any>>, damage : number) {
         for (let x = 0; x < damage * 2; x++) {
             this.world.particle_system.register_particle(new BloodParticle(
                 this.world.particle_system, this.world.app,
@@ -36,8 +32,7 @@ export class ClientPlayer extends Player<ClientWorld> {
         }
     }
 
-    handle_slot_changed() {}
-    handle_player_shoot_gun(origin : Vector, direction : Vector) {
+    particlehandle__player_shoot_bullet(origin : Vector, direction : Vector) {
         this.world.particle_system.register_particle(new AmmoParticle(
             this.world.particle_system, this.world.app,
             origin, direction.mult(new Vector(10))
