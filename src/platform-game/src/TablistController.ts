@@ -1,8 +1,8 @@
 import Vector from "../../helpers-common/helpers/Vector";
 import { Rect } from "../../helpers-common/helpers/Rect";
-import { GameWorld } from "./GameWorld";
+import { GameClient } from "./GameClient";
 
-export function render_tablist(app : GameWorld, ping : number) {
+export function render_tablist(app : GameClient, ping : number) {
     app.draw(ctx => { // UI
         app.draw(() => {
             const tablist_rect = new Rect(

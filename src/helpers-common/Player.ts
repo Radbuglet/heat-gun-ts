@@ -66,6 +66,8 @@ export class Player<WorldType extends World<any>> {
     if (this.selected_slot !== slot) {
       this.selected_slot = slot;
       this.gun_pullup_cooldown = this.get_active_weapon().get_pullup_cooldown_max();
+
+      if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__slot_changed();
     }
   }
 
@@ -135,10 +137,12 @@ export class Player<WorldType extends World<any>> {
       }
     }
     console.log("Spawned player!");
+    if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__movementstate_changed(true);
   }
 
-  safe_set_health(new_health : number) {
+  set_health(new_health : number) {
     this.health = Math.min(new_health, MAX_HEALTH);
+    if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__health_changed();
   }
 
   update(update_evt : IUpdate) {
@@ -155,9 +159,7 @@ export class Player<WorldType extends World<any>> {
     this.regen_timer += update_evt.ticks;
     if (this.regen_timer > 100 && RunPlatform.is_server()) {
       this.regen_timer = 0;
-      let last_health = this.health;
-      this.safe_set_health(this.health + 1);
-      if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__health_changed();
+      this.set_health(this.health + 1);
     }
 
     this.weapons.forEach(weapon => weapon.update(update_evt));
@@ -183,9 +185,9 @@ export class Player<WorldType extends World<any>> {
     );*/
   }
 
-  damage_player(amount : number, death_info_handler : () => IDeathHandlerInfo) {
-    this.safe_set_health(this.health - amount);
-    if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__health_changed();
+  damage_player(amount : number, death_info_handler : () => IDeathHandlerInfo, attacker? : Player<WorldType>) {
+    this.set_health(this.health - amount);
+    if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__damaged(attacker, amount);
 
     if (this.health <= 0) {
       if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__death(death_info_handler());

@@ -206,7 +206,10 @@ export class Weapon {
             this.player.energy -= trait.cost;
             this.change_trait_value(trait, 1);
 
-            if (RunPlatform.is_server()) (this.player as unknown as ServerPlayer).replicate__energy_changed();
+            if (RunPlatform.is_server()) {
+                (this.player as unknown as ServerPlayer).replicate__energy_changed();
+                (this.player as unknown as ServerPlayer).replicate__weaponinfo_changed();
+            }
         }
     }
 
@@ -215,7 +218,10 @@ export class Weapon {
             this.player.energy += trait.cost;
             this.change_trait_value(trait, -1);
 
-            if (RunPlatform.is_server()) (this.player as unknown as ServerPlayer).replicate__energy_changed();
+            if (RunPlatform.is_server()) {
+                (this.player as unknown as ServerPlayer).replicate__energy_changed();
+                (this.player as unknown as ServerPlayer).replicate__weaponinfo_changed();
+            }
         }
     }
 
@@ -308,7 +314,6 @@ export class Weapon {
 
         if (RunPlatform.is_client() && this.get_next_slot() !== null) {
             this.player.select_slot(this.get_next_slot());
-            if (RunPlatform.is_server()) (this.player as unknown as ServerPlayer).replicate__slot_changed()
         }
 
         for (let i = 0; i < this.get_upgrades().additional_barrels + 1; i++) {
@@ -332,7 +337,7 @@ export class Weapon {
                         / (this.get_upgrades().additional_barrels + 1)
                     ) * this.get_firerate_multiplier(false), 3));
                 
-                if (RunPlatform.is_client()) (damaged_player as unknown as ClientPlayer).particlehandle__damaged(attacker, damage);
+                if (RunPlatform.is_client()) (damaged_player as unknown as ClientPlayer).particlehandle__damaged(damage);
                     
                 damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35)).add(new Vector(0, -20)));
                 
@@ -410,7 +415,7 @@ export class Weapon {
                               }
                             ]
                         }
-                    });
+                    }, attacker);
     
                     attacker.energy += gained_energy;
                     attacker.total_energy += gained_energy;

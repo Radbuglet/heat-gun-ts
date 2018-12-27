@@ -1,4 +1,4 @@
-import { GameWorld } from "./GameWorld";
+import { GameClient } from "./GameClient";
 import { CanvasApplication } from "../../helpers-client/CanvasApplication";
 import { MapLoader } from "../../helpers-common/MapLoader";
 import { ClientSocket } from "./ClientSocket";
@@ -10,7 +10,7 @@ import { RushDirections } from "../../helpers-common/RushDirections";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { MainGame, SocketEventGroups } from "./entry";
 
-export class NetworkedGameWorld extends GameWorld {
+export class NetworkedGameWorld extends GameClient {
     constructor(private main_game : MainGame, map_loader : MapLoader, private socket : ClientSocket, my_uuid : string, my_name: string, my_spawn : Vector) {
         super(main_game, map_loader, my_uuid, my_name, my_spawn);
 
@@ -109,9 +109,12 @@ export class NetworkedGameWorld extends GameWorld {
         });
 
         this.socket.clump_on(PacketNames.replicate_player_damaged, SocketEventGroups.GAME, (attacker : string, target_uuid : string, damage : number) => {
-            if (this.world.players.has(target_uuid) && attacker !== this.local_player.uuid) {
+            if (this.world.players.has(target_uuid)) {
                 const target_player = this.world.players.get(target_uuid);
-                target_player.particlehandle__damaged(null, damage);
+
+                if (attacker !== this.local_player.uuid) {
+                    target_player.particlehandle__damaged(damage);
+                }
             }
         });
         

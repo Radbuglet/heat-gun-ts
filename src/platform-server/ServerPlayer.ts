@@ -18,7 +18,7 @@ export class ServerPlayer extends Player<ServerWorld> {
   }
 
     replicate__damaged(attacker : Player<World<any>>, damage : number) {
-        this.user.send_packet(PacketNames.replicate_player_damaged, attacker.uuid, this.uuid, damage);
+        this.world.broadcast_packet(PacketNames.replicate_player_damaged, (attacker ? attacker.uuid : null), this.uuid, damage);
     }
 
     // @TODO add good replication

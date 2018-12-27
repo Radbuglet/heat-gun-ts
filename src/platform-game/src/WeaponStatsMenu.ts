@@ -4,12 +4,12 @@ import { rainbow_color } from "../../helpers-client/color";
 import { configurable_traits, ITrait } from "../../helpers-common/Weapon";
 import { Rect } from "../../helpers-common/helpers/Rect";
 import Vector from "../../helpers-common/helpers/Vector";
-import { GameWorld } from "./GameWorld";
+import { GameClient } from "./GameClient";
 
 export class WeaponStatsMenu {
     public changing_weapon_stats : boolean = false;
     public weapon_stat_edit_index : number = 0;
-    constructor(private app : GameWorld, private stat_changed_handler : (weapon_index : number, stat_index : number, is_upgrade : boolean) => void) {
+    constructor(private app : GameClient, private stat_changed_handler : (weapon_index : number, stat_index : number, is_upgrade : boolean) => void) {
 
     }
 

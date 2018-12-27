@@ -13,16 +13,18 @@ export class ServerWorld extends World<ServerPlayer> {
         this.players.forEach(player => player.send_message(message));
     }
 
-    replicate_new_beam(orgin_player : Player<any>, beam : IBeam) {
+    replicate__new_beam(orgin_player : Player<any>, beam : IBeam) {
         this.broadcast_packet(PacketNames.replicate_new_beam, orgin_player.uuid, beam.path.map(vec => vec.serialize()), beam.color, beam.size);
     }
 
-    replicate_player_added() {
+    replicate__player_added() {
         this.broadcast_player_list();
+        this.replicate_everything(false);
     }
 
-    replicate_player_removed() {
+    replicate__player_removed() {
         this.broadcast_player_list();
+        this.replicate_everything(false);
     }
 
     replicate_everything(forceful : boolean) {

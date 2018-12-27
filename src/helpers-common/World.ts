@@ -41,15 +41,14 @@ export abstract class World<PlayerClass extends Player<any>> {
         this.players.set(player.uuid, player);
         
         if (RunPlatform.is_server()) {
-            (this as unknown as ServerWorld).replicate_player_added();
-            (player as unknown as ServerPlayer).replicate_own_state(true);
+            (this as unknown as ServerWorld).replicate__player_added();
         }
     }
 
     remove_player(player: PlayerClass) {
         this.players.delete(player.uuid);
         
-        if (RunPlatform.is_server()) (this as unknown as ServerWorld).replicate_player_removed();
+        if (RunPlatform.is_server()) (this as unknown as ServerWorld).replicate__player_removed();
     }
 
     update(update_evt: IUpdate) {
@@ -146,6 +145,6 @@ export abstract class World<PlayerClass extends Player<any>> {
             path_lerping: false,
             delete_flag: false
         });
-        if (RunPlatform.is_server()) (this as unknown as ServerWorld).replicate_new_beam(origin_player, this.beams[new_beam_index - 1]);
+        if (RunPlatform.is_server()) (this as unknown as ServerWorld).replicate__new_beam(origin_player, this.beams[new_beam_index - 1]);
     }
 }

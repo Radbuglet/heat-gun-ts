@@ -142,7 +142,6 @@ socketserver.on("connection", socket => {
         ) {
             world.wrapped_queue_packets(() => {
                 socket_user.player.select_slot(new_slot);
-                socket_user.player.replicate__slot_changed();
             });
         }
     });
@@ -191,7 +190,6 @@ socketserver.on("connection", socket => {
             const player = socket_user.player;
             if (slot !== player.get_selected_slot()) {
                 player.select_slot(slot);
-                socket_user.player.replicate__slot_changed();
             }
 
             player.sync_pos(Vector.deserialize(position), () => {
@@ -217,7 +215,6 @@ socketserver.on("connection", socket => {
                 } else {
                     weapon.downgrade_trait(configurable_traits[trait_index]);
                 }
-                player.replicate__weaponinfo_changed();
             });
         }
     });
@@ -241,6 +238,7 @@ socketserver.on("connection", socket => {
 let last_update_timestamp = now();
 let total_runtime_ms = 0;
 let total_runtime_ticks = 0;
+let total_runtime_runs = 0;
 setInterval(() => {
     const delta = now() - last_update_timestamp;
     last_update_timestamp = now();
@@ -249,6 +247,7 @@ setInterval(() => {
 
     total_runtime_ms += delta;
     total_runtime_ticks += ticks;
+    total_runtime_runs++;
     
     world.update({
         exec_mode: ExecMode.server,
@@ -257,8 +256,6 @@ setInterval(() => {
         total_ms: total_runtime_ms,
         total_ticks: total_runtime_ticks
     });
-
-    // world.players.forEach(player => console.log(player.position.toString()));
 }, 1000 / 60);
 
 setInterval(() => {

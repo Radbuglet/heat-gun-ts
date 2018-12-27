@@ -26,9 +26,6 @@ export class SocketUser {
 
         // Adds player to world, replicating all of it's information
         this.server_world.add_player(this.player);
-
-        // Replicates the game state
-        this.server_world.replicate_everything(false);
     }
 
     remove_player_from_world() {

@@ -16,7 +16,7 @@ import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { draw_text, limit_line_size, left_right_alignment, get_line_size } from "../../helpers-client/draw_text";
 import { CloudHorizon } from "./CloudHorizon";
 
-export abstract class GameWorld extends CanvasSubApplication {
+export abstract class GameClient extends CanvasSubApplication {
     public local_player : ClientPlayer;
     private camera : Camera = new Camera(new Vector(0, 0), this);
     public world : ClientWorld;

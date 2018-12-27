@@ -14,7 +14,7 @@ export class ClientPlayer extends Player<ClientWorld> {
         super(world, name);
     }
 
-    particlehandle__damaged(attacker : Player<World<any>>, damage : number) {
+    particlehandle__damaged(damage : number) {
         for (let x = 0; x < damage * 2; x++) {
             this.world.particle_system.register_particle(new BloodParticle(
                 this.world.particle_system, this.world.app,
