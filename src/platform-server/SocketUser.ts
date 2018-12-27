@@ -17,6 +17,9 @@ export class SocketUser {
     play(username : string) {
         console.log("A user has joined with the username ", username);
 
+        // Make sure to reset their queue level due to race conditions or other things that could make it non zero.
+        this.queuing_packets_level = 0;
+
         this.server_world.wrapped_queue_packets(() => {
             // Broadcast message
             this.server_world.broadcast_message([]);
