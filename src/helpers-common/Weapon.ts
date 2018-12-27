@@ -25,6 +25,9 @@ export interface IWeaponStats {
     fricmod : number
     slow_motion : number
     slot_on_shoot : number
+
+    kb_reverse : number
+    kb_increase : number
 }
 
 export interface IWeapon {
@@ -122,6 +125,21 @@ export const configurable_traits: ITrait[] = [
     null,
 
     {
+        key: "kb_reverse",
+        name: "Reversed Knockback",
+        maxval: 1,
+        cost: 10
+    },
+    {
+        key: "kb_increase",
+        name: "Increased Knockback",
+        maxval: 4,
+        cost: 3
+    },
+
+    null,
+
+    {
         key: "scope",
         name: "Scope",
         maxval: 7,
@@ -138,7 +156,7 @@ export const configurable_traits: ITrait[] = [
         name: "Shot slot change (0 = disabled)",
         maxval: 3,
         cost: 0
-    }
+    },
 ];
 
 export class Weapon {
@@ -159,7 +177,9 @@ export class Weapon {
             trail_color: 0,
             fricmod: 0,
             slow_motion: 0,
-            slot_on_shoot: 0
+            slot_on_shoot: 0,
+            kb_increase: 0,
+            kb_reverse: 0
         }
     }
 
@@ -343,7 +363,11 @@ export class Weapon {
                 
                 if (RunPlatform.is_client()) (damaged_player as unknown as ClientPlayer).particlehandle__damaged(damage);
                     
-                damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35)).add(new Vector(0, -20)));
+                damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35 + this.get_upgrades().kb_increase * 5)).add(new Vector(0, -20)));
+                if (+ this.get_upgrades().kb_reverse === 1) {
+                    damaged_player.velocity.mutnegate();
+                    damaged_player.velocity.mutmult(new Vector(0.5));
+                }
                 
                 if (RunPlatform.is_server()) (damaged_player as unknown as ServerPlayer).replicate__movementstate_changed(true);
 
