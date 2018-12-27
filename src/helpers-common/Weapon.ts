@@ -364,9 +364,8 @@ export class Weapon {
                 if (RunPlatform.is_client()) (damaged_player as unknown as ClientPlayer).particlehandle__damaged(damage);
                     
                 damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35 + this.get_upgrades().kb_increase * 5)).add(new Vector(0, -20)));
-                if (+ this.get_upgrades().kb_reverse === 1) {
+                if (this.get_upgrades().kb_reverse === 1) {
                     damaged_player.velocity.mutnegate();
-                    damaged_player.velocity.mutmult(new Vector(0.5));
                 }
                 
                 if (RunPlatform.is_server()) (damaged_player as unknown as ServerPlayer).replicate__movementstate_changed(true);
