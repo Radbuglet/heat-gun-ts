@@ -16,7 +16,6 @@ import {
 import { World } from "./World";
 import {v4 as uuidv4} from "uuid";
 import { IUpdate } from "./helpers/IUpdate";
-import { PowerupTypeNames } from "./PowerUps";
 import { ServerPosRollbacker } from "./helpers/ServerSyncPosController";
 import { Rect } from "./helpers/Rect";
 import { ITextComponent } from "./helpers/ITextComponent";
@@ -40,11 +39,6 @@ export abstract class Player<WorldType extends World<any>> {
   abstract handle_energy_changed();
   public energy: number = DEFAULT_ENERGY;
   public total_energy: number = DEFAULT_ENERGY;
-
-  abstract handle_powerupstate_changed();
-  public power_up_slot: string = null;
-  public current_power_up: string = null;
-  public power_up_time_left: number = 0;
 
   abstract handle_slot_changed();
   private selected_slot: number = 0;
@@ -161,7 +155,7 @@ export abstract class Player<WorldType extends World<any>> {
 
     this.gun_pullup_cooldown = Math.max(0, this.gun_pullup_cooldown - update_evt.ticks);
 
-    if (!this.can_use_rush && (this.is_on_ground() || this.current_power_up === PowerupTypeNames.InfiniteDashes)) {
+    if (!this.can_use_rush && this.is_on_ground()) {
       this.can_use_rush = true;
     }
 
@@ -213,14 +207,7 @@ export abstract class Player<WorldType extends World<any>> {
     this.handle_energy_changed();
     this.handle_health_changed();
     this.handle_movementstate_changed(forceful);
-    this.handle_powerupstate_changed();
     this.handle_slot_changed();
-  }
-
-  activate_powerup() {
-    // @TODO implement
-
-    this.handle_powerupstate_changed();
   }
 
   apply_physics(ticks : number) {

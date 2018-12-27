@@ -221,7 +221,7 @@ export class Weapon {
     }
 
     update(update_evt: IUpdate) {
-        if (this.player.is_on_ground() || this.player.current_power_up === PowerupTypeNames.UnlimitedAmmo) {
+        if (this.player.is_on_ground()) {
             this.set_ammo(this.get_max_ammo());
         }
 
@@ -270,7 +270,7 @@ export class Weapon {
         const raycaster = new BeamRaycaster({
             starting_position: this.player.collision_rect.point_middle(),
             starting_direction: bullet_direction,
-            phase_world: this.player.current_power_up === PowerupTypeNames.BulletFaze,
+            phase_world: false,
 
             max_dist: this.get_max_dist(), // @TODO calculate
             ray_collision_box_size: new Vector(this.get_bullet_size()),

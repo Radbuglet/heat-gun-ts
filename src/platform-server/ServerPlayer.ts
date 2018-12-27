@@ -48,10 +48,6 @@ export class ServerPlayer extends Player<ServerWorld> {
         this.world.broadcast_packet(PacketNames.replicate_energy_change, this.uuid, this.energy, this.total_energy);
     }
 
-    handle_powerupstate_changed() {
-        
-    }
-
     handle_slot_changed() {
         this.world.broadcast_packet(PacketNames.replicate_slot_change, this.uuid, this.get_selected_slot());
     }

@@ -200,16 +200,6 @@ socketserver.on("connection", socket => {
         }
     });
 
-    socket.on("use_power_up", () => {
-        if (socket_user.is_playing()) {
-            const player = socket_user.player;
-
-            if (player.power_up_slot !== null && player.current_power_up === null) {
-                player.activate_powerup();
-            }
-        }
-    });
-
     socket.on((PacketNames.modify_weapon_trait as number).toString(), (weapon_index : number, trait_index : number, is_increase : boolean) => {
         if (
             socket_user.is_playing()

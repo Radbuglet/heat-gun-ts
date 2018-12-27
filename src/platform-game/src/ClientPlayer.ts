@@ -18,8 +18,7 @@ export class ClientPlayer extends Player<ClientWorld> {
     handle_energy_changed() {}
     handle_health_changed() {}
     handle_movementstate_changed() {}
-    handle_powerupstate_changed() {}
-    handle_damaged(attacker : Player<World<any>>, damage : number) {
+    handle_damaged(attacker : Player<World<any>>, damage : number, is_confirmed : boolean) {
         for (let x = 0; x < damage * 2; x++) {
             this.world.particle_system.register_particle(new BloodParticle(
                 this.world.particle_system, this.world.app,
