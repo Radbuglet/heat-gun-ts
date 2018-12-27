@@ -52,9 +52,13 @@ export abstract class World<PlayerClass extends Player<any>> {
     }
 
     update(update_evt: IUpdate) {
+        if (RunPlatform.is_server()) (this as unknown as ServerWorld).queue_all_players_packets();
+
         this.players.forEach(player => {
             player.update(update_evt);
         });
+        
+        if (RunPlatform.is_server()) (this as unknown as ServerWorld).unqueue_all_players_packets();
 
         // @TODO power-ups!
 

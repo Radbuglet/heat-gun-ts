@@ -24,6 +24,7 @@ import { ITile } from "./MapLoader";
 import { RunPlatform } from "./helpers/RunPlatform";
 import { clamp_num } from "./helpers/Math";
 import { ServerPlayer } from "../platform-server/ServerPlayer";
+import { ServerWorld } from "../platform-server/ServerWorld";
 
 export class Player<WorldType extends World<any>> {
   public position: Vector = new Vector(10, 10);
@@ -146,6 +147,7 @@ export class Player<WorldType extends World<any>> {
   }
 
   update(update_evt : IUpdate) {
+    if (RunPlatform.is_server()) (this.world as unknown as ServerWorld).queue_all_players_packets();
     this.apply_physics(/*1*/ Math.floor(update_evt.ticks * 100) / 100);
     this.collision_rect.top_left = this.position;
     this.sync_controller.record_position(this.position);
@@ -164,6 +166,8 @@ export class Player<WorldType extends World<any>> {
 
     this.weapons.forEach(weapon => weapon.update(update_evt));
     this.sync_controller.attempt_sync(this.position);
+
+    if (RunPlatform.is_server()) (this.world as unknown as ServerWorld).unqueue_all_players_packets();
   }
 
   sync_pos(expected_pos : Vector, callback : () => void) {

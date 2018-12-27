@@ -11,10 +11,12 @@ export class ServerPlayer extends Player<ServerWorld> {
     }
 
   replicate_own_state(forceful : boolean) {
-    this.replicate__energy_changed();
-    this.replicate__health_changed();
-    this.replicate__movementstate_changed(forceful);
-    this.replicate__slot_changed();
+    this.world.wrapped_queue_packets(() => {
+        this.replicate__energy_changed();
+        this.replicate__health_changed();
+        this.replicate__movementstate_changed(forceful);
+        this.replicate__slot_changed();
+    });
   }
 
     replicate__damaged(attacker : Player<World<any>>, damage : number) {

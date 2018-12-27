@@ -207,8 +207,10 @@ export class Weapon {
             this.change_trait_value(trait, 1);
 
             if (RunPlatform.is_server()) {
+                (this.player.world as unknown as ServerWorld).queue_all_players_packets();
                 (this.player as unknown as ServerPlayer).replicate__energy_changed();
                 (this.player as unknown as ServerPlayer).replicate__weaponinfo_changed();
+                (this.player.world as unknown as ServerWorld).unqueue_all_players_packets();
             }
         }
     }
@@ -219,8 +221,10 @@ export class Weapon {
             this.change_trait_value(trait, -1);
 
             if (RunPlatform.is_server()) {
+                (this.player.world as unknown as ServerWorld).queue_all_players_packets();
                 (this.player as unknown as ServerPlayer).replicate__energy_changed();
                 (this.player as unknown as ServerPlayer).replicate__weaponinfo_changed();
+                (this.player.world as unknown as ServerWorld).unqueue_all_players_packets();
             }
         }
     }

@@ -94,21 +94,7 @@ socketserver.on("connection", socket => {
         }
 
         if (typeof username === "string" && ServerPlayer.is_valid_username(username) === null && !socket_user.is_playing()) {
-            world.wrapped_queue_packets(() => {
-                socket_user.play(username);
-
-                world.broadcast_message([]);
-                world.broadcast_message([{
-                    color: "#ee1a1a",
-                    text: username
-                  },
-                  {
-                    color: "gray",
-                    text: " entered the area"
-                  }
-                ]);
-                world.broadcast_message([]);
-            });
+            socket_user.play(username);
         }
     });
 
@@ -140,9 +126,7 @@ socketserver.on("connection", socket => {
             typeof new_slot === "number" && Weapon.is_valid_slot_index(new_slot) && // Argument validation
             socket_user.is_playing() // Gameplay checks
         ) {
-            world.wrapped_queue_packets(() => {
                 socket_user.player.select_slot(new_slot);
-            });
         }
     });
 
@@ -152,14 +136,12 @@ socketserver.on("connection", socket => {
             Vector.is_valid_serialized_vector(position) &&
             socket_user.is_playing() && socket_user.player.can_use_rush // Gameplay checks
         ) {
-            world.wrapped_queue_packets(() => {
-                const player = socket_user.player; // Store reference to player because `socket_user.player` everywhere looks ugly.
+            const player = socket_user.player; // Store reference to player because `socket_user.player` everywhere looks ugly.
 
+            player.sync_pos(Vector.deserialize(position), () => {
                 if (!player.is_on_ground()) player.can_use_rush = false; 
 
-                player.sync_pos(Vector.deserialize(position), () => {
-                    player.rush(direction_enum_value);
-                });
+                player.rush(direction_enum_value);
             });
         }
     });
@@ -172,10 +154,8 @@ socketserver.on("connection", socket => {
             if (player.using_scope === new_scope_state) return;
 
             player.sync_pos(Vector.deserialize(position), () => {
-                world.wrapped_queue_packets(() => {
-                    player.using_scope = new_scope_state;
-                    player.replicate__movementstate_changed(false);
-                });
+                player.using_scope = new_scope_state;
+                player.replicate__movementstate_changed(false);
             });
         }
     });
@@ -209,13 +189,11 @@ socketserver.on("connection", socket => {
             const player = socket_user.player;
             const weapon = player.weapons[weapon_index];
 
-            world.wrapped_queue_packets(() => {
-                if (is_increase) {
-                    weapon.upgrade_trait(configurable_traits[trait_index]);
-                } else {
-                    weapon.downgrade_trait(configurable_traits[trait_index]);
-                }
-            });
+            if (is_increase) {
+                weapon.upgrade_trait(configurable_traits[trait_index]);
+            } else {
+                weapon.downgrade_trait(configurable_traits[trait_index]);
+            }
         }
     });
 
@@ -259,9 +237,7 @@ setInterval(() => {
 }, 1000 / 60);
 
 setInterval(() => {
-    world.queue_all_players_packets();
     world.replicate_everything(false);
-    world.unqueue_all_players_packets();
 }, 2000);
 
 setInterval(() => {

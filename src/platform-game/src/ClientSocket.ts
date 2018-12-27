@@ -1,4 +1,4 @@
-import { PacketNames } from "../../helpers-common/ProtocolDefs";
+import { PacketNames, decode_packet_name } from "../../helpers-common/ProtocolDefs";
 
 export class ClientSocket {
     private handlers : Map<PacketNames, Handler[]> = new Map();
@@ -7,7 +7,7 @@ export class ClientSocket {
         this.underlying_socket.on("pktclump", (data : [[any]]) => {
             data.forEach(packet => {
                 const evtname = packet.shift();
-                console.log(evtname, "->", ...packet);
+                console.log(decode_packet_name(evtname), "->", ...packet);
                 if (this.handlers.has(evtname)) {
                     const handler_list = this.handlers.get(evtname);
                     // I am doing it this way because handlers are able to register other handlers which updates the handler list
