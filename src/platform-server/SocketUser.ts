@@ -9,7 +9,7 @@ import { Leaderboard } from "./Leaderboard";
 export class SocketUser {
     public player : ServerPlayer = null;
 
-    constructor(public socket : Socket, private server_world : ServerWorld) {
+    constructor(private socket : Socket, private server_world : ServerWorld) {
 
     }
 
@@ -116,7 +116,7 @@ export class SocketUser {
             clumped_pkt.push([pkt.evt_name].concat(pkt.args));
         })
         setTimeout(() => {
-            this.socket.emit("pktclump", clumped_pkt);
+            if (this.socket !== null) this.socket.emit("pktclump", clumped_pkt);
         }, LAGSWITCH_SVTOCL);
     }
 }
