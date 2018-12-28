@@ -79,7 +79,7 @@ export abstract class World<PlayerClass extends Player<any>> {
                 }
             }
         });
-        this.beams.filter(beam => beam.delete_flag === false);
+        this.beams = this.beams.filter(beam => beam.delete_flag === false);
     }
 
     get_tile_collisions(rect : Rect, foreground_no_ignore: boolean = false): ITile[] {
