@@ -22,6 +22,7 @@ export interface IBeam {
     color : string
     path_lerping : boolean
     delete_flag : boolean
+    is_from_other? : boolean
 }
 
 export abstract class World<PlayerClass extends Player<any>> {

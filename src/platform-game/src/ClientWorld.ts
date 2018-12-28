@@ -40,8 +40,10 @@ export class ClientWorld extends World<ClientPlayer> {
         this.beams.forEach(beam => {
             this.app.draw(ctx => {
                 ctx.strokeStyle = beam.color;
-                ctx.shadowColor = beam.color;
-                ctx.shadowBlur = 10;
+                if (!beam.is_from_other) {
+                    ctx.shadowColor = beam.color;
+                    ctx.shadowBlur = 10;
+                }
 
                 ctx.beginPath();
                 ctx.lineWidth = beam.size;

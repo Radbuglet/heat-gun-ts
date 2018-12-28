@@ -78,13 +78,9 @@ export class NetworkedGameWorld extends GameClient {
         this.socket.clump_on(PacketNames.replicate_new_beam, SocketEventGroups.GAME, ( orgin_player_uuid : string, path : ISerializedVector[], color : string, size : number ) => {
             if (orgin_player_uuid === this.local_player.uuid) return; // We don't want to add the same beam twice!
 
-            console.log({
-                color, size, path: path.map(svec => Vector.deserialize(svec)),
-                delete_flag: false, path_lerping: false
-            });
             this.world.beams.push({
                 color, size, path: path.map(svec => Vector.deserialize(svec)),
-                delete_flag: false, path_lerping: false
+                delete_flag: false, path_lerping: false, is_from_other: true
             });
         });
 
