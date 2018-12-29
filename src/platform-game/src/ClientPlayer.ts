@@ -46,14 +46,8 @@ export class ClientPlayer extends Player<ClientWorld> {
             ctx.fillStyle = this.get_movement_collisions(new Vector(0, 0)).length > 0 ? "red" : "gold";
             ctx.strokeStyle = "darkred";
 
-            ctx.fillRect(
-                this.collision_rect.get_x(), this.collision_rect.get_y(),
-                this.collision_rect.get_width(), this.collision_rect.get_height());
-            
-            ctx.strokeRect(
-                this.collision_rect.get_x(), this.collision_rect.get_y(),
-                this.collision_rect.get_width(), this.collision_rect.get_height()
-            );
+            this.collision_rect.fill_rect(ctx);
+            this.collision_rect.stroke_rect(ctx);
         });
 
         app.draw(ctx => {
