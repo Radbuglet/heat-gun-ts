@@ -61,7 +61,7 @@ interface KickScreenState {
 export class MainGame extends CanvasApplication {
     private active_kick_screen : KickScreenState = null;
     private leaderboard_loader : LeaderboardLoader = new LeaderboardLoader("/leaderboard");
-    private active_sub : CanvasSubApplication = new MainMenuSub(this, this.leaderboard_loader);
+    private active_sub : CanvasSubApplication = new MainMenuSub(this, this.map_loader, this.leaderboard_loader);
     
     private socket : ClientSocket = null;
 
@@ -85,7 +85,7 @@ export class MainGame extends CanvasApplication {
 
         this.socket.clump_on(PacketNames.state_change__to_death, SocketEventGroups.MAIN, (death_msg : ITextComponent[]) => {
             this.socket.unregister_group(SocketEventGroups.GAME);
-            this.active_sub = new MainMenuSub(this, this.leaderboard_loader, death_msg);
+            this.active_sub = new MainMenuSub(this, this.map_loader, this.leaderboard_loader, death_msg);
             this.change_css_state(CSSStateAttributes.is_in_menu, "yes");
             this.leaderboard_loader.load();
         });

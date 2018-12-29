@@ -10,14 +10,33 @@ import { ILbDBScore } from "../../helpers-common/LeaderboardScheme";
 import { LeaderboardLoader } from "./LeaderboardLoader";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { draw_text } from "../../helpers-client/draw_text";
+import { ClientWorld } from "./ClientWorld";
+import { MapLoader } from "../../helpers-common/MapLoader";
+import { ClientPlayer } from "./ClientPlayer";
+import { Camera } from "../../helpers-client/Camera";
+import { ExecMode } from "../../helpers-common/helpers/RunPlatform";
 
 export class MainMenuSub extends CanvasSubApplication {
     private bg_scroll_y : number = 0;
     private cloud_horizon : CloudHorizon = new CloudHorizon(this);
     private active_leaderboard_index : number = 0;
 
-    constructor(private main_app : MainGame, private leaderboard_loader : LeaderboardLoader, private death_message : ITextComponent[] = null) {
+    private camera : Camera = new Camera(new Vector(0, 0), this);
+    private world : ClientWorld;
+    private local_player : ClientPlayer;
+
+    constructor(private main_app : MainGame, private map_loader : MapLoader, private leaderboard_loader : LeaderboardLoader, private death_message : ITextComponent[] = null) {
         super(main_app);
+        this.world = new ClientWorld(map_loader, this);
+        this.local_player = new ClientPlayer(this.world, " ");
+        this.local_player.spawn();
+        this.world.add_player(this.local_player);
+
+        for (let x = 0; x < 10; x++) {
+            const p = new ClientPlayer(this.world, " ");
+            p.spawn();
+            this.world.add_player(p);
+        }
     }
 
     app_keydown(e : KeyboardEvent) {
@@ -72,30 +91,48 @@ export class MainMenuSub extends CanvasSubApplication {
 
     app_update(dt : number, ticks_passed : number) {
         this.bg_scroll_y += ticks_passed * 2;
+        this.world.update({
+            delta: dt, exec_mode: ExecMode.client, ticks: ticks_passed, total_ms: 0, total_ticks: 0
+        });
     }
 
     app_render(ctx : CanvasRenderingContext2D, width : number, height : number, ticks_passed : number) {
         const screen_rect = new Rect(new Vector(0, 0), new Vector(width, height));
+
         // Background Grid
-        this.draw_grid();
         this.cloud_horizon.draw();
 
         let logo_rect : Rect;
         let space_to_play_start_y : number;
+
+        // That cool world in main menu thing that I kind of coppied from Quake.
+        this.world.players.forEach(player => {
+            if (player.get_active_weapon().can_shoot()) {
+                player.get_active_weapon().shoot(Vector.from_angle(torad(Math.random() * 360)));
+            }
+        });
+        this.camera.lookvec = this.local_player.collision_rect.point_middle().sub(new Vector(0, 100));
+        this.camera.attach();
+        this.world.render_particles();
+        this.world.render_beams();
+        this.world.players.forEach(player => player.render(this));
+        this.world.render_world(this.camera.get_view_rect(), null, null, null);
+        this.world.render_bounding_box();
+        this.camera.dettach();
 
         // Logo
         this.draw(() => {
             const logo_text = "Heat Gun";
             const logo_font_size = 120;
 
-            ctx.fillStyle = "yellow";
+            ctx.fillStyle = "gold";
             ctx.strokeStyle = "#ff0a12";
             ctx.shadowColor = "#ff0a12";
             ctx.shadowBlur = 5;
             ctx.lineWidth = 1;
             ctx.textAlign = "left";
             ctx.textBaseline = "middle";
-            ctx.globalAlpha = 0.6;
+            //ctx.globalAlpha = 0.6;
             ctx.font = logo_font_size + "px 'Bangers'";
 
             const logo_width = ctx.measureText(logo_text).width;
@@ -117,12 +154,20 @@ export class MainMenuSub extends CanvasSubApplication {
             space_to_play_start_y = screen_rect.get_point(0.5, 0.8).getY() - 40;
 
             ctx.font = "40px 'Bangers'";
-            ctx.fillStyle = "#bbb";
+            ctx.fillStyle = rainbow_color({
+                light: 40,
+                saturation: 100,
+                time_div: 20
+            });
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText("Press space to play", screen_rect.get_point(0.5, 0.8).getX(), screen_rect.get_point(0.5, 0.8).getY());
 
-            ctx.fillStyle = "#ccc";
+            ctx.fillStyle = rainbow_color({
+                light: 40,
+                saturation: 80,
+                time_div: 20
+            });
             ctx.font = "20px 'Bangers'";
             ctx.fillText("Pro tip: Press enter to play with last name", screen_rect.get_point(0.5, 0.9).getX(), screen_rect.get_point(0.5, 0.9).getY());
         });
@@ -139,16 +184,6 @@ export class MainMenuSub extends CanvasSubApplication {
                     lb_main_rect_1d.point_middle(),
                     new Vector(screen_rect.get_width() * 0.25, lb_main_rect_1d.get_height())
                 );
-    
-                // Grid
-                this.draw(() => {
-                    ctx.beginPath();
-                    ctx.rect(lb_main_rect.get_x(), lb_main_rect.get_y(), lb_main_rect.get_width(), lb_main_rect.get_height());
-                    ctx.closePath();
-                    ctx.clip();
-                    
-                    this.draw_grid(0.2);
-                });
     
                 // Draw contents
                 this.draw(() => {
