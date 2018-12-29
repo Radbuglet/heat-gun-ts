@@ -9,6 +9,7 @@ import { IUpdate } from "../../helpers-common/helpers/IUpdate";
 import { TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../config/Config";
 import Vector from "../../helpers-common/helpers/Vector";
 import { Rect } from "../../helpers-common/helpers/Rect";
+import { MapChunker } from "../../helpers-common/MapChunker";
 
 export interface IEditorRenderParams {
     hovered_objects : ITile[]
@@ -62,6 +63,7 @@ export class ClientWorld extends World<ClientPlayer> {
 
     fix_tile_indices() {
         this.tiles.forEach((tile, i) => {tile.absolute_tile_index = i});
+        this.chunk_map();
     }
 
     render_world(vision_rect : Rect, dec_rendering_vis_group : string, singular_dec_norender_index : number, editor_rendering_params : IEditorRenderParams) {

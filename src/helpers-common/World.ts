@@ -33,6 +33,10 @@ export abstract class World<PlayerClass extends Player<any>> {
 
     constructor(map_loader: MapLoader) {
         this.tiles = map_loader.clone_map_object();
+        this.chunk_map();
+    }
+
+    chunk_map() {
         console.log("Chunking map...");
         this.map_chunker = new MapChunker(this.tiles, TPZONE_LEFT, TPZONE_RIGHT, 200);
         console.log("Finished chunking map!");
