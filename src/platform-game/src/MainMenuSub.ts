@@ -15,6 +15,7 @@ import { MapLoader } from "../../helpers-common/MapLoader";
 import { ClientPlayer } from "./ClientPlayer";
 import { Camera } from "../../helpers-client/Camera";
 import { ExecMode } from "../../helpers-common/helpers/RunPlatform";
+import { TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../config/Config";
 
 export class MainMenuSub extends CanvasSubApplication {
     private bg_scroll_y : number = 0;
@@ -23,20 +24,10 @@ export class MainMenuSub extends CanvasSubApplication {
 
     private camera : Camera = new Camera(new Vector(0, 0), this);
     private world : ClientWorld;
-    private local_player : ClientPlayer;
 
     constructor(private main_app : MainGame, private map_loader : MapLoader, private leaderboard_loader : LeaderboardLoader, private death_message : ITextComponent[] = null) {
         super(main_app);
         this.world = new ClientWorld(map_loader, this);
-        this.local_player = new ClientPlayer(this.world, " ");
-        this.local_player.spawn();
-        this.world.add_player(this.local_player);
-
-        for (let x = 0; x < 10; x++) {
-            const p = new ClientPlayer(this.world, " ");
-            p.spawn();
-            this.world.add_player(p);
-        }
     }
 
     app_keydown(e : KeyboardEvent) {
@@ -105,13 +96,16 @@ export class MainMenuSub extends CanvasSubApplication {
         let logo_rect : Rect;
         let space_to_play_start_y : number;
 
-        // That cool world in main menu thing that I kind of coppied from Quake.
-        this.world.players.forEach(player => {
-            if (player.get_active_weapon().can_shoot()) {
-                player.get_active_weapon().shoot(Vector.from_angle(torad(Math.random() * 360)));
-            }
-        });
-        this.camera.lookvec = this.local_player.collision_rect.point_middle().sub(new Vector(0, 100));
+        // Map preview
+        const target_lookvec = Rect.from_positions(new Vector(TPZONE_LEFT, TPZONE_TOP), new Vector(TPZONE_RIGHT, TPZONE_BOTTOM)).get_percent_margin_rect(0.2).get_point(
+            this.get_mouse_position().getX() / width,
+            this.get_mouse_position().getY() / height
+        );
+        const mov_avg_resistance = 3;
+        this.camera.lookvec = target_lookvec.mult(new Vector(mov_avg_resistance)).add(this.camera.lookvec).div(new Vector(1 + mov_avg_resistance));
+
+        this.camera.setZoom(0.9);
+
         this.camera.attach();
         this.world.render_particles();
         this.world.render_beams();

@@ -169,6 +169,7 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
       this.ctx.imageSmoothingEnabled = false;
 
       this.resizecanvas();
+      this.mouse_position = new Vector(this.getResolutionWidth() / 2, this.getResolutionHeight() / 2);
       window.addEventListener("resize", this.resizecanvas.bind(this));
       window.addEventListener("keydown", this.keypress_down_handler.bind(this));
       window.addEventListener("keyup", this.keypress_up_handler.bind(this));
