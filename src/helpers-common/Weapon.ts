@@ -192,6 +192,10 @@ export class Weapon {
     get_upgrades(): IWeaponStats {
         return this.replicated_data.conf;
     }
+    
+    get_active_upgrades() : ITrait[] {
+        return configurable_traits.filter(trait_info => trait_info !== null && this.get_upgrades()[trait_info.key] > 0);
+    }
 
     get_max_ammo(): number {
         return 2 + this.get_upgrades().additional_ground_ammo;

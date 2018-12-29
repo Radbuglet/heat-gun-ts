@@ -5,6 +5,8 @@ import { configurable_traits, ITrait } from "../../helpers-common/Weapon";
 import { Rect } from "../../helpers-common/helpers/Rect";
 import Vector from "../../helpers-common/helpers/Vector";
 import { GameClient } from "./GameClient";
+import { draw_text } from "../../helpers-client/draw_text";
+import { get_theme_rainbow, get_theme_dark, get_theme_red } from "../../helpers-client/ColorTheme";
 
 export class WeaponStatsMenu {
     public changing_weapon_stats : boolean = false;
@@ -40,9 +42,10 @@ export class WeaponStatsMenu {
 
             this.app.draw(() => {
                 const page_begin_x = width * 0.1;
+                const page_end_x = width * 0.9;
                 const page_begin_y = height * 0.1;
 
-                const page_width = width * 0.8;
+                const page_width = page_end_x - page_begin_x;
 
                 let active_element_y = page_begin_y;
 
@@ -77,11 +80,13 @@ export class WeaponStatsMenu {
 
                     active_element_y += weapon_height + 40;
                 });
+                
+                const active_element_y_afterweapondisplay = active_element_y;
 
                 this.app.draw(() => {
                     const trait_elem_height = 75;
-                    const trait_elem_x = width * 0.3;
-                    const trait_elem_width = width * (1 - (0.3 * 2));
+                    const trait_elem_x = page_begin_x;
+                    const trait_elem_width = page_width * 0.7;
 
                     configurable_traits.forEach((trait_data, i) => {
                         if (Math.abs(i - this.weapon_stat_edit_index) < 3 || i > this.weapon_stat_edit_index) {
@@ -123,6 +128,38 @@ export class WeaponStatsMenu {
                             active_element_y += trait_elem_height + 40;
                         }
                     });
+                });
+
+                this.app.draw(() => {
+                    draw_text(this.app, page_begin_x + page_width * 0.7 + 20, active_element_y_afterweapondisplay, "20px monospace", 20, [
+                        [
+                            {
+                                bg: get_theme_red(),
+                                color: "#fff",
+                                text: "  Current Weapon Stats  "
+                            }
+                        ],
+                        []
+                    ].concat(...this.app.local_player.get_active_weapon().get_active_upgrades().map(trait_info => {
+                        const trait_val = this.app.local_player.get_active_weapon().get_upgrades()[trait_info.key];
+                        return [
+                            [
+                                {
+                                    bg: get_theme_rainbow(),
+                                    color: get_theme_dark(),
+                                    text: " " + trait_info.name + " "
+                                }
+                            ],
+                            [
+                                {
+                                    bg: get_theme_dark(),
+                                    color: get_theme_red(),
+                                    text: " " + "[x] ".repeat(trait_val) + "[ ] ".repeat(trait_info.maxval - trait_val) + " "
+                                }
+                            ],
+                            []
+                        ]
+                    })));
                 });
             });
 
