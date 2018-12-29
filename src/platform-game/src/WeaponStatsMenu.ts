@@ -89,10 +89,10 @@ export class WeaponStatsMenu {
                                 const is_selected = i === this.weapon_stat_edit_index;
 
                                 ctx.fillStyle = is_selected ? "#5e5e5e" : "#3f3d3fdd";
-                                ctx.strokeStyle = this.app.local_player.energy >= trait_data.cost ? "#e8e8e8" : "red";
+                                ctx.strokeStyle = this.app.local_player.energy >= trait_data.cost ? (is_selected ? get_theme_rainbow() : "#e8e8e8") : get_theme_red();
 
                                 ctx.shadowBlur = 20;
-                                ctx.shadowColor = "#000";
+                                ctx.shadowColor = ctx.strokeStyle === get_theme_rainbow() ? get_theme_rainbow() : "#000";
 
                                 ctx.fillRect(trait_elem_x, active_element_y, trait_elem_width, trait_elem_height);
                                 ctx.strokeRect(trait_elem_x, active_element_y, trait_elem_width, trait_elem_height);
@@ -164,7 +164,7 @@ export class WeaponStatsMenu {
                 ctx.textBaseline = "bottom";
                 ctx.font = "20px monospace";
 
-                ctx.fillStyle = "red";
+                ctx.fillStyle = get_theme_red();
                 Rect.from_positions(new Vector(20 - 5, height - 30 - 25), new Vector(20 + ctx.measureText(text).width + 5, height - 30 + 5)).fill_rect(ctx);
 
                 ctx.fillStyle = "#fff";

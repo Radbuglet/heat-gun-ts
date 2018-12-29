@@ -15,6 +15,7 @@ import { WEAPONS_HELD, MAX_HEALTH, TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { draw_text, limit_line_size, left_right_alignment, get_line_size } from "../../helpers-client/draw_text";
 import { CloudHorizon } from "./CloudHorizon";
+import { get_theme_rainbow, get_theme_dark, get_theme_red } from "../../helpers-client/ColorTheme";
 
 export abstract class GameClient extends CanvasSubApplication {
     public local_player : ClientPlayer;
@@ -322,15 +323,11 @@ export abstract class GameClient extends CanvasSubApplication {
                 this.draw(() => {
                     ctx.fillStyle = "#008f32";
     
-                    const theme_rainbow = rainbow_color({
-                        light: 80,
-                        saturation: 100,
-                        time_div: 20
-                    });
+                    const theme_rainbow = get_theme_rainbow();
     
-                    const theme_dark = "#3f3d3fdd";
+                    const theme_dark = get_theme_dark();
     
-                    const theme_red = "#FF5555";
+                    const theme_red = get_theme_red();
     
                     const leaderboard_data = this.get_leaderboard();
     
