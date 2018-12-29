@@ -65,7 +65,7 @@ export class ClientWorld extends World<ClientPlayer> {
     }
 
     render_world(vision_rect : Rect, dec_rendering_vis_group : string, singular_dec_norender_index : number, editor_rendering_params : IEditorRenderParams) {
-        this.map_chunker.get_tiles_in_rect(vision_rect).forEach(tile => {
+        this.map_chunker.get_tiles_in_rect(vision_rect).sort((a, b) => a.absolute_tile_index - b.absolute_tile_index).forEach(tile => {
             this.app.draw((ctx) => {
                 ctx.imageSmoothingEnabled = false;
                 if (tile.layer === Layers.obj || tile.force_original_color) {
