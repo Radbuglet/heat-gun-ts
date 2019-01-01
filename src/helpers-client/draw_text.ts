@@ -71,7 +71,10 @@ export function draw_text(app : CanvasApplicationInterface, x : number, y : numb
                         rect.fill_rect_pixelfixed(ctx);
                     }
 
-                    if (hover) app.set_pointer_mode("pointer");
+                    if (hover && (
+                        typeof text_part.click_func_action === "function" ||
+                        typeof text_part.click_url_action === "string"
+                    )) app.set_pointer_mode("pointer");
 
                     if (hover && app.is_mouse_down_frame()) {
                         if (typeof text_part.click_func_action === "function") text_part.click_func_action();
