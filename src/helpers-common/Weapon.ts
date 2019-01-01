@@ -282,7 +282,7 @@ export class Weapon {
     }
 
     get_pullup_cooldown_max() : number {
-        return 10 + (this.get_upgrades().additional_callibur * 5) + (this.get_upgrades().additional_barrels * 5);
+        return Math.floor(10 + (this.get_upgrades().additional_callibur * 5) + (this.get_upgrades().additional_barrels * 5));
     }
 
     is_selected() {
@@ -290,7 +290,7 @@ export class Weapon {
     }
 
     get_cooldown_when_shooting() : number {
-        return (
+        return Math.floor(
             (
                 (15 * this.get_firerate_multiplier(true)) +
                 (
@@ -331,6 +331,16 @@ export class Weapon {
         return Math.max(1000 + (this.get_upgrades().additional_callibur * 200) - (this.get_upgrades().additional_barrels * 75), 100) + (this.get_upgrades().bullet_gravity * 200);
     }
 
+    get_damage() : number {
+        return Math.ceil(Math.max(
+            (4 * this.get_firerate_multiplier(true))
+            +
+            (
+                ((this.get_upgrades().additional_callibur * 2) + (this.get_upgrades().additional_barrels * 7))
+                / (this.get_upgrades().additional_barrels + 1)
+            ) * this.get_firerate_multiplier(true), 3));
+    }
+
     shoot(aim_direction : Vector) {
         if (RunPlatform.is_server()) (this.player.world as ServerWorld).queue_all_players_packets();
 
@@ -357,13 +367,7 @@ export class Weapon {
                 const damaged_player = raycaster.collided_player;
                 const attacker = this.player;
                 
-                const damage = Math.ceil(Math.max(
-                    (4 * this.get_firerate_multiplier(false))
-                    +
-                    (
-                        ((this.get_upgrades().additional_callibur * 2) + (this.get_upgrades().additional_barrels * 7))
-                        / (this.get_upgrades().additional_barrels + 1)
-                    ) * this.get_firerate_multiplier(false), 3));
+                const damage = this.get_damage();
                 
                 if (RunPlatform.is_client()) (damaged_player as unknown as ClientPlayer).particlehandle__damaged(damage);
                     
