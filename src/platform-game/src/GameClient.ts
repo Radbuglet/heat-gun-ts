@@ -557,8 +557,6 @@ export abstract class GameClient extends CanvasSubApplication {
         if (e.code === "Digit2") this.local_player.select_slot(1);
         if (e.code === "Digit3") this.local_player.select_slot(2);
 
-        if (e.code === "KeyR") this.direction_negate_mode = !this.direction_negate_mode;
-
         if (e.code === "Tab") {
             e.preventDefault();
         }
