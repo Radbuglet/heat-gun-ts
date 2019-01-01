@@ -40,123 +40,171 @@ export interface ITrait {
     cost: number
     maxval: number
     key: string
+    
+    filter_id : string
+    unfiltered_index? : number
 }
 
-export const configurable_traits: ITrait[] = [
+export interface ITraitCategory {
+    name : string,
+    filter_identifier : string
+}
+
+export const configurable_traits : ITrait[] = [
     {
         key: "additional_ground_ammo",
         name: "Additional ammo",
         maxval: 4,
-        cost: 3
+        cost: 3,
+        filter_id: "gun"
     },
     {
         key: "additional_callibur",
         name: "Additional callibur",
         maxval: 7,
-        cost: 4
+        cost: 4,
+        filter_id: "gun"
     },
     {
         key: "fire_rate",
         name: "Faster Fire",
         maxval: 4,
         cost: 3,
+        filter_id: "gun"
     },
     {
         key: "additional_barrels",
         name: "Additional Barrels",
         maxval: 3,
-        cost: 10
+        cost: 10,
+        filter_id: "gun"
     },
-
-    null,
 
     {
         key: "gravmod",
         name: "Gravity--",
         maxval: 4,
-        cost: 2
+        cost: 2,
+        filter_id: "mov"
     },
     {
         key: "fricmod",
         name: "Friction--",
         maxval: 4,
-        cost: 2
+        cost: 2,
+        filter_id: "mov"
     },
     {
         key: "additional_launching_power",
         name: "Additional proppelling",
         maxval: 5,
-        cost: 2
+        cost: 2,
+        filter_id: "mov"
     },
     {
         key: "slow_motion",
         name: "Slow Motion",
         maxval: 4,
-        cost: 3
+        cost: 3,
+        filter_id: "mov"
     },
     {
         key: "suck_mode",
         name: "Reverse Direction",
         maxval: 1,
-        cost: 5
+        cost: 5,
+        filter_id: "mov"
     },
-
-    null,
 
     {
         key: "additional_size",
         name: "Bigger bullet size",
         maxval: 5,
-        cost: 3
+        cost: 3,
+        filter_id: "bul"
     },
     {
         key: "bullet_gravity",
         name: "Bullet Gravity",
         maxval: 5,
-        cost: 2
+        cost: 2,
+        filter_id: "bul"
     },
     {
         key: "trail_color",
         name: "Trail Color",
         maxval: 10,
-        cost: 0
+        cost: 0,
+        filter_id: "bul"
     },
-
-    null,
 
     {
         key: "kb_reverse",
         name: "Reversed Knockback",
         maxval: 1,
-        cost: 10
+        cost: 10,
+        filter_id: "kb"
     },
     {
         key: "kb_increase",
         name: "Increased Knockback",
         maxval: 4,
-        cost: 3
+        cost: 3,
+        filter_id: "kb"
     },
-
-    null,
 
     {
         key: "scope",
         name: "Scope",
         maxval: 7,
-        cost: 0
+        cost: 0,
+        filter_id: "misc"
     },
     {
         key: "teleportation",
         name: "Teleportation",
         maxval: 4,
-        cost: 3
+        cost: 3,
+        filter_id: "misc"
     },
     {
         key: "slot_on_shoot",
         name: "Shot slot change (0 = disabled)",
         maxval: 3,
-        cost: 0
+        cost: 0,
+        filter_id: "misc"
+    }
+];
+
+configurable_traits.forEach((trait, i) => {
+    trait.unfiltered_index = i;
+});
+
+export const trait_categories : ITraitCategory[] = [
+    {
+        name: "All Upgrades",
+        filter_identifier: null
     },
+    {
+        name: "Gun Upgrades",
+        filter_identifier: "gun"
+    },
+    {
+        name: "Movement Upgrades",
+        filter_identifier: "mov"
+    },
+    {
+        name: "Bullet Upgrades",
+        filter_identifier: "bul"
+    },
+    {
+        name: "Knock-back Upgrades",
+        filter_identifier: "kb"
+    },
+    {
+        name: "Misc",
+        filter_identifier: "misc"
+    }
 ];
 
 export class Weapon {

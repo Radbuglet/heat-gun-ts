@@ -1,26 +1,47 @@
 // @TODO make helper methods and store references, it doesn't hurt!
 
 import { rainbow_color } from "../../helpers-client/color";
-import { configurable_traits, ITrait } from "../../helpers-common/Weapon";
+import { configurable_traits, ITrait, trait_categories } from "../../helpers-common/Weapon";
 import { Rect } from "../../helpers-common/helpers/Rect";
 import Vector from "../../helpers-common/helpers/Vector";
 import { GameClient } from "./GameClient";
 import { draw_text } from "../../helpers-client/draw_text";
 import { get_theme_rainbow, get_theme_dark, get_theme_red } from "../../helpers-client/ColorTheme";
+import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
+
+const DISPLAY_CATEGORY_TICKS = 20;
 
 export class WeaponStatsMenu {
     public changing_weapon_stats : boolean = false;
     public weapon_stat_edit_index : number = 0;
+    private my_configurable_traits : ITrait[] = [...configurable_traits];
+    private active_filter_index : number = 0;
+    private ticks_display_category : number = 0;
+
     constructor(private app : GameClient, private stat_changed_handler : (weapon_index : number, stat_index : number, is_upgrade : boolean) => void) {
 
     }
 
+    apply_filter(filter_index : number) {
+        this.weapon_stat_edit_index = 0;
+        this.active_filter_index = filter_index;
+        this.my_configurable_traits = [...configurable_traits].filter(trait => {
+            if (filter_index === 0) return true;
+
+            return trait_categories[filter_index].filter_identifier === trait.filter_id;
+        });
+
+        this.ticks_display_category = DISPLAY_CATEGORY_TICKS + 30;
+    }
+
     get_selected_trait() : ITrait {
-        return configurable_traits[this.weapon_stat_edit_index];
+        return this.my_configurable_traits[this.weapon_stat_edit_index];
     }
 
     render() {
         if (!this.changing_weapon_stats) return;
+
+        this.ticks_display_category--;
 
         const width = this.app.getResolutionWidth();
         const height = this.app.getResolutionHeight();
@@ -88,7 +109,7 @@ export class WeaponStatsMenu {
                     const trait_elem_x = page_begin_x;
                     const trait_elem_width = page_width * 0.7;
 
-                    configurable_traits.forEach((trait_data, i) => {
+                    this.my_configurable_traits.forEach((trait_data, i) => {
                         if (Math.abs(i - this.weapon_stat_edit_index) < 3 || i > this.weapon_stat_edit_index) {
                             if (trait_data !== null) {
                                 const is_selected = i === this.weapon_stat_edit_index;
@@ -131,18 +152,33 @@ export class WeaponStatsMenu {
                 });
 
                 this.app.draw(() => {
-                    draw_text(this.app, page_begin_x + page_width * 0.7 + 20, active_element_y_afterweapondisplay, "20px monospace", 20, [
+                    const text_lines : ITextComponent[][] = [];
+
+                    text_lines.push(...[
                         [
                             {
                                 bg: get_theme_red(),
                                 color: "#fff",
-                                text: "  Current Weapon Stats  "
+                                text: "  Current Weapon Upgrades  "
                             }
                         ],
                         []
-                    ].concat(...this.app.local_player.get_active_weapon().get_active_upgrades().map(trait_info => {
+                    ]);
+
+                    if (this.app.local_player.get_active_weapon().get_active_upgrades().length === 0) {
+                        text_lines.push(...[
+                            [
+                                {
+                                    color: get_theme_red(),
+                                    text: "No upgrades on this gun!"
+                                }
+                            ]
+                        ]);
+                    }
+
+                    this.app.local_player.get_active_weapon().get_active_upgrades().forEach(trait_info => {
                         const trait_val = this.app.local_player.get_active_weapon().get_upgrades()[trait_info.key];
-                        return [
+                        text_lines.push(...[
                             [
                                 {
                                     bg: get_theme_rainbow(),
@@ -158,40 +194,112 @@ export class WeaponStatsMenu {
                                 }
                             ],
                             []
-                        ]
-                    })));
-                });
-            });
+                        ]);
+                    });
 
-            // Scroll bar
-            this.app.draw(() => {
-                const scroll_rect = Rect.from_positions(new Vector(width - 10, 10), new Vector(width, height - 10));
-                const unit_rect = scroll_rect.clone_and_perform(rect => {
-                    rect.size.mutdiv(new Vector(1, configurable_traits.length));
-                });
-                
-                configurable_traits.forEach((trait, i) => {
-                    if (trait !== null) {
-                        this.app.draw(() => {
-                            ctx.fillStyle = "#313131";
-    
-                            if (i === this.weapon_stat_edit_index) {
-                                ctx.fillStyle = "#BDBDBD";
+                    text_lines.push(...[
+                        [],
+                        [
+                            {
+                                bg: get_theme_red(),
+                                color: "#fff",
+                                text: "  Current Weapon Stats  "
                             }
-    
-                            if (Rect.from_positions(unit_rect.point_top_left().sub(new Vector(200, 0)), unit_rect.point_bottom_right()).testcollision(Rect.centered_around(this.app.get_mouse_position(), new Vector(1)))) {
-                                ctx.fillStyle = "#fff";
-    
-                                if (this.app.is_mouse_down()) {
-                                    this.weapon_stat_edit_index = i;
+                        ],
+                        [],
+                        [
+                            {
+                                bg: get_theme_dark(),
+                                color: get_theme_red(),
+                                text: " Damage per bullet: "
+                            },
+                            {
+                                bg: get_theme_dark(),
+                                color: get_theme_rainbow(),
+                                text: this.app.local_player.get_active_weapon().get_damage() + " "
+                            }
+                        ],
+                        [
+                            {
+                                bg: get_theme_dark(),
+                                color: get_theme_red(),
+                                text: " Range: "
+                            },
+                            {
+                                bg: get_theme_dark(),
+                                color: get_theme_rainbow(),
+                                text: this.app.local_player.get_active_weapon().get_max_dist() + " "
+                            }
+                        ],
+                        [
+                            {
+                                bg: get_theme_dark(),
+                                color: get_theme_red(),
+                                text: " Shoot cooldown: "
+                            },
+                            {
+                                bg: get_theme_dark(),
+                                color: get_theme_rainbow(),
+                                text: this.app.local_player.get_active_weapon().get_cooldown_when_shooting() + " ticks "
+                            }
+                        ],
+                        [
+                            {
+                                bg: get_theme_dark(),
+                                color: get_theme_red(),
+                                text: " Pull out cooldown: "
+                            },
+                            {
+                                bg: get_theme_dark(),
+                                color: get_theme_rainbow(),
+                                text: this.app.local_player.get_active_weapon().get_pullup_cooldown_max() + " ticks "
+                            }
+                        ]
+                    ]);
+
+                    text_lines.push(...[
+                        [],
+                        [{
+                            bg: get_theme_red(),
+                            color: "#fff",
+                            text: "  Filter Upgrades  "
+                        }],
+                        []
+                    ]);
+
+                    trait_categories.forEach((category, i) => {
+                        text_lines.push([
+                            {
+                                bg: category.filter_identifier === trait_categories[this.active_filter_index].filter_identifier ? "#fff" : undefined,
+                                color: get_theme_dark(),
+                                text: "   "
+                            },
+                            {
+                                bg: get_theme_dark(),
+                                color: category.filter_identifier === trait_categories[this.active_filter_index].filter_identifier ? "#fff" : get_theme_red(),
+                                text: " " + category.name + " ",
+                                hover_bg: "#0d0d0d",
+                                click_func_action: () => {
+                                    this.apply_filter(i);
                                 }
                             }
-                            
-                            unit_rect.fill_rect(ctx);
-                        });   
-                    }
+                        ]);
+                    });
 
-                    unit_rect.top_left.mutadd(unit_rect.size.isolate_y());
+                    text_lines.push(...[
+                        [],
+                        [{
+                            color: get_theme_red(),
+                            text: " Pro Tip: Press Shift + Up/Down Arrow "
+                        }],
+                        [{
+                            color: get_theme_red(),
+                            text: " to change the selected category! "
+                        }],
+                        []
+                    ]);
+
+                    draw_text(this.app, page_begin_x + page_width * 0.7 + 20, active_element_y_afterweapondisplay, "20px monospace", 20, text_lines);
                 });
             });
 
@@ -206,7 +314,20 @@ export class WeaponStatsMenu {
 
                 ctx.fillStyle = "#fff";
                 ctx.fillText(text, 20, height - 30);
-            })
+            });
+
+            if (this.ticks_display_category > 0 || this.app.get_keys_down().get("ShiftLeft")) {
+                this.app.draw(() => {
+                    ctx.globalAlpha = this.app.get_keys_down().get("ShiftLeft") ? 1 : this.ticks_display_category / DISPLAY_CATEGORY_TICKS;
+                    draw_text(this.app, width / 2, height / 2, "30px monospace", 30, [
+                        [{
+                            bg: get_theme_rainbow(),
+                            color: get_theme_dark(),
+                            text: "  " + trait_categories[this.active_filter_index].name + "  "
+                        }]
+                    ], true);
+                });
+            }
         });
     }
 
@@ -215,46 +336,40 @@ export class WeaponStatsMenu {
             if (e.code === "Escape") {
                 this.changing_weapon_stats = false;
             }
-    
-            if (e.code === "ArrowUp") {
-                this.weapon_stat_edit_index -= 1;
-
-                while (configurable_traits[this.weapon_stat_edit_index] === null) {
+            
+            if (!this.app.get_keys_down().get("ShiftLeft")) {
+                if (e.code === "ArrowUp" && this.weapon_stat_edit_index > 0) {
                     this.weapon_stat_edit_index -= 1;
                 }
-            }
-    
-            if (e.code === "ArrowDown") {
-                this.weapon_stat_edit_index += 1;
-                while (configurable_traits[this.weapon_stat_edit_index] === null) {
+        
+                if (e.code === "ArrowDown" && this.weapon_stat_edit_index < this.my_configurable_traits.length - 1) {
                     this.weapon_stat_edit_index += 1;
                 }
-            }
-    
-            const last_stat_index = configurable_traits.length - 1;
-    
-            if (this.weapon_stat_edit_index > last_stat_index) {
-                this.weapon_stat_edit_index = 0;
-            }
-    
-            if (this.weapon_stat_edit_index < 0) {
-                this.weapon_stat_edit_index = last_stat_index;
+            } else {
+                if (e.code === "ArrowUp" && this.active_filter_index > 0) {
+                    this.active_filter_index -= 1;
+                    this.apply_filter(this.active_filter_index);
+                }
+        
+                if (e.code === "ArrowDown" && this.active_filter_index < trait_categories.length - 1) {
+                    this.active_filter_index += 1;
+                    this.apply_filter(this.active_filter_index);
+                }
             }
     
             if (e.code === "ArrowLeft") {
                 this.app.local_player.get_active_weapon().downgrade_trait(this.get_selected_trait());
-                this.stat_changed_handler(this.app.local_player.get_selected_slot(), this.weapon_stat_edit_index, false);
+                this.stat_changed_handler(this.app.local_player.get_selected_slot(), this.get_selected_trait().unfiltered_index, false);
             }
     
             if (e.code === "ArrowRight") {
                 this.app.local_player.get_active_weapon().upgrade_trait(this.get_selected_trait());
-                this.stat_changed_handler(this.app.local_player.get_selected_slot(), this.weapon_stat_edit_index, true);
+                this.stat_changed_handler(this.app.local_player.get_selected_slot(), this.get_selected_trait().unfiltered_index, true);
             }
         }
 
         if (e.code === "KeyF") {
             this.changing_weapon_stats = !this.changing_weapon_stats;
-        }
-        
+        }        
     }
 }
