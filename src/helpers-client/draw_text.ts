@@ -56,21 +56,29 @@ export function draw_text(app : CanvasApplicationInterface, x : number, y : numb
         let drawing_y = y;
 
         text_lines.forEach(text_line => {
-            let line_width = 0;
-            text_line.forEach((text_part) => {line_width += ctx.measureText(text_part.text).width});
+            let line_width = get_line_size(app, font, text_line);
 
             let drawing_x = centered ? x - line_width / 2 : x;
 
             text_line.forEach((text_part : ITextComponent) => {
                 app.draw(ctx => {
                     const text_part_width = ctx.measureText(text_part.text).width + (text_part.space_size_after || 0);
+                    const rect = new Rect(new Vector(drawing_x, drawing_y), new Vector(text_part_width, line_break_size));
+                    const hover = Rect.centered_around(app.get_mouse_position(), new Vector(1, 1)).testcollision(rect);
 
                     if (text_part.bg) {
-                        ctx.fillStyle = text_part.bg;
-                        new Rect(new Vector(drawing_x, drawing_y), new Vector(text_part_width, line_break_size)).fill_rect_pixelfixed(ctx);
+                        ctx.fillStyle = (typeof text_part.hover_bg === "string" && hover) ? text_part.hover_bg :text_part.bg;
+                        rect.fill_rect_pixelfixed(ctx);
+                    }
+
+                    if (hover) app.set_pointer_mode("pointer");
+
+                    if (hover && app.is_mouse_down_frame()) {
+                        if (typeof text_part.click_func_action === "function") text_part.click_func_action();
+                        if (typeof text_part.click_url_action === "string") open(text_part.click_url_action);
                     }
                     
-                    ctx.fillStyle = text_part.color;
+                    ctx.fillStyle = (typeof text_part.hover_color === "string" && hover) ? text_part.hover_color :text_part.color;
                     ctx.fillText(text_part.text, drawing_x, drawing_y);
                     
                     drawing_x += text_part_width;
