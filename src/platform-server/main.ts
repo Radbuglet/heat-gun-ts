@@ -68,6 +68,7 @@ app.get("/favicon.ico", (req, res) => res.sendFile(join(__dirname, 'favicon.ico'
 
 app.use("/static/game", serveStatic(join(source_root_path, "platform-game/static")));
 app.use("/static/editor", serveStatic(join(source_root_path, "platform-editor/static")));
+app.use("/static/img", serveStatic(join(source_root_path, "img/")));
 
 app.use((req, res) => { // 404
     res.redirect("/");

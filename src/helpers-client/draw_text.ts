@@ -3,6 +3,12 @@ import { CanvasApplicationInterface } from "./CanvasApplication";
 import { Rect } from "../helpers-common/helpers/Rect";
 import Vector from "../helpers-common/helpers/Vector";
 
+export enum AlignmentModes {
+    normal,
+    centered,
+    right
+}
+
 // @TODO remove newline_after flag and implement in a different way
 export function limit_line_size(app : CanvasApplicationInterface, font : string, text : ITextComponent[][], max_line_size : number) : ITextComponent[][] {
     const new_text : ITextComponent[][] = [[]];
@@ -47,7 +53,7 @@ export function limit_line_size(app : CanvasApplicationInterface, font : string,
     return new_text;
 }
 
-export function draw_text(app : CanvasApplicationInterface, x : number, y : number, font : string, line_break_size : number, text_lines : ITextComponent[][], centered : boolean = false) {
+export function draw_text(app : CanvasApplicationInterface, x : number, y : number, font : string, line_break_size : number, text_lines : ITextComponent[][], align : AlignmentModes = AlignmentModes.normal) {
     app.draw(ctx => {
         ctx.font = font;
         ctx.textAlign = "start";
@@ -58,7 +64,7 @@ export function draw_text(app : CanvasApplicationInterface, x : number, y : numb
         text_lines.forEach(text_line => {
             let line_width = get_line_size(app, font, text_line);
 
-            let drawing_x = centered ? x - line_width / 2 : x;
+            let drawing_x = align === AlignmentModes.centered ? x - line_width / 2 : (align === AlignmentModes.right ? x - line_width : x);
 
             text_line.forEach((text_part : ITextComponent) => {
                 app.draw(ctx => {

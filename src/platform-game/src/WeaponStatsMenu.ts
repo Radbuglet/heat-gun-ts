@@ -5,7 +5,7 @@ import { configurable_traits, ITrait, trait_categories } from "../../helpers-com
 import { Rect } from "../../helpers-common/helpers/Rect";
 import Vector from "../../helpers-common/helpers/Vector";
 import { GameClient } from "./GameClient";
-import { draw_text } from "../../helpers-client/draw_text";
+import { draw_text, AlignmentModes } from "../../helpers-client/draw_text";
 import { get_theme_rainbow, get_theme_dark, get_theme_red } from "../../helpers-client/ColorTheme";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 
@@ -325,7 +325,7 @@ export class WeaponStatsMenu {
                             color: get_theme_dark(),
                             text: "  " + trait_categories[this.active_filter_index].name + "  "
                         }]
-                    ], true);
+                    ], AlignmentModes.centered);
                 });
             }
         });

@@ -9,9 +9,10 @@ import { ClientSocket } from "./ClientSocket";
 import Vector, { ISerializedVector } from "../../helpers-common/helpers/Vector";
 import { PacketNames } from "../../helpers-common/ProtocolDefs";
 import { CanvasGraph } from "../../helpers-client/CanvasGraph";
-import { MainMenuSub, LoadingScreen } from "./MainMenuSub";
+import { MainMenuSub, LoadingScreen } from "./menu/MainMenuSub";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { LeaderboardLoader } from "./LeaderboardLoader";
+import { TutorialSub } from "./menu/TutorialSub";
 
 RunPlatform.set_platform(ExecMode.client);
 
@@ -61,14 +62,25 @@ interface KickScreenState {
 export class MainGame extends CanvasApplication {
     private active_kick_screen : KickScreenState = null;
     private leaderboard_loader : LeaderboardLoader = new LeaderboardLoader("/leaderboard");
-    private active_sub : CanvasSubApplication = new MainMenuSub(this, this.map_loader, this.leaderboard_loader);
+    private active_sub : CanvasSubApplication;
     
     private socket : ClientSocket = null;
 
     constructor(canvas : HTMLCanvasElement, private map_loader : MapLoader) {
         super(canvas);
-        this.change_css_state(CSSStateAttributes.is_in_menu, "yes");
+        if (localStorage.getItem("saw_tutorial") !== "yes") {
+            this.show_tutorial()
+        } else {
+            this.active_sub = new MainMenuSub(this, this.map_loader, this.leaderboard_loader);
+        }
         this.startup();
+    }
+
+    show_tutorial() {
+        this.active_sub = new TutorialSub(this, this.map_loader, () => {
+            this.active_sub = new MainMenuSub(this, this.map_loader, this.leaderboard_loader);
+            localStorage.setItem("saw_tutorial", "yes");
+        });
     }
 
     set_up_socket(captcha_token : string) {
@@ -80,13 +92,11 @@ export class MainGame extends CanvasApplication {
 
         this.socket.clump_on(PacketNames.state_change__to_game, SocketEventGroups.MAIN, (my_uuid : string, my_name : string, my_position : ISerializedVector) => {
             this.active_sub = new NetworkedGameWorld(this, this.map_loader, this.socket, my_uuid, my_name, Vector.deserialize(my_position));
-            this.change_css_state(CSSStateAttributes.is_in_menu, "no");
         });
 
         this.socket.clump_on(PacketNames.state_change__to_death, SocketEventGroups.MAIN, (death_msg : ITextComponent[]) => {
             this.socket.unregister_group(SocketEventGroups.GAME);
             this.active_sub = new MainMenuSub(this, this.map_loader, this.leaderboard_loader, death_msg);
-            this.change_css_state(CSSStateAttributes.is_in_menu, "yes");
             this.leaderboard_loader.load();
         });
 
@@ -106,11 +116,6 @@ export class MainGame extends CanvasApplication {
 
     set_kick_screen(state : KickScreenState) {
         this.active_kick_screen = state;
-        this.change_css_state(CSSStateAttributes.is_in_menu, "no");
-    }
-
-    change_css_state(attr : CSSStateAttributes, val : string) {
-        document.body.setAttribute(attr, val);
     }
 
     request_spawn_player(name : string) {

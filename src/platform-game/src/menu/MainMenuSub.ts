@@ -1,33 +1,24 @@
-import { CanvasSubApplication } from "../../helpers-client/CanvasApplication";
-import { rainbow_color } from "../../helpers-client/color";
-import { Rect } from "../../helpers-common/helpers/Rect";
-import Vector from "../../helpers-common/helpers/Vector";
-import { torad } from "../../helpers-common/helpers/Math";
-import { MainGame } from "./entry";
-import { Player } from "../../helpers-common/Player";
-import { CloudHorizon } from "./CloudHorizon";
-import { ILbDBScore } from "../../helpers-common/LeaderboardScheme";
-import { LeaderboardLoader } from "./LeaderboardLoader";
-import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
-import { draw_text } from "../../helpers-client/draw_text";
-import { ClientWorld } from "./ClientWorld";
-import { MapLoader } from "../../helpers-common/MapLoader";
-import { ClientPlayer } from "./ClientPlayer";
-import { Camera } from "../../helpers-client/Camera";
-import { ExecMode } from "../../helpers-common/helpers/RunPlatform";
-import { TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../config/Config";
+import { CanvasSubApplication } from "../../../helpers-client/CanvasApplication";
+import { rainbow_color } from "../../../helpers-client/color";
+import { Rect } from "../../../helpers-common/helpers/Rect";
+import Vector from "../../../helpers-common/helpers/Vector";
+import { torad } from "../../../helpers-common/helpers/Math";
+import { MainGame } from "../entry";
+import { Player } from "../../../helpers-common/Player";
+import { ILbDBScore } from "../../../helpers-common/LeaderboardScheme";
+import { LeaderboardLoader } from "../LeaderboardLoader";
+import { ITextComponent } from "../../../helpers-common/helpers/ITextComponent";
+import { draw_text, AlignmentModes } from "../../../helpers-client/draw_text";
+import { MapLoader } from "../../../helpers-common/MapLoader";
+import { MenuBGSub } from "./MenuBGSub";
+import { get_theme_rainbow, get_theme_dark, get_theme_red } from "../../../helpers-client/ColorTheme";
+import { discord_invite_url, github_repo_url } from "../../../config/Config";
 
-export class MainMenuSub extends CanvasSubApplication {
-    private bg_scroll_y : number = 0;
-    private cloud_horizon : CloudHorizon = new CloudHorizon(this);
+export class MainMenuSub extends MenuBGSub {
     private active_leaderboard_index : number = 0;
 
-    private camera : Camera = new Camera(new Vector(0, 0), this);
-    private world : ClientWorld;
-
-    constructor(private main_app : MainGame, private map_loader : MapLoader, private leaderboard_loader : LeaderboardLoader, private death_message : ITextComponent[] = null) {
-        super(main_app);
-        this.world = new ClientWorld(map_loader, this);
+    constructor(private main_app : MainGame, map_loader : MapLoader, private leaderboard_loader : LeaderboardLoader, private death_message : ITextComponent[] = null) {
+        super(main_app, map_loader);
     }
 
     app_keydown(e : KeyboardEvent) {
@@ -81,40 +72,19 @@ export class MainMenuSub extends CanvasSubApplication {
     }
 
     app_update(dt : number, ticks_passed : number) {
-        this.bg_scroll_y += ticks_passed * 2;
-        this.world.update({
-            delta: dt, exec_mode: ExecMode.client, ticks: ticks_passed, total_ms: 0, total_ticks: 0
-        });
+        super.app_update(dt, ticks_passed);
     }
 
     app_render(ctx : CanvasRenderingContext2D, width : number, height : number, ticks_passed : number) {
         const screen_rect = new Rect(new Vector(0, 0), new Vector(width, height));
 
-        // Background Grid
-        this.cloud_horizon.draw();
-
-        let logo_rect : Rect;
-        let space_to_play_start_y : number;
-
-        // Map preview
-        const target_lookvec = Rect.from_positions(new Vector(TPZONE_LEFT, TPZONE_TOP), new Vector(TPZONE_RIGHT, TPZONE_BOTTOM)).get_percent_margin_rect(0.2).get_point(
-            this.get_mouse_position().getX() / width,
-            this.get_mouse_position().getY() / height
-        );
-        const mov_avg_resistance = 3;
-        this.camera.lookvec = target_lookvec.mult(new Vector(mov_avg_resistance)).add(this.camera.lookvec).div(new Vector(1 + mov_avg_resistance));
-
-        this.camera.setZoom(0.9);
-
-        this.camera.attach();
-        this.world.render_particles();
-        this.world.render_beams();
-        this.world.players.forEach(player => player.render(this));
-        this.world.render_world(this.camera.get_view_rect(), null, null, null);
-        this.world.render_bounding_box();
-        this.camera.dettach();
+        // Bg
+        super.app_render(ctx, width, height, ticks_passed);
 
         // Logo
+        let logo_rect : Rect;
+        let space_to_play_start_y : number;
+        
         this.draw(() => {
             const logo_text = "Heat Gun";
             const logo_font_size = 120;
@@ -149,8 +119,8 @@ export class MainMenuSub extends CanvasSubApplication {
 
             ctx.font = "40px 'Bangers'";
             ctx.fillStyle = rainbow_color({
-                light: 40,
-                saturation: 100,
+                light: 50,
+                saturation: 80,
                 time_div: 20
             });
             ctx.textAlign = "center";
@@ -269,27 +239,64 @@ export class MainMenuSub extends CanvasSubApplication {
         if (this.death_message !== null) {
             this.draw(() => {
                 ctx.fillStyle = "red";
-                draw_text(this, width / 2, space_to_play_start_y + 90, "24px bangers", 24 + 4, [this.death_message], true);
+                draw_text(this, width / 2, space_to_play_start_y + 90, "24px bangers", 24 + 4, [this.death_message], AlignmentModes.centered);
             });
         }
-    }
 
-    draw_grid(alpha : number = 0.1, color : string = "hsla(0, 100%, 63%)") {
-        const width = this.getResolutionWidth();
-        const height = this.getResolutionHeight();
-        this.draw(ctx => {
-            ctx.strokeStyle = color;
-            ctx.globalAlpha = alpha;
-            ctx.lineWidth = 4;
 
-            for (let y = 0; y < (height - 1) * 2; y += height / 50) {
-                const actual_start_y = ((y + this.bg_scroll_y) % (height * 2)) - height;
-                ctx.beginPath();
-                ctx.moveTo(0, actual_start_y);
-                ctx.lineTo(width, actual_start_y + height);
-                ctx.stroke();
+        // Navigation
+        this.draw(() => {
+            const sidebar_text : ITextComponent[][] = [];
+            
+            // Nav
+            sidebar_text.push([
+                {
+                    bg: get_theme_rainbow(),
+                    hover_bg: "#fff",
+                    color: get_theme_dark(),
+                    text: "  View tutorial  ",
+                    click_func_action: () => {
+                        this.main_app.show_tutorial();
+                    }
+                }
+            ], []);
+            sidebar_text.push([
+                {
+                    bg: get_theme_red(),
+                    hover_bg: "red",
+                    color: "#fff",
+                    text: "  View Editor  ",
+                    click_url_action: "/editor"
+                }
+            ], [], []);
+
+            // Social
+            if (typeof discord_invite_url === "string") {
+                sidebar_text.push([
+                    {
+                        bg: "#7289da",
+                        hover_bg: "#677bc4",
+                        color: "#fff",
+                        text: "  Discord Server  ",
+                        click_url_action: discord_invite_url
+                    }
+                ]);
             }
-        });
+
+            if (typeof github_repo_url === "string") {
+                sidebar_text.push([
+                    {
+                        bg: "#24292e",
+                        hover_bg: "#111",
+                        color: "#fff",
+                        text: "  Github Repo  ",
+                        click_url_action: github_repo_url
+                    }
+                ]);
+            }
+            
+            draw_text(this, width + 1, 10, "20px monospace", 20, sidebar_text, AlignmentModes.right);
+        })
     }
 }
 

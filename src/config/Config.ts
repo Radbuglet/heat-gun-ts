@@ -28,3 +28,4 @@ export const SERVER_PORT = 8080;
 export const GAME_VERSION = "2X:prerelease";
 
 export const discord_invite_url = "https://discordapp.com/invite/hNZJbwn";
+export const github_repo_url = "https://github.com/Radbuglet/heat-gun-ts";
