@@ -21,16 +21,14 @@ import { Rect } from "./helpers/Rect";
 import { ITextComponent } from "./helpers/ITextComponent";
 import { RushDirections } from "./RushDirections";
 import { ITile } from "./MapLoader";
-import { RunPlatform } from "./helpers/RunPlatform";
 import { clamp_num } from "./helpers/Math";
-import { ServerPlayer } from "../platform-server/ServerPlayer";
-import { ServerWorld } from "../platform-server/ServerWorld";
 
-export class Player<WorldType extends World<any>> {
+export abstract class Player<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> {
   public position: Vector = new Vector(10, 10);
   public velocity: Vector = new Vector(0, 0);
   public using_scope: boolean = false;
   public can_use_rush: boolean = true;
+  public chat_log : ITextComponent[][] = [];
 
   public health: number = MAX_HEALTH;
 
@@ -39,23 +37,22 @@ export class Player<WorldType extends World<any>> {
 
   private selected_slot: number = 0;
   public gun_pullup_cooldown : number = 0;
+
   private regen_timer : number = 0;
 
-  public weapons: Weapon[] = new Array(WEAPONS_HELD).fill(null).map((_, i) => new Weapon(this, [
-    "rgb(123, 255, 0)",
-    "rgb(187, 233, 0)",
-    "rgb(242, 255, 0)"
-  ][i]));
+  public weapons : TWeapon[] = [];
   public uuid : string;
   private sync_controller = new ServerPosRollbacker(MAX_ROLLBACK_POSITIONS_ALLOWED);
   public collision_rect : Rect;
 
-  constructor(public world : WorldType, public name: string) {
+  constructor(public world : TWorld, public name: string) {
     this.uuid = uuidv4();
     this.collision_rect = new Rect(this.position, PLAYER_COLLISION_BOX);
+    
+    this.weapons = new Array(WEAPONS_HELD).fill(null).map((_, i) => this.generate_weapon(i));
   }
 
-  get_active_weapon() {
+  get_active_weapon() : TWeapon {
     return this.weapons[this.selected_slot];
   }
 
@@ -63,13 +60,13 @@ export class Player<WorldType extends World<any>> {
     return this.selected_slot;
   }
 
-  select_slot(slot : number) {
+  select_slot(slot : number) : boolean {
     if (this.selected_slot !== slot) {
       this.selected_slot = slot;
       this.gun_pullup_cooldown = this.get_active_weapon().get_pullup_cooldown_max();
-
-      if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__slot_changed();
     }
+
+    return this.selected_slot !== slot;
   }
 
   get_movement_collisions(vec : Vector, return_raw_collisions = false) : ITile[] {
@@ -110,8 +107,6 @@ export class Player<WorldType extends World<any>> {
     }
     
     if (!this.is_on_ground()) this.can_use_rush = false;
-
-    if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__movementstate_changed(false);
   }
 
   spawn() {
@@ -138,16 +133,13 @@ export class Player<WorldType extends World<any>> {
       }
     }
     console.log("Spawned player!");
-    if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__movementstate_changed(true);
   }
 
   set_health(new_health : number) {
     this.health = Math.min(new_health, MAX_HEALTH);
-    if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__health_changed();
   }
 
   update(update_evt : IUpdate) {
-    if (RunPlatform.is_server()) (this.world as unknown as ServerWorld).queue_all_players_packets();
     this.apply_physics(/*1*/ Math.floor(update_evt.ticks * 100) / 100);
     this.collision_rect.top_left = this.position;
     this.sync_controller.record_position(this.position);
@@ -158,16 +150,16 @@ export class Player<WorldType extends World<any>> {
       this.can_use_rush = true;
     }
 
-    this.regen_timer += update_evt.ticks;
-    if (this.regen_timer > 100 && RunPlatform.is_server()) {
-      this.regen_timer = 0;
-      this.set_health(this.health + 1);
+    if (this.world.simulation_permissions.can_perform_regen) {
+      this.regen_timer += update_evt.ticks;
+      if (this.regen_timer > 100) {
+          this.regen_timer = 0;
+          this.set_health(this.health + 1);
+      }
     }
 
     this.weapons.forEach(weapon => weapon.update(update_evt));
     this.sync_controller.attempt_sync(this.position);
-
-    if (RunPlatform.is_server()) (this.world as unknown as ServerWorld).unqueue_all_players_packets();
   }
 
   sync_pos(expected_pos : Vector, callback : () => void) {
@@ -189,13 +181,9 @@ export class Player<WorldType extends World<any>> {
     );*/
   }
 
-  damage_player(amount : number, death_info_handler : () => IDeathHandlerInfo, attacker? : Player<WorldType>) {
+  damage_player(amount : number, death_info_handler : () => IDeathHandlerInfo, attacker? : TPlayer) : boolean {
     this.set_health(this.health - amount);
-    if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__damaged(attacker, amount);
-
-    if (this.health <= 0) {
-      if (RunPlatform.is_server()) (this as unknown as ServerPlayer).replicate__death(death_info_handler());
-    }
+    return this.health <= 0;
   }
 
   apply_physics(ticks : number) {
@@ -271,6 +259,16 @@ export class Player<WorldType extends World<any>> {
   
     return null;
   }
+
+  send_message(message : ITextComponent[]) {
+    this.chat_log.push(message);
+
+    if (this.chat_log.length >= 20) {
+        this.chat_log.shift();
+    }   
+  }
+  
+  abstract generate_weapon(index : number) : TWeapon;
 }
 
 export interface IDeathHandlerInfo {

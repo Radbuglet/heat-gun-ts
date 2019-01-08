@@ -4,10 +4,10 @@ import Vector from "./helpers/Vector";
 import { BeamRaycaster } from "./BeamRaycaster";
 import { num_in_range } from "./helpers/Math";
 import { WEAPONS_HELD } from "../config/Config";
-import { RunPlatform } from "./helpers/RunPlatform";
 import { ServerWorld } from "../platform-server/ServerWorld";
 import { ServerPlayer } from "../platform-server/ServerPlayer";
 import { ClientPlayer } from "../platform-game/src/ClientPlayer";
+import { World } from "./World";
 
 export interface IWeaponStats {
     additional_ground_ammo: number
@@ -207,7 +207,7 @@ export const trait_categories : ITraitCategory[] = [
     }
 ];
 
-export class Weapon {
+export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> {
     public replicated_data: IWeapon = {
         ammo: 2,
         conf: {
@@ -233,7 +233,7 @@ export class Weapon {
 
     public shot_cooldown : number = 0;
 
-    constructor(public player: Player<any>, public theme_color : string) {
+    constructor(public player: TPlayer) {
 
     }
 
@@ -273,18 +273,15 @@ export class Weapon {
         return this.get_trait_value(trait) >= trait.maxval;
     }
 
-    upgrade_trait(trait: ITrait) {
+    upgrade_trait(trait: ITrait) : boolean {
         if (this.player.energy >= trait.cost && !this.is_trait_maxed_out(trait)) {
             this.player.energy -= trait.cost;
             this.change_trait_value(trait, 1);
 
-            if (RunPlatform.is_server()) {
-                (this.player.world as unknown as ServerWorld).queue_all_players_packets();
-                (this.player as unknown as ServerPlayer).replicate__energy_changed();
-                (this.player as unknown as ServerPlayer).replicate__weaponinfo_changed();
-                (this.player.world as unknown as ServerWorld).unqueue_all_players_packets();
-            }
+            return true;
         }
+
+        return false;
     }
 
     downgrade_trait(trait: ITrait) {
@@ -292,13 +289,10 @@ export class Weapon {
             this.player.energy += trait.cost;
             this.change_trait_value(trait, -1);
 
-            if (RunPlatform.is_server()) {
-                (this.player.world as unknown as ServerWorld).queue_all_players_packets();
-                (this.player as unknown as ServerPlayer).replicate__energy_changed();
-                (this.player as unknown as ServerPlayer).replicate__weaponinfo_changed();
-                (this.player.world as unknown as ServerWorld).unqueue_all_players_packets();
-            }
+            return true;
         }
+
+        return false;
     }
 
     get_next_slot() : number {
@@ -331,10 +325,6 @@ export class Weapon {
 
     get_pullup_cooldown_max() : number {
         return Math.floor(10 + (this.get_upgrades().additional_callibur * 5) + (this.get_upgrades().additional_barrels * 5));
-    }
-
-    is_selected() {
-        return this === this.player.get_active_weapon();
     }
 
     get_cooldown_when_shooting() : number {
@@ -389,16 +379,26 @@ export class Weapon {
             ) * this.get_firerate_multiplier(true), 3));
     }
 
-    shoot(aim_direction : Vector) {
-        if (RunPlatform.is_server()) (this.player.world as ServerWorld).queue_all_players_packets();
+    is_selected() : boolean {
+        return this as unknown as TWeapon === this.player.get_active_weapon();
+    }
 
-        if (!this.can_player_teleport(aim_direction)) return;
+    shoot(aim_direction : Vector) : IShotResult<TWorld, TPlayer, TWeapon> {
+        const shot_result : IShotResult<TWorld, TPlayer, TWeapon> = {
+            did_shoot: false,
+            damage_amount: null,
+            damaged_player: null,
+            energy_gained: null
+        };
+
+        if (!this.can_player_teleport(aim_direction)) return shot_result;
+        shot_result.did_shoot = true;
 
         this.apply_forces(aim_direction, true);
         this.shot_cooldown = this.get_cooldown_when_shooting();
         this.set_ammo(this.get_ammo() - 1);
 
-        if (RunPlatform.is_client() && this.get_next_slot() !== null) {
+        if (this.player.world.simulation_permissions.can_perform_next_slot_select && this.get_next_slot() !== null) {
             this.player.select_slot(this.get_next_slot());
         }
 
@@ -410,27 +410,21 @@ export class Weapon {
             );
             
             const raycaster = this.raycast_beam(bullet_direction);
-            if (RunPlatform.is_client()) (this.player as unknown as ClientPlayer).particlehandle__player_shoot_bullet(this.player.collision_rect.point_middle(), bullet_direction);
             if (raycaster.collided_player !== null) {
-                const damaged_player = raycaster.collided_player;
+                const damaged_player : TPlayer = raycaster.collided_player;
                 const attacker = this.player;
                 
                 const damage = this.get_damage();
-                
-                if (RunPlatform.is_client()) (damaged_player as unknown as ClientPlayer).particlehandle__damaged(damage);
+                shot_result.damaged_player = damaged_player;
+                shot_result.damage_amount = damage;
                     
                 damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35 + this.get_upgrades().kb_increase * 5)).add(new Vector(0, -20)));
                 if (this.get_upgrades().kb_reverse === 1) {
                     damaged_player.velocity.mutnegate();
                 }
-                
-                if (RunPlatform.is_server()) (damaged_player as unknown as ServerPlayer).replicate__movementstate_changed(true);
 
-                if (RunPlatform.is_server()) {
-                    const damaged_player_server = damaged_player as unknown as ServerPlayer;
-                    const attacker_player_server = attacker as unknown as ServerPlayer;
-
-                    damaged_player_server.send_message([{
+                if (this.player.world.simulation_permissions.can_perform_shot_damage) {
+                    damaged_player.send_message([{
                         color: "red",
                         text: attacker.name
                       }, {
@@ -448,8 +442,9 @@ export class Weapon {
                     ]);
 
                     const gained_energy = damage / 4;
+                    shot_result.energy_gained = gained_energy;
 
-                    attacker_player_server.send_message([{
+                    this.player.send_message([{
                         color: "darkgreen",
                         text: "You gained "
                       },
@@ -502,7 +497,6 @@ export class Weapon {
     
                     attacker.energy += gained_energy;
                     attacker.total_energy += gained_energy;
-                    attacker_player_server.replicate__energy_changed();
                 }
             }
 
@@ -514,7 +508,7 @@ export class Weapon {
             );
         }
 
-        if (RunPlatform.is_server()) (this.player.world as ServerWorld).unqueue_all_players_packets();
+        return shot_result;
     }
 
     get_beam_color() {
@@ -542,8 +536,6 @@ export class Weapon {
         if (this.get_upgrades().suck_mode > 0) {
             this.player.velocity.mutnegate();
         }
-
-        if (RunPlatform.is_server()) (this.player as unknown as ServerPlayer).replicate__movementstate_changed(false);
     }
 
     can_teleport_tpvec(tp_vec : Vector) {
@@ -566,4 +558,11 @@ export class Weapon {
         return num_in_range(0, slot, WEAPONS_HELD - 1);
     }
 
+}
+
+interface IShotResult<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> {
+    did_shoot : boolean,
+    damaged_player : TPlayer,
+    damage_amount : number,
+    energy_gained : number
 }

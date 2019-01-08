@@ -13,7 +13,6 @@ import { SocketUser } from "./SocketUser";
 import { num_in_range, calculate_ticks, torad } from "../helpers-common/helpers/Math";
 import Vector, { ISerializedVector } from "../helpers-common/helpers/Vector";
 import { Weapon, configurable_traits } from "../helpers-common/Weapon";
-import { RunPlatform, ExecMode } from "../helpers-common/helpers/RunPlatform";
 import { readFileSync } from "fs";
 import { PacketNames } from "../helpers-common/ProtocolDefs";
 import { Leaderboard } from "./Leaderboard";
@@ -24,8 +23,6 @@ import { recaptcha_credentials } from "../config/Credentials";
 const now = require("performance-now");
 
 console.log(`Heat Gun Server ~~ Version ${GAME_VERSION}`);
-
-RunPlatform.set_platform(ExecMode.server);
 
 const source_root_path = join(__dirname, "../");
 
@@ -82,7 +79,11 @@ app.use((req, res) => { // 404
 const server = createServer(app);
 const socketserver = socketio(server);
 
-const world = new ServerWorld(map_loader);
+const world = new ServerWorld(map_loader, {
+    can_perform_next_slot_select: false,
+    can_perform_regen: true,
+    can_perform_shot_damage: true
+});
 
 socketserver.on("connection", socket => {
     let socket_user : SocketUser = new SocketUser(socket, world);
@@ -229,7 +230,6 @@ setInterval(() => {
     total_runtime_runs++;
     
     world.update({
-        exec_mode: ExecMode.server,
         delta, ticks,
         
         total_ms: total_runtime_ms,

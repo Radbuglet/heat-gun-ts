@@ -2,7 +2,6 @@
 
 import { MapLoader, Layers } from "../../helpers-common/MapLoader";
 import { CanvasApplication, CanvasSubApplication } from "../../helpers-client/CanvasApplication";
-import { ExecMode, RunPlatform } from "../../helpers-common/helpers/RunPlatform";
 import { NetworkedGameWorld } from "./NetworkedGameWorld";
 import * as SocketIOClient from "socket.io-client";
 import { ClientSocket } from "./ClientSocket";
@@ -13,8 +12,6 @@ import { MainMenuSub, LoadingScreen } from "./menu/MainMenuSub";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { LeaderboardLoader } from "./LeaderboardLoader";
 import { TutorialSub } from "./menu/TutorialSub";
-
-RunPlatform.set_platform(ExecMode.client);
 
 const loader = new MapLoader();
 let main_game : MainGame = null;

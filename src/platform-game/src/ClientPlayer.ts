@@ -1,13 +1,13 @@
-import { Player } from "../../helpers-common/Player";
-import { CanvasApplication, CanvasSubApplication } from "../../helpers-client/CanvasApplication";
+import { Player, IDeathHandlerInfo } from "../../helpers-common/Player";
+import { CanvasSubApplication } from "../../helpers-client/CanvasApplication";
 import Vector from "../../helpers-common/helpers/Vector";
 import { rainbow_color } from "../../helpers-client/color";
 import { MAX_HEALTH } from "../../config/Config";
 import { ClientWorld } from "./ClientWorld";
 import { AmmoParticle, BloodParticle } from "./Particles";
-import { World } from "../../helpers-common/World";
+import { ClientWeapon } from "./ClientWeapon";
 
-export class ClientPlayer extends Player<ClientWorld> {
+export class ClientPlayer extends Player<ClientWorld, ClientPlayer, ClientWeapon> {
     public gun_look_direction : Vector = null;
 
     constructor(world : ClientWorld, name : string) {
@@ -38,8 +38,6 @@ export class ClientPlayer extends Player<ClientWorld> {
             origin, direction.mult(new Vector(10))
         ));
     }
-
-    send_message() {}
 
     render(app : CanvasSubApplication) {
         app.draw(ctx => {
@@ -109,4 +107,19 @@ export class ClientPlayer extends Player<ClientWorld> {
             });
         }
     }
+
+    generate_weapon(index : number) {
+        return new ClientWeapon(this, [
+            "rgb(123, 255, 0)",
+            "rgb(187, 233, 0)",
+            "rgb(242, 255, 0)"
+          ][index]);
+    }
+
+    damage_player(amount : number, death_info_handler : () => IDeathHandlerInfo, attacker? : ClientPlayer) : boolean {
+        this.particlehandle__damaged(amount);
+        const killed = super.damage_player(amount, death_info_handler, attacker);
+        return killed;
+    }
+    
 }

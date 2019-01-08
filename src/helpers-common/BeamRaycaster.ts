@@ -3,15 +3,15 @@ import Vector from "./helpers/Vector";
 import { World } from "./World";
 import { Player } from "./Player";
 import { Rect } from "./helpers/Rect";
-import { PLAYER_COLLISION_BOX } from "../config/Config";
+import { Weapon } from "./Weapon";
 
 // @TODO implement reflections properly
 
-export interface BeamRaycasterConstructionArgs {
+export interface BeamRaycasterConstructionArgs<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> {
     starting_position : Vector
     starting_direction : Vector
     max_dist : number
-    world : World<Player<any>>
+    world : TWorld
     ray_collision_box_size : Vector
 
     gravity_vec : Vector
@@ -19,13 +19,13 @@ export interface BeamRaycasterConstructionArgs {
 
     phase_world : boolean
 
-    initiator_player : Player<any>
+    initiator_player : TPlayer
 
     chk_every : number
 }
 
-export class BeamRaycaster extends BaseRaycaster {
-    private world : World<Player<any>>;
+export class BeamRaycaster<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> extends BaseRaycaster {
+    private world : TWorld;
     private max_dist : number;
     private ray_collbox_size : Vector;
 
@@ -37,12 +37,12 @@ export class BeamRaycaster extends BaseRaycaster {
 
     private phase_world : boolean;
 
-    private initiator_player : Player<any>;
+    private initiator_player : TPlayer;
     private chk_every : number;
 
-    public collided_player : Player<any> = null;
+    public collided_player : TPlayer = null;
 
-    constructor(args : BeamRaycasterConstructionArgs) {
+    constructor(args : BeamRaycasterConstructionArgs<TWorld, TPlayer, TWeapon>) {
         super(args.starting_position, args.starting_direction);
 
         this.hidden_velocity = this.direction.clone();

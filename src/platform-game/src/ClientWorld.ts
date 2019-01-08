@@ -1,4 +1,4 @@
-import { World } from "../../helpers-common/World";
+import { World, WorldSimulationPermissions } from "../../helpers-common/World";
 import { ClientPlayer } from "./ClientPlayer";
 import { CanvasApplicationInterface } from "../../helpers-client/CanvasApplication";
 import { Layers, OneWayDirections, MapLoader, ITile } from "../../helpers-common/MapLoader";
@@ -9,7 +9,7 @@ import { IUpdate } from "../../helpers-common/helpers/IUpdate";
 import { TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../config/Config";
 import Vector from "../../helpers-common/helpers/Vector";
 import { Rect } from "../../helpers-common/helpers/Rect";
-import { MapChunker } from "../../helpers-common/MapChunker";
+import { ClientWeapon } from "./ClientWeapon";
 
 export interface IEditorRenderParams {
     hovered_objects : ITile[]
@@ -17,11 +17,15 @@ export interface IEditorRenderParams {
     x_ray : boolean
 }
 
-export class ClientWorld extends World<ClientPlayer> {
+export class ClientWorld extends World<ClientWorld, ClientPlayer, ClientWeapon> {
     public particle_system : ParticleSystem = new ParticleSystem();
 
-    constructor(loader : MapLoader, public app : CanvasApplicationInterface) {
-        super(loader);
+    constructor(loader : MapLoader, public app : CanvasApplicationInterface, perms : WorldSimulationPermissions = {
+        can_perform_next_slot_select: true,
+        can_perform_regen: false,
+        can_perform_shot_damage: false
+    }) {
+        super(loader, perms);
     }
 
     replicate_new_beam() {}

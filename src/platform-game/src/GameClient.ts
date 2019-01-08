@@ -6,7 +6,6 @@ import { ClientWorld } from "./ClientWorld";
 import { WeaponStatsMenu } from "./WeaponStatsMenu";
 import { MapLoader, Layers } from "../../helpers-common/MapLoader";
 import { calculate_ticks, torad } from "../../helpers-common/helpers/Math";
-import { ExecMode } from "../../helpers-common/helpers/RunPlatform";
 import { render_tablist } from "./TablistController";
 import { RushDirections } from "../../helpers-common/RushDirections";
 import { Rect } from "../../helpers-common/helpers/Rect";
@@ -16,13 +15,13 @@ import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { draw_text, limit_line_size, left_right_alignment, get_line_size } from "../../helpers-client/draw_text";
 import { CloudHorizon } from "./CloudHorizon";
 import { get_theme_rainbow, get_theme_dark, get_theme_red } from "../../helpers-client/ColorTheme";
+import { WorldSimulationPermissions } from "../../helpers-common/World";
 
 export abstract class GameClient extends CanvasSubApplication {
     public local_player : ClientPlayer;
     private camera : Camera = new Camera(new Vector(0, 0), this);
     public world : ClientWorld;
     private weapon_stats_menu;
-    private chat_log : ITextComponent[][] = [];
     private show_sidebar : boolean = true;
 
     private cloud_horizon : CloudHorizon = new CloudHorizon(this);
@@ -32,24 +31,18 @@ export abstract class GameClient extends CanvasSubApplication {
     protected ping : number = 0;
     private direction_negate_mode : boolean = false;
 
-    constructor(main_app : CanvasApplication, maploader : MapLoader, my_uuid : string, my_name : string, my_spawn : Vector) {
+    public testworld_bot : ClientPlayer = null;
+
+    constructor(main_app : CanvasApplication, maploader : MapLoader, my_uuid : string, my_name : string, my_spawn : Vector, perms : WorldSimulationPermissions = null) {
         super(main_app);
 
         this.weapon_stats_menu = new WeaponStatsMenu(this, this.handle_stats_change.bind(this));
         
-        this.world = new ClientWorld(maploader, this);
+        this.world = perms !== null ? new ClientWorld(maploader, this, perms) : new ClientWorld(maploader, this);
         this.local_player = new ClientPlayer(this.world, my_name);
         this.local_player.uuid = my_uuid;
         this.local_player.position.copyOther(my_spawn);
         this.world.add_player(this.local_player);
-    }
-
-    add_message(msg : ITextComponent[]) {
-        this.chat_log.push(msg);
-
-        if (this.chat_log.length >= 20) {
-            this.chat_log.shift();
-        }
     }
     
     app_update(delta) {
@@ -58,7 +51,7 @@ export abstract class GameClient extends CanvasSubApplication {
         this.total_ticks = ticks;
 
         const event = {
-            delta, ticks, exec_mode: ExecMode.client, total_ms: this.total_ms, total_ticks: this.total_ticks
+            delta, ticks, total_ms: this.total_ms, total_ticks: this.total_ticks
         }
 
         this.local_player.gun_look_direction = this.get_mouse_position().sub(new Vector(this.getResolutionWidth() / 2, this.getResolutionHeight() / 2)).normalized();
@@ -317,7 +310,7 @@ export abstract class GameClient extends CanvasSubApplication {
 
                 // Chat
                 const chat_start_x = 50;
-                const chat_lines = limit_line_size(this, "15px monospace", this.chat_log, (container_hpbar_rect.get_x() - 30) - chat_start_x);
+                const chat_lines = limit_line_size(this, "15px monospace", this.local_player.chat_log, (container_hpbar_rect.get_x() - 30) - chat_start_x);
                 draw_text(this, chat_start_x, weaponbar_rect.get_y() - 30 - (chat_lines.length * 17), "15px monospace", 17, chat_lines); 
             });
 

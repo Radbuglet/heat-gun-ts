@@ -6,10 +6,9 @@ import { IUpdate } from "./helpers/IUpdate";
 import { CollisionFace, Rect } from "./helpers/Rect";
 import { BeamRaycaster } from "./BeamRaycaster";
 import { MapChunker } from "./MapChunker";
-import { TPZONE_LEFT, TPZONE_RIGHT, TPZONE_TOP, TPZONE_BOTTOM } from "../config/Config";
-import { RunPlatform } from "./helpers/RunPlatform";
-import { ServerWorld } from "../platform-server/ServerWorld";
-import { ServerPlayer } from "../platform-server/ServerPlayer";
+import { TPZONE_LEFT, TPZONE_RIGHT } from "../config/Config";
+import { Weapon } from "./Weapon";
+import { ITextComponent } from "./helpers/ITextComponent";
 
 export interface ITileCollided {
     tile: ITile
@@ -25,13 +24,19 @@ export interface IBeam {
     is_from_other? : boolean
 }
 
-export abstract class World<PlayerClass extends Player<any>> {
+export interface WorldSimulationPermissions {
+    can_perform_regen : boolean,
+    can_perform_shot_damage : boolean,
+    can_perform_next_slot_select : boolean
+}
+
+export class World<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> {
     public tiles : ITile[] = null;
     public map_chunker : MapChunker = null;
-    public players: Map<string, PlayerClass> = new Map();
+    public players: Map<string, TPlayer> = new Map();
     public beams : IBeam[] = [];
 
-    constructor(map_loader: MapLoader) {
+    constructor(map_loader: MapLoader, public simulation_permissions : WorldSimulationPermissions) {
         this.tiles = map_loader.clone_map_object();
         this.chunk_map();
     }
@@ -42,30 +47,18 @@ export abstract class World<PlayerClass extends Player<any>> {
         console.log("Finished chunking map!");
     }
 
-    add_player(player: PlayerClass) {
+    add_player(player: TPlayer) {
         this.players.set(player.uuid, player);
-        
-        if (RunPlatform.is_server()) {
-            (this as unknown as ServerWorld).replicate__player_added();
-        }
     }
 
-    remove_player(player: PlayerClass) {
+    remove_player(player: TPlayer) {
         this.players.delete(player.uuid);
-        
-        if (RunPlatform.is_server()) (this as unknown as ServerWorld).replicate__player_removed();
     }
 
     update(update_evt: IUpdate) {
-        if (RunPlatform.is_server()) (this as unknown as ServerWorld).queue_all_players_packets();
-
         this.players.forEach(player => {
             player.update(update_evt);
         });
-        
-        if (RunPlatform.is_server()) (this as unknown as ServerWorld).unqueue_all_players_packets();
-
-        // @TODO power-ups!
 
         this.beams.forEach(beam => {
             if (beam.path_lerping) {
@@ -120,7 +113,7 @@ export abstract class World<PlayerClass extends Player<any>> {
         });
     }
 
-    raycastaddon__check_collisions(raycaster: BeamRaycaster, ray_collision_box: Vector): boolean { // @TODO a lot of stuff!
+    raycastaddon__check_collisions(raycaster: BeamRaycaster<TWorld, TPlayer, TWeapon>, ray_collision_box: Vector): boolean { // @TODO a lot of stuff!
         const ray_collisionbox_position = raycaster.position.sub(ray_collision_box.div(new Vector(2)));
 
         return this.get_movement_collisions(
@@ -148,12 +141,18 @@ export abstract class World<PlayerClass extends Player<any>> {
         }).length === 0;
     }
 
-    add_gun_beams(origin_player : Player<any>, path : Vector[], size : number, color : string) {
-        const new_beam_index = this.beams.push({
+    add_gun_beams(origin_player : TPlayer, path : Vector[], size : number, color : string) : IBeam {
+        const new_beam = {
             path, size, color,
             path_lerping: false,
             delete_flag: false
-        });
-        if (RunPlatform.is_server()) (this as unknown as ServerWorld).replicate__new_beam(origin_player, this.beams[new_beam_index - 1]);
+        };
+        this.beams.push(new_beam);
+
+        return new_beam;
+    }
+
+    broadcast_message(message : ITextComponent[]) {
+        this.players.forEach(player => player.send_message(message));
     }
 }

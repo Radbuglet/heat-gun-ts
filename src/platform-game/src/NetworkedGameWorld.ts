@@ -94,7 +94,7 @@ export class NetworkedGameWorld extends GameClient {
         });
 
         this.socket.clump_on(PacketNames.send_message, SocketEventGroups.GAME, (message : ITextComponent[]) => {
-            this.add_message(message);
+            this.local_player.send_message(message);
         });
 
         this.socket.clump_on(PacketNames.replicate_slot_change, SocketEventGroups.GAME, (target_uuid : string, slot : number) => {

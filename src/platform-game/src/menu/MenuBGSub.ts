@@ -6,7 +6,6 @@ import { CloudHorizon } from "../CloudHorizon";
 import { ClientWorld } from "../ClientWorld";
 import { MapLoader } from "../../../helpers-common/MapLoader";
 import { Camera } from "../../../helpers-client/Camera";
-import { ExecMode } from "../../../helpers-common/helpers/RunPlatform";
 import { TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../../config/Config";
 
 export abstract class MenuBGSub extends CanvasSubApplication {
@@ -22,7 +21,7 @@ export abstract class MenuBGSub extends CanvasSubApplication {
 
     app_update(dt : number, ticks_passed : number) {
         this.world.update({
-            delta: dt, exec_mode: ExecMode.client, ticks: ticks_passed, total_ms: 0, total_ticks: 0
+            delta: dt, ticks: ticks_passed, total_ms: 0, total_ticks: 0
         });
     }
 
