@@ -5,19 +5,69 @@
       "lasts_for_mins": 1440,
       "scores": [
         {
-          "username": "B",
-          "score": 28,
-          "expire_timestamp": 1544193606474
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1546994960590
         },
         {
-          "username": "B",
-          "score": 26,
-          "expire_timestamp": 1544193616835
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1546995012690
         },
         {
-          "username": "A",
-          "score": 18,
-          "expire_timestamp": 1544193573154
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1546995029222
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1546995144152
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1546995364033
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1546996030289
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1546996377081
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1546996515915
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1546996789616
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1547000364871
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1547000872160
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1547000928986
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1547000968295
         }
       ]
     },
@@ -26,19 +76,104 @@
       "lasts_for_mins": 10080,
       "scores": [
         {
-          "username": "B",
-          "score": 28,
-          "expire_timestamp": 1544712006474
+          "username": "1",
+          "score": 100,
+          "expire_timestamp": 1546979597179
         },
         {
-          "username": "B",
-          "score": 26,
-          "expire_timestamp": 1544712016835
+          "username": "1",
+          "score": 100,
+          "expire_timestamp": 1546979742645
         },
         {
-          "username": "A",
-          "score": 18,
-          "expire_timestamp": 1544711973154
+          "username": "1",
+          "score": 100,
+          "expire_timestamp": 1546979747999
+        },
+        {
+          "username": "1",
+          "score": 100,
+          "expire_timestamp": 1546979700711
+        },
+        {
+          "username": "1",
+          "score": 100,
+          "expire_timestamp": 1546979704075
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1547057123787
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1547058427542
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1547058811856
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1547059504750
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1547057028086
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1547519328986
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1547057155524
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1547058528241
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1546975696768
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1547059708076
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1547068911307
+        },
+        {
+          "username": "1",
+          "score": 20,
+          "expire_timestamp": 1547069070105
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1547081418086
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1547513360590
+        },
+        {
+          "username": " ",
+          "score": 20,
+          "expire_timestamp": 1547519368295
         }
       ]
     }

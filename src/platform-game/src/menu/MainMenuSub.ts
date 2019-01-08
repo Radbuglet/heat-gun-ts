@@ -13,6 +13,7 @@ import { MapLoader } from "../../../helpers-common/MapLoader";
 import { MenuBGSub } from "./MenuBGSub";
 import { get_theme_rainbow, get_theme_dark, get_theme_red } from "../../../helpers-client/ColorTheme";
 import { discord_invite_url, github_repo_url } from "../../../config/Config";
+import { TestWorldClient } from "../TestWorldClient";
 
 export class MainMenuSub extends MenuBGSub {
     private active_leaderboard_index : number = 0;
@@ -259,16 +260,29 @@ export class MainMenuSub extends MenuBGSub {
                         this.main_app.show_tutorial();
                     }
                 }
-            ], []);
+            ]);
+
+            sidebar_text.push([
+                {
+                    bg: "#57ff47",
+                    hover_bg: "#fff",
+                    color: get_theme_dark(),
+                    text: "  Test World  ",
+                    click_func_action: () => {
+                        this.main_app.active_sub = new TestWorldClient(this.main_app, this.main_app.map_loader);
+                    }
+                }
+            ]);
+            
             sidebar_text.push([
                 {
                     bg: get_theme_red(),
                     hover_bg: "red",
                     color: "#fff",
-                    text: "  View Editor  ",
+                    text: "  Open Editor  ",
                     click_url_action: "/editor"
                 }
-            ], [], []);
+            ], []);
 
             // Social
             if (typeof discord_invite_url === "string") {

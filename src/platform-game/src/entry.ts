@@ -59,11 +59,11 @@ interface KickScreenState {
 export class MainGame extends CanvasApplication {
     private active_kick_screen : KickScreenState = null;
     private leaderboard_loader : LeaderboardLoader = new LeaderboardLoader("/leaderboard");
-    private active_sub : CanvasSubApplication;
+    public active_sub : CanvasSubApplication;
     
     private socket : ClientSocket = null;
 
-    constructor(canvas : HTMLCanvasElement, private map_loader : MapLoader) {
+    constructor(canvas : HTMLCanvasElement, public map_loader : MapLoader) {
         super(canvas);
         if (localStorage.getItem("saw_tutorial") !== "yes") {
             this.show_tutorial()
@@ -73,9 +73,13 @@ export class MainGame extends CanvasApplication {
         this.startup();
     }
 
+    goto_main_menu() {
+        this.active_sub = new MainMenuSub(this, this.map_loader, this.leaderboard_loader);
+    }
+
     show_tutorial() {
         this.active_sub = new TutorialSub(this, this.map_loader, () => {
-            this.active_sub = new MainMenuSub(this, this.map_loader, this.leaderboard_loader);
+            this.goto_main_menu();
             localStorage.setItem("saw_tutorial", "yes");
         });
     }

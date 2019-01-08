@@ -31,6 +31,8 @@ export abstract class CanvasApplicationInterface {
 
   abstract get_canvas() : HTMLCanvasElement;
   abstract get_ctx() : CanvasRenderingContext2D;
+
+  abstract going_to_display_prompt();
 }
 
 export abstract class CanvasSubApplication extends CanvasApplicationInterface {
@@ -104,6 +106,10 @@ export abstract class CanvasSubApplication extends CanvasApplicationInterface {
 
   get_ctx() {
     return this.main.get_ctx();
+  }
+
+  going_to_display_prompt() {
+    this.main.going_to_display_prompt();
   }
 }
 
@@ -310,5 +316,10 @@ export abstract class CanvasApplication extends CanvasApplicationInterface {
 
     get_ctx() {
       return this.ctx;
+    }
+
+    going_to_display_prompt() {
+      this.mouse_down = false;
+      this.mousedown_frame = false;
     }
   }

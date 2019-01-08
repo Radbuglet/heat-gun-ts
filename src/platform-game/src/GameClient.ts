@@ -261,6 +261,7 @@ export abstract class GameClient extends CanvasSubApplication {
 
                 // HP Bar
                 const container_hpbar_rect = Rect.centered_around(weaponbar_rect.get_point(0.5, 0).sub(new Vector(0, 50)), new Vector(width * 0.3 + 150, 40));
+                const hp_player = this.testworld_bot || this.local_player;
                 
                 this.draw(() => {
                     const hpbar_rect = container_hpbar_rect.clone_and_perform(rect => rect.size.mutsub(new Vector(170, 0)));
@@ -279,12 +280,12 @@ export abstract class GameClient extends CanvasSubApplication {
                                     4 * Math.sin(torad(x * 5 + Date.now() / 5))
                                 ));
                             })
-                            ctx.fillStyle = x <= this.local_player.health ? rainbow_color({
+                            ctx.fillStyle = x <= hp_player.health ? rainbow_color({
                                 time_div: 20, light: 50, saturation: 100, add_to_time: x * 4
                             }) : "#2b2b2b";
                             cloned_sectioned_hpbar_rect.fill_rect_pixelfixed(ctx);
     
-                            ctx.fillStyle = x <= this.local_player.health ? rainbow_color({
+                            ctx.fillStyle = x <= hp_player.health ? rainbow_color({
                                 time_div: 20, light: 30, saturation: 100, add_to_time: x * 4
                             }) : "#191919";
                             Rect.from_positions(cloned_sectioned_hpbar_rect.point_bottom_left(), cloned_sectioned_hpbar_rect.point_bottom_right().sub(new Vector(0, 10))).fill_rect_pixelfixed(ctx);
@@ -304,7 +305,7 @@ export abstract class GameClient extends CanvasSubApplication {
                         ctx.textBaseline = "middle";
                         ctx.textAlign = "center";
                         ctx.font = "20px monospace";
-                        ctx.fillText("HP " + this.local_player.health + "/" + MAX_HEALTH, hptext_rect.point_middle().getX(), hptext_rect.point_middle().getY());
+                        ctx.fillText((this.testworld_bot !== null ? "BOT " : "") + "HP " + hp_player.health + "/" + MAX_HEALTH, hptext_rect.point_middle().getX(), hptext_rect.point_middle().getY());
                     });
                 });
 

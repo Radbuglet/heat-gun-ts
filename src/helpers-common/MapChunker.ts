@@ -19,8 +19,6 @@ export class MapChunker {
         for (let x = 0; x < slice_count; x++) {
             const filtered_tiles = tiles.filter(tile => current_slice_rect.testcollision(tile.rect));
 
-            console.log("Creating slice", x + 1, "of", slice_count, "- It contains", filtered_tiles.length, "tile(s).");
-
             this.slices.push({
                 container_rect: current_slice_rect.clone(),
                 tiles: filtered_tiles
