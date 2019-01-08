@@ -5,22 +5,20 @@ const { series } = require('gulp');
 const { join } = require('path');
 const { spawn } = require('child_process');
 const webpackStream = require('webpack-stream');
-const babel = require('gulp-babel');
-const sourcemaps = require('gulp-sourcemaps');
-
-let watch_process = null;
-
 
 const source_path = "src/";
 
+let watch_process = null;
+
 function build_client_platform(platform_name, output_folder_path) {
     return function wrapped__build_client_platform() {
+        console.log("Building platform", platform_name, "...");
+
         const platform_path = join(source_path, platform_name);
-        return src(join(platform_path, "src/entry.ts"), { base: "./" })
-            //.pipe(sourcemaps.init())
+        return src(join(platform_path, "src/entry.ts"))
             .pipe(webpackStream({
                 stats: 'errors-only',
-                mode: "production",
+                mode: 'development',
                 output: {
                     filename: "bundle.js"
                 },
@@ -33,10 +31,6 @@ function build_client_platform(platform_name, output_folder_path) {
                     ]
                 }
             }))
-            //.pipe(babel({
-            //    presets: ['@babel/env']
-            //}))
-            //.pipe(sourcemaps.write())
             .pipe(dest(join(platform_path, output_folder_path)))
     }
 }
@@ -51,6 +45,7 @@ module.exports.run_server = function(cb) {
     if (watch_process !== null) {
         console.log("Killing previous process...");
         watch_process.kill();
+        console.log("Killed previous process.");
     }
 
     console.log("\n\n");
