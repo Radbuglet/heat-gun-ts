@@ -370,7 +370,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
     }
 
     get_damage() : number {
-        return Math.ceil(Math.max(
+        return Math.round(Math.max(
             (4 * this.get_firerate_multiplier(true))
             +
             (
