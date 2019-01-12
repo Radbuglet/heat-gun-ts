@@ -8,8 +8,8 @@ export class ClientWeapon extends Weapon<ClientWorld, ClientPlayer, ClientWeapon
         super(player);
     }
 
-    shoot(aim_direction : Vector) {
-        const result = super.shoot(aim_direction);
+    shoot(aim_direction : Vector, aim_magnitude : number) {
+        const result = super.shoot(aim_direction, aim_magnitude);
         if (result.did_shoot) {
             this.player.particlehandle__player_shoot_bullet(this.player.collision_rect.point_middle(), aim_direction.clone());
         }

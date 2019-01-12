@@ -162,10 +162,11 @@ socketserver.on("connection", socket => {
         }
     });
 
-    socket.on((PacketNames.shoot_gun as number).toString(), (direction : number, slot : number, position : ISerializedVector) => {
+    socket.on((PacketNames.shoot_gun as number).toString(), (direction : number, magnitude : number, slot : number, position : ISerializedVector) => {
         if (
             typeof slot === "number" && Weapon.is_valid_slot_index(slot) && // Argument validation
             typeof direction === "number" && num_in_range(-180, direction, 180) &&
+            typeof magnitude === "number" && num_in_range(0, magnitude, 1000) &&
             Vector.is_valid_serialized_vector(position) &&
             socket_user.is_playing() // Gameplay checks
         ) {
@@ -175,7 +176,7 @@ socketserver.on("connection", socket => {
             }
 
             player.sync_pos(Vector.deserialize(position), () => {
-                player.get_active_weapon().shoot(Vector.from_angle(torad(direction)));
+                player.get_active_weapon().shoot(Vector.from_angle(torad(direction)), magnitude);
             });
         }
     });

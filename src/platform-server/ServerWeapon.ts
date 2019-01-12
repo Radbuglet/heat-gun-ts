@@ -36,9 +36,9 @@ export class ServerWeapon extends Weapon<ServerWorld, ServerPlayer, ServerWeapon
         this.player.replicate__movementstate_changed(false);
     }
 
-    shoot(aim_direction : Vector) {
+    shoot(aim_direction : Vector, aim_magnitude : number) {
         this.player.world.queue_all_players_packets();
-        const result = super.shoot(aim_direction);
+        const result = super.shoot(aim_direction, aim_magnitude);
 
         if (result.did_shoot) {
             if (result.damaged_player !== null) {

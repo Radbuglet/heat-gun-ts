@@ -10,7 +10,7 @@ import { render_tablist } from "./TablistController";
 import { RushDirections } from "../../helpers-common/RushDirections";
 import { Rect } from "../../helpers-common/helpers/Rect";
 import { rainbow_color } from "../../helpers-client/color";
-import { WEAPONS_HELD, MAX_HEALTH, TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../config/Config";
+import { WEAPONS_HELD, MAX_HEALTH, TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM, AIM_MAGNITUDE_DIST_MAX, AIM_MAGNITUDE_DIST_MIN } from "../../config/Config";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { draw_text, limit_line_size, left_right_alignment, get_line_size } from "../../helpers-client/draw_text";
 import { CloudHorizon } from "./CloudHorizon";
@@ -65,13 +65,13 @@ export abstract class GameClient extends CanvasSubApplication {
         if (!this.weapon_stats_menu.changing_weapon_stats) {
             const weapon = this.local_player.get_active_weapon();
             if (weapon.can_shoot() && this.is_mouse_down()) {
-                this.handle_shot(this.local_player.gun_look_direction);
-                weapon.shoot(this.local_player.gun_look_direction);
+                this.handle_shot(this.local_player.gun_look_direction, this.local_player.gun_look_magnitude);
+                weapon.shoot(this.local_player.gun_look_direction, this.local_player.gun_look_magnitude);
             }
         }
     }
 
-    abstract handle_shot(lookdir : Vector);
+    abstract handle_shot(lookdir : Vector, lookmag : number);
     abstract handle_scope(new_state : boolean);
     abstract handle_stats_change(weapon_index : number, stat_index : number, is_upgrade : boolean);
     abstract handle_dash(direction : RushDirections);
@@ -103,7 +103,7 @@ export abstract class GameClient extends CanvasSubApplication {
             this.draw(() => {
                 if (this.local_player.using_scope) {
                     this.draw(() => {
-                        const raycaster = this.local_player.get_active_weapon().raycast_beam(this.local_player.gun_look_direction, 10);
+                        const raycaster = this.local_player.get_active_weapon().raycast_beam(this.local_player.gun_look_direction, this.local_player.gun_look_magnitude, 10);
 
                         ctx.beginPath();
                         raycaster.beam_path.forEach((pos, i) => {
@@ -141,6 +141,42 @@ export abstract class GameClient extends CanvasSubApplication {
 
             this.camera.dettach();
         });
+
+        if (this.local_player.using_scope && this.local_player.get_active_weapon().get_upgrades().bullet_gravity > 0) {
+            this.draw(() => {
+                ctx.globalAlpha = 0.1;
+                ctx.lineWidth = 5;
+
+                ctx.beginPath();
+                ctx.arc(
+                    this.get_screen_center_pos().getX(), this.get_screen_center_pos().getY(), AIM_MAGNITUDE_DIST_MAX,
+                    -this.local_player.gun_look_direction.getrad() + Math.PI / 2 - Math.PI * 0.1,
+                    -this.local_player.gun_look_direction.getrad() + Math.PI / 2 + Math.PI * 0.1
+                );
+                ctx.stroke();
+
+
+
+                ctx.beginPath();
+                ctx.arc(
+                    this.get_screen_center_pos().getX(), this.get_screen_center_pos().getY(), AIM_MAGNITUDE_DIST_MIN,
+                    -this.local_player.gun_look_direction.getrad() + Math.PI / 2 - Math.PI * 0.1,
+                    -this.local_player.gun_look_direction.getrad() + Math.PI / 2 + Math.PI * 0.1
+                );
+                ctx.stroke();
+
+
+                ctx.beginPath();
+                ctx.arc(
+                    this.get_screen_center_pos().getX(), this.get_screen_center_pos().getY(), this.local_player.gun_look_magnitude,
+                    -this.local_player.gun_look_direction.getrad() + Math.PI / 2 - Math.PI * 0.05,
+                    -this.local_player.gun_look_direction.getrad() + Math.PI / 2 + Math.PI * 0.05
+                );
+                ctx.strokeStyle = "red";
+                ctx.globalAlpha = 0.2;
+                ctx.stroke();
+            });
+        }
 
         // Draw localizers
         this.draw_localizer(LocalizerSides.left);
@@ -479,6 +515,10 @@ export abstract class GameClient extends CanvasSubApplication {
 
         // Weapon stats UI
         this.weapon_stats_menu.render();
+    }
+
+    get_screen_center_pos() : Vector {
+        return new Vector(this.getResolutionWidth() / 2, this.getResolutionHeight() / 2);
     }
 
     get_leaderboard() {

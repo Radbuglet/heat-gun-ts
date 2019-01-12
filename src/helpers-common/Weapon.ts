@@ -2,8 +2,8 @@ import { Player } from "./Player";
 import { IUpdate } from "./helpers/IUpdate";
 import Vector from "./helpers/Vector";
 import { BeamRaycaster } from "./BeamRaycaster";
-import { num_in_range } from "./helpers/Math";
-import { WEAPONS_HELD } from "../config/Config";
+import { num_in_range, clamp_num } from "./helpers/Math";
+import { WEAPONS_HELD, AIM_MAGNITUDE_DIST_MIN, AIM_MAGNITUDE_DIST_MAX } from "../config/Config";
 import { ServerWorld } from "../platform-server/ServerWorld";
 import { ServerPlayer } from "../platform-server/ServerPlayer";
 import { ClientPlayer } from "../platform-game/src/ClientPlayer";
@@ -341,7 +341,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
         );
     }
 
-    raycast_beam(bullet_direction : Vector, chk_every = 1) {
+    raycast_beam(bullet_direction : Vector, aim_magnitude : number, chk_every = 1) {
         const raycaster = new BeamRaycaster({
             starting_position: this.player.collision_rect.point_middle(),
             starting_direction: bullet_direction,
@@ -383,7 +383,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
         return this as unknown as TWeapon === this.player.get_active_weapon();
     }
 
-    shoot(aim_direction : Vector) : IShotResult<TWorld, TPlayer, TWeapon> {
+    shoot(aim_direction : Vector, aim_magnitude : number) : IShotResult<TWorld, TPlayer, TWeapon> {
         const shot_result : IShotResult<TWorld, TPlayer, TWeapon> = {
             did_shoot: false,
             damage_amount: null,
@@ -409,7 +409,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
                 Math.cos(aim_direction.getrad() + direction_innac)
             );
             
-            const raycaster = this.raycast_beam(bullet_direction);
+            const raycaster = this.raycast_beam(bullet_direction, aim_magnitude);
             if (raycaster.collided_player !== null) {
                 const damaged_player : TPlayer = raycaster.collided_player;
                 const attacker = this.player;

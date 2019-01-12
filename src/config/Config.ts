@@ -29,3 +29,6 @@ export const GAME_VERSION = "2X:0.0.0";
 
 export const discord_invite_url = "https://discordapp.com/invite/hNZJbwn";
 export const github_repo_url = "https://github.com/Radbuglet/heat-gun-ts";
+
+export const AIM_MAGNITUDE_DIST_MIN = 200;
+export const AIM_MAGNITUDE_DIST_MAX = 300;

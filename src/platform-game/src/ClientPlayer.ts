@@ -9,6 +9,7 @@ import { ClientWeapon } from "./ClientWeapon";
 
 export class ClientPlayer extends Player<ClientWorld, ClientPlayer, ClientWeapon> {
     public gun_look_direction : Vector = null;
+    public gun_look_magnitude : number = 1;
 
     constructor(world : ClientWorld, name : string) {
         super(world, name);

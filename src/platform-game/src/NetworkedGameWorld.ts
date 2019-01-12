@@ -127,8 +127,8 @@ export class NetworkedGameWorld extends GameClient {
         }
     }
 
-    handle_shot(look_direction : Vector) {
-        this.socket.emit(PacketNames.shoot_gun, look_direction.getdeg(), this.local_player.get_selected_slot(), this.local_player.position.serialize());
+    handle_shot(look_direction : Vector, look_magnitude : number) {
+        this.socket.emit(PacketNames.shoot_gun, look_direction.getdeg(), look_magnitude, this.local_player.get_selected_slot(), this.local_player.position.serialize());
     }
 
     handle_scope(bool : boolean) {
