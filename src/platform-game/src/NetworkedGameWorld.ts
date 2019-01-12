@@ -107,10 +107,7 @@ export class NetworkedGameWorld extends GameClient {
         this.socket.clump_on(PacketNames.replicate_player_damaged, SocketEventGroups.GAME, (attacker : string, target_uuid : string, damage : number) => {
             if (this.world.players.has(target_uuid)) {
                 const target_player = this.world.players.get(target_uuid);
-
-                if (attacker !== this.local_player.uuid) {
-                    target_player.particlehandle__damaged(damage);
-                }
+                target_player.particlehandle__damaged(damage);
             }
         });
         
