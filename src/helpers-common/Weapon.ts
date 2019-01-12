@@ -420,7 +420,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
                 damaged_player.velocity.copyOther(bullet_direction.mult(new Vector(35 + this.get_upgrades().kb_increase * 5)).add(new Vector(0, -20)));
                 if (this.get_upgrades().kb_reverse === 1) {
                     damaged_player.velocity.setX(damaged_player.get_launching_velocity_for(attacker.position).getX() * 0.8);
-                    //damaged_player.velocity.setY((damaged_player.position.getY() - attacker.position.getY()) * (5 + this.get_upgrades().kb_increase * 5));
+                    damaged_player.velocity.setY(-bullet_direction.mult(new Vector(10 + this.get_upgrades().kb_increase * 5)).getY());
                     damaged_player.velocity.copyOther(damaged_player.velocity.normalized().mult(new Vector(Math.min(damaged_player.velocity.len(), 50 + this.get_upgrades().kb_increase * 50))));
                 }
 
