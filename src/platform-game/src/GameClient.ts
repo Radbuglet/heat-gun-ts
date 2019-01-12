@@ -54,7 +54,8 @@ export abstract class GameClient extends CanvasSubApplication {
             delta, ticks, total_ms: this.total_ms, total_ticks: this.total_ticks
         }
 
-        this.local_player.gun_look_direction = this.get_mouse_position().sub(new Vector(this.getResolutionWidth() / 2, this.getResolutionHeight() / 2)).normalized();
+        this.local_player.gun_look_direction = this.get_mouse_position().sub(this.get_screen_center_pos()).normalized();
+        this.local_player.gun_look_magnitude = this.get_mouse_position().sub(this.get_screen_center_pos()).len();
         if (this.local_player.gun_look_direction.len() === 0) {
             this.local_player.gun_look_direction = new Vector(2, -1).normalized();
         }
