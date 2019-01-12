@@ -347,12 +347,11 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
             starting_direction: bullet_direction,
             phase_world: false,
 
-            max_dist: this.get_max_dist(), // @TODO calculate
+            max_dist: this.get_max_dist(),
             ray_collision_box_size: new Vector(this.get_bullet_size()),
 
             gravity_vec: new Vector(0, 
-                Math.max((this.get_upgrades().bullet_gravity * 0.5 - (this.get_upgrades().additional_callibur * 0.1)), 0) / 1000
-                //10
+                (clamp_num(0, (aim_magnitude - AIM_MAGNITUDE_DIST_MIN) / (AIM_MAGNITUDE_DIST_MAX - AIM_MAGNITUDE_DIST_MIN), 1) * (this.get_upgrades().bullet_gravity * 0.5)) / 1000
             ),
             path_diff_until_change: 0.25,
             
@@ -366,7 +365,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
     }
     
     get_max_dist() : number {
-        return Math.max(1000 + (this.get_upgrades().additional_callibur * 200) - (this.get_upgrades().additional_barrels * 75), 100) + (this.get_upgrades().bullet_gravity * 200);
+        return Math.max(1000 + (this.get_upgrades().additional_callibur * 200) - (this.get_upgrades().additional_barrels * 75), 100);
     }
 
     get_damage() : number {
