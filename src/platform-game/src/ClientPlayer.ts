@@ -23,7 +23,7 @@ export class ClientPlayer extends Player<ClientWorld, ClientPlayer, ClientWeapon
             ));
         }
 
-        if (this.health - damage <= 0) {
+        if (this.health <= 0) {
             for (let x = 0; x < 20; x++) {
                 this.world.particle_system.register_particle(new AmmoParticle(
                     this.world.particle_system, this.world.app,
@@ -118,8 +118,8 @@ export class ClientPlayer extends Player<ClientWorld, ClientPlayer, ClientWeapon
     }
 
     damage_player(amount : number, death_info_handler : () => IDeathHandlerInfo, attacker? : ClientPlayer) : boolean {
-        this.particlehandle__damaged(amount);
         const killed = super.damage_player(amount, death_info_handler, attacker);
+        this.particlehandle__damaged(amount);
         return killed;
     }
     
