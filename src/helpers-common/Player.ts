@@ -247,6 +247,14 @@ export abstract class Player<TWorld extends World<TWorld, TPlayer, TWeapon>, TPl
     );
   }
 
+  get_launching_velocity_for(dest : Vector, time : number = 1000) : Vector {
+    const fric_coef_n = 1 - this.get_friction_coef();
+    return new Vector(
+      ((dest.getX() - this.position.getX())/(1-Math.pow(Math.E, -fric_coef_n*time))*fric_coef_n) * 0.9,
+      dest.getY() - this.position.getY() - ((time * time * fric_coef_n)/2)
+    );
+  }
+
   static is_valid_username(username : string) : string {
     // @TODO validate
     if (username.length === 0) {
