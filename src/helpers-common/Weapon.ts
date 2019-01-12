@@ -403,7 +403,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
         }
 
         for (let i = 0; i < this.get_upgrades().additional_barrels + 1; i++) {
-            const direction_innac : number = (Math.random() - 0.75) * ((this.get_upgrades().additional_barrels + this.get_upgrades().additional_size * 0.025) / 5);
+            const direction_innac : number = (Math.random() - 0.5) * (this.get_upgrades().additional_barrels / 5);
             const bullet_direction = new Vector(
                 Math.sin(aim_direction.getrad() + direction_innac),
                 Math.cos(aim_direction.getrad() + direction_innac)
