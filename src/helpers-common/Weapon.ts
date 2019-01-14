@@ -333,7 +333,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
                 (15 * this.get_firerate_multiplier(true)) +
                 (
                     (this.get_upgrades().additional_callibur * 12) +
-                    (this.get_upgrades().additional_barrels * 100)
+                    (this.get_upgrades().additional_barrels * 50)
                 ) * this.get_firerate_multiplier(false)
             ) + (
                 (this.get_upgrades().teleportation * 15)
