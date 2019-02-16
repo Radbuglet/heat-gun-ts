@@ -32,3 +32,7 @@ export function wrap_num(num : number, max : number) {
     if (num < 0) return max - 1;
     return num;
 }
+
+export function randint(min : number, max : number) : number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}

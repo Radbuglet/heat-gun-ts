@@ -111,26 +111,18 @@ export abstract class Player<TWorld extends World<TWorld, TPlayer, TWeapon>, TPl
 
   spawn() {
     while (true) {
-
-      this.position.copyOther(new Vector(Math.floor(Math.random() * (TPZONE_RIGHT - TPZONE_LEFT)) + TPZONE_LEFT, Math.floor(Math.random() * 2000 - 2500)));
-      this.collision_rect.top_left = this.position;
+      this.world.spawn_rect(this.collision_rect);
 
       if (this.get_movement_collisions(new Vector(0, 0)).length > 0) {
         continue;
       }
 
-      let is_ok = true;
-      while (this.get_movement_collisions(new Vector(0, 1)).length === 0) {
-        this.position.setY(this.position.getY() + 1);
-        if (this.position.getY() > TPZONE_BOTTOM) {
-          is_ok = false;
-          break;
-        }
+      if (this.get_movement_collisions(new Vector(0, 1)).length === 0) {
+        continue;
       }
 
-      if (is_ok) {
-        break;
-      }
+      break;
+
     }
     console.log("Spawned player!");
   }

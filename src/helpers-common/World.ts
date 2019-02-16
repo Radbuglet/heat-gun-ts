@@ -9,11 +9,7 @@ import { MapChunker } from "./MapChunker";
 import { TPZONE_LEFT, TPZONE_RIGHT } from "../config/Config";
 import { Weapon } from "./Weapon";
 import { ITextComponent } from "./helpers/ITextComponent";
-
-export interface ITileCollided {
-    tile: ITile
-    face: CollisionFace
-}
+import { randint } from "./helpers/Math";
 
 export interface IBeam {
     path : Vector[]
@@ -45,6 +41,12 @@ export class World<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exten
         console.log("Chunking map...");
         this.map_chunker = new MapChunker(this.tiles, TPZONE_LEFT, TPZONE_RIGHT, 200);
         console.log("Finished chunking map!");
+    }
+
+    spawn_rect(rect : Rect) {
+        const tile = this.tiles[randint(0, this.tiles.length - 1)];
+        rect.top_left.setX(tile.rect.get_x() + randint(0, tile.rect.get_width() - rect.get_width()));
+        rect.top_left.setY(tile.rect.get_y() - rect.get_height());
     }
 
     add_player(player: TPlayer) {
