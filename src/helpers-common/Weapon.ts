@@ -8,6 +8,8 @@ import { ServerWorld } from "../platform-server/ServerWorld";
 import { ServerPlayer } from "../platform-server/ServerPlayer";
 import { ClientPlayer } from "../platform-game/src/ClientPlayer";
 import { World } from "./World";
+import { PowerUpCrystal } from "./PowerUpCrystal";
+import { PowerUpTypes } from "./PowerUpTypes";
 
 export interface IWeaponStats {
     additional_ground_ammo: number
@@ -207,7 +209,7 @@ export const trait_categories : ITraitCategory[] = [
     }
 ];
 
-export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> {
+export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon, TCrystal>, TPlayer extends Player<TWorld, TPlayer, TWeapon, TCrystal>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon, TCrystal>, TCrystal extends PowerUpCrystal<TWorld, TPlayer, TWeapon, TCrystal>> {
     public replicated_data: IWeapon = {
         ammo: 2,
         conf: {
@@ -345,7 +347,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
         const raycaster = new BeamRaycaster({
             starting_position: this.player.collision_rect.point_middle(),
             starting_direction: bullet_direction,
-            phase_world: false,
+            phase_world: this.player.powerup_slot === PowerUpTypes.bullet_phase && this.player.is_powerup_active,
 
             max_dist: this.get_max_dist(),
             ray_collision_box_size: new Vector(this.get_bullet_size()),
@@ -368,22 +370,28 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
         return Math.max(1000 + (this.get_upgrades().additional_callibur * 200) - (this.get_upgrades().additional_barrels * 75), 100);
     }
 
-    get_damage() : number {
-        return Math.round(Math.max(
+    get_damage(to_player? : TPlayer) : number {
+        let damage = Math.round(Math.max(
             (4 * this.get_firerate_multiplier(true))
             +
             (
                 ((this.get_upgrades().additional_callibur * 2) + (this.get_upgrades().additional_barrels * 10))
                 / (this.get_upgrades().additional_barrels + 1)
             ) * this.get_firerate_multiplier(true), 3));
+        
+        if ((this.player.powerup_slot === PowerUpTypes.quad_damage && this.player.is_powerup_active) || (to_player && to_player.powerup_slot === PowerUpTypes.quad_damage && to_player.is_powerup_active)) {
+            damage *= 2;
+        }
+
+        return damage;
     }
 
     is_selected() : boolean {
         return this as unknown as TWeapon === this.player.get_active_weapon();
     }
 
-    shoot(aim_direction : Vector, aim_magnitude : number) : IShotResult<TWorld, TPlayer, TWeapon> {
-        const shot_result : IShotResult<TWorld, TPlayer, TWeapon> = {
+    shoot(aim_direction : Vector, aim_magnitude : number) : IShotResult<TWorld, TPlayer, TWeapon, TCrystal> {
+        const shot_result : IShotResult<TWorld, TPlayer, TWeapon, TCrystal> = {
             did_shoot: false,
             damage_amount: null,
             damaged_player: null,
@@ -413,7 +421,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
                 const damaged_player : TPlayer = raycaster.collided_player;
                 const attacker = this.player;
                 
-                const damage = this.get_damage();
+                const damage = this.get_damage(damaged_player);
                 shot_result.damaged_player = damaged_player;
                 shot_result.damage_amount = damage;
                     
@@ -561,7 +569,7 @@ export class Weapon<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exte
 
 }
 
-interface IShotResult<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> {
+interface IShotResult<TWorld extends World<TWorld, TPlayer, TWeapon, TCrystal>, TPlayer extends Player<TWorld, TPlayer, TWeapon, TCrystal>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon, TCrystal>, TCrystal extends PowerUpCrystal<TWorld, TPlayer, TWeapon, TCrystal>> {
     did_shoot : boolean,
     damaged_player : TPlayer,
     damage_amount : number,

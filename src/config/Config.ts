@@ -32,3 +32,6 @@ export const github_repo_url = "https://github.com/Radbuglet/heat-gun-ts";
 
 export const AIM_MAGNITUDE_DIST_MIN = 200;
 export const AIM_MAGNITUDE_DIST_MAX = 300;
+
+export const POWERUP_COUNT = 5;
+export const POWERUP_MINDIST = 1000;

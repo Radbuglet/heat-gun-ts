@@ -2,8 +2,9 @@ import { Weapon } from "../../helpers-common/Weapon";
 import { ClientWorld } from "./ClientWorld";
 import { ClientPlayer } from "./ClientPlayer";
 import Vector from "../../helpers-common/helpers/Vector";
+import { ClientPowerUpCrystal } from "./ClientPowerUpCrystal";
 
-export class ClientWeapon extends Weapon<ClientWorld, ClientPlayer, ClientWeapon> {
+export class ClientWeapon extends Weapon<ClientWorld, ClientPlayer, ClientWeapon, ClientPowerUpCrystal> {
     constructor(player : ClientPlayer, public theme_color : string) {
         super(player);
     }

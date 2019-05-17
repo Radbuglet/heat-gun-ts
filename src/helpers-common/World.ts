@@ -6,10 +6,11 @@ import { IUpdate } from "./helpers/IUpdate";
 import { CollisionFace, Rect } from "./helpers/Rect";
 import { BeamRaycaster } from "./BeamRaycaster";
 import { MapChunker } from "./MapChunker";
-import { TPZONE_LEFT, TPZONE_RIGHT } from "../config/Config";
+import { TPZONE_LEFT, TPZONE_RIGHT, POWERUP_COUNT } from "../config/Config";
 import { Weapon } from "./Weapon";
 import { ITextComponent } from "./helpers/ITextComponent";
 import { randint } from "./helpers/Math";
+import { PowerUpCrystal } from "./PowerUpCrystal";
 
 export interface IBeam {
     path : Vector[]
@@ -23,19 +24,31 @@ export interface IBeam {
 export interface WorldSimulationPermissions {
     can_perform_regen : boolean,
     can_perform_shot_damage : boolean,
-    can_perform_next_slot_select : boolean
+    can_perform_next_slot_select : boolean,
+    can_spawn_powerups : boolean,
+    can_pickup_powerups : boolean
 }
 
-export class World<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> {
+export abstract class World<TWorld extends World<TWorld, TPlayer, TWeapon, TCrystal>, TPlayer extends Player<TWorld, TPlayer, TWeapon, TCrystal>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon, TCrystal>, TCrystal extends PowerUpCrystal<TWorld, TPlayer, TWeapon, TCrystal>> {
     public tiles : ITile[] = null;
     public map_chunker : MapChunker = null;
-    public players: Map<string, TPlayer> = new Map();
+    public players : Map<string, TPlayer> = new Map();
+    public powerup_crystals : Map<string, TCrystal> = new Map();
     public beams : IBeam[] = [];
 
     constructor(map_loader: MapLoader, public simulation_permissions : WorldSimulationPermissions) {
         this.tiles = map_loader.clone_map_object();
         this.chunk_map();
+        
+        if (this.simulation_permissions.can_spawn_powerups) {
+            this.powerup_crystals.clear();
+            for (let _ = 0; _ < POWERUP_COUNT; _++) {
+                this.add_crystal(this.crystal_factory());
+            }
+        }
     }
+
+    abstract crystal_factory() : TCrystal;
 
     chunk_map() {
         console.log("Chunking map...");
@@ -44,9 +57,24 @@ export class World<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exten
     }
 
     spawn_rect(rect : Rect) {
-        const tile = this.tiles[randint(0, this.tiles.length - 1)];
-        rect.top_left.setX(tile.rect.get_x() + randint(0, tile.rect.get_width() - rect.get_width()));
-        rect.top_left.setY(tile.rect.get_y() - rect.get_height());
+        while (true) {
+            const tile = this.tiles[randint(0, this.tiles.length - 1)];
+
+            if (tile.rect.get_width() <= rect.get_width() + 20) continue;
+
+            rect.top_left.setX(tile.rect.get_x() + randint(0, tile.rect.get_width() - rect.get_width()));
+            rect.top_left.setY(tile.rect.get_y() - rect.get_height());
+
+            if (this.get_movement_collisions(rect, new Vector(0, 0)).length > 0) {
+                continue;
+              }
+        
+              if (this.get_movement_collisions(rect, new Vector(0, 1)).length === 0) {
+                continue;
+              }
+
+            break;
+        }
     }
 
     add_player(player: TPlayer) {
@@ -56,10 +84,25 @@ export class World<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exten
     remove_player(player: TPlayer) {
         this.players.delete(player.uuid);
     }
+    
+    add_crystal(crystal : TCrystal) {
+        this.powerup_crystals.set(crystal.uuid, crystal);
+    }
+
+    remove_crystal(crystal : TCrystal) {
+        if (this.simulation_permissions.can_spawn_powerups) {
+            this.add_crystal(this.crystal_factory());
+        }
+        this.powerup_crystals.delete(crystal.uuid);
+    }
 
     update(update_evt: IUpdate) {
         this.players.forEach(player => {
             player.update(update_evt);
+        });
+
+        this.powerup_crystals.forEach(crystal => {
+            crystal.update(update_evt);
         });
 
         this.beams.forEach(beam => {
@@ -115,7 +158,7 @@ export class World<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer exten
         });
     }
 
-    raycastaddon__check_collisions(raycaster: BeamRaycaster<TWorld, TPlayer, TWeapon>, ray_collision_box: Vector): boolean { // @TODO a lot of stuff!
+    raycastaddon__check_collisions(raycaster: BeamRaycaster<TWorld, TPlayer, TWeapon, TCrystal>, ray_collision_box: Vector): boolean { // @TODO a lot of stuff!
         const ray_collisionbox_position = raycaster.position.sub(ray_collision_box.div(new Vector(2)));
 
         return this.get_movement_collisions(

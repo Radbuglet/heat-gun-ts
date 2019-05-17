@@ -77,6 +77,10 @@ export function draw_text(app : CanvasApplicationInterface, x : number, y : numb
                         rect.fill_rect_pixelfixed(ctx);
                     }
 
+                    if (typeof text_part.opacity === "number") {
+                        ctx.globalAlpha = text_part.opacity;
+                    }
+
                     if (hover && (
                         typeof text_part.click_func_action === "function" ||
                         typeof text_part.click_url_action === "string"

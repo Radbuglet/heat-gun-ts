@@ -6,8 +6,10 @@ import { MAX_HEALTH } from "../../config/Config";
 import { ClientWorld } from "./ClientWorld";
 import { AmmoParticle, BloodParticle } from "./Particles";
 import { ClientWeapon } from "./ClientWeapon";
+import { ClientPowerUpCrystal } from "./ClientPowerUpCrystal";
+import { PowerUpTypes } from "../../helpers-common/PowerUpTypes";
 
-export class ClientPlayer extends Player<ClientWorld, ClientPlayer, ClientWeapon> {
+export class ClientPlayer extends Player<ClientWorld, ClientPlayer, ClientWeapon, ClientPowerUpCrystal> {
     public gun_look_direction : Vector = null;
     public gun_look_magnitude : number = 1;
 
@@ -41,9 +43,16 @@ export class ClientPlayer extends Player<ClientWorld, ClientPlayer, ClientWeapon
     }
 
     render(app : CanvasSubApplication) {
+        if (this.powerup_slot === PowerUpTypes.invisibility && this.is_powerup_active) {
+            return;
+        }
         app.draw(ctx => {
             ctx.fillStyle = this.get_movement_collisions(new Vector(0, 0)).length > 0 ? "red" : "gold";
             ctx.strokeStyle = "darkred";
+
+            if (this.powerup_slot === PowerUpTypes.quad_damage && this.is_powerup_active) {
+                ctx.fillStyle = "#d819e6";
+            }
 
             this.collision_rect.fill_rect(ctx);
             this.collision_rect.stroke_rect(ctx);

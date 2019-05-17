@@ -15,7 +15,11 @@ export enum PacketNames {
     perform_dash,
     replicate_slot_change,
     replicate_player_damaged,
-    validate_captcha
+    replicate_crystal_list,
+    validate_captcha,
+    perform_activate_powerup,
+    replicate_powerup_crystals,
+    replicate_player_crystal_state
 }
 
 export function decode_packet_name(num : PacketNames) {
@@ -36,6 +40,10 @@ export function decode_packet_name(num : PacketNames) {
         'perform_dash',
         'replicate_slot_change',
         'replicate_player_damaged',
-        'validate_captcha'
+        'replicate_crystal_list',
+        'validate_captcha',
+        'perform_activate_powerup',
+        'replicate_powerup_crystals',
+        'replicate_player_crystal_state'
     ][num];
 }

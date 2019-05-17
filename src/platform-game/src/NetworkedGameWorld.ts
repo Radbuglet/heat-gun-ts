@@ -9,6 +9,7 @@ import { IWeapon } from "../../helpers-common/Weapon";
 import { RushDirections } from "../../helpers-common/RushDirections";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { MainGame, SocketEventGroups } from "./entry";
+import { ClientPowerUpCrystal } from "./ClientPowerUpCrystal";
 
 export class NetworkedGameWorld extends GameClient {
     constructor(private main_game : MainGame, map_loader : MapLoader, private socket : ClientSocket, my_uuid : string, my_name: string, my_spawn : Vector) {
@@ -104,12 +105,41 @@ export class NetworkedGameWorld extends GameClient {
             }
         });
 
+        this.socket.clump_on(PacketNames.replicate_player_crystal_state, SocketEventGroups.GAME, (target_uuid : string, powerup_id : number, active : boolean, time_left : number) => {
+            if (this.world.players.has(target_uuid)) {
+                const target_player = this.world.players.get(target_uuid);
+
+                target_player.powerup_slot = powerup_id;
+                target_player.is_powerup_active = active;
+                target_player.power_up_time_left = time_left;
+            }
+        });
+
         this.socket.clump_on(PacketNames.replicate_player_damaged, SocketEventGroups.GAME, (attacker : string, target_uuid : string, damage : number) => {
             if (this.world.players.has(target_uuid)) {
                 const target_player = this.world.players.get(target_uuid);
                 target_player.particlehandle__damaged(damage);
             }
         });
+
+        this.socket.clump_on(PacketNames.replicate_crystal_list, SocketEventGroups.GAME, (crystals) => {
+            this.world.powerup_crystals.forEach(crystal => {
+                if (!(crystal.uuid in crystals)) {
+                    this.world.powerup_crystals.delete(crystal.uuid);
+                }
+            });
+
+            for (let crystal_uuid in crystals) {
+                if (!this.world.powerup_crystals.has(crystal_uuid)) {
+                    const crystal = new ClientPowerUpCrystal(this.world);
+                    crystal.uuid = crystal_uuid;
+                    crystal.collision_rect.top_left = Vector.deserialize(crystals[crystal_uuid][0]);
+                    crystal.powerup_type = parseInt(crystals[crystal_uuid][1]);
+                    this.world.powerup_crystals.set(crystal_uuid, crystal);
+                }
+            }
+        });
+
         
         this.socket.underlying_socket.on("custom_pong", (s) => {
             this.ping = Date.now() - s;
@@ -134,6 +164,10 @@ export class NetworkedGameWorld extends GameClient {
 
     handle_dash(dir : RushDirections) {
         this.socket.emit(PacketNames.perform_dash, this.local_player.position.serialize(), dir);
+    }
+
+    handle_powerup_activate() {
+        this.socket.emit(PacketNames.perform_activate_powerup);
     }
 
     handle_stats_change(weapon_index : number, stat_index : number, is_upgrade : boolean) {

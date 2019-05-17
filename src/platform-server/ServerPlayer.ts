@@ -6,8 +6,10 @@ import { PacketNames } from "../helpers-common/ProtocolDefs";
 import { IUpdate } from "../helpers-common/helpers/IUpdate";
 import { RushDirections } from "../helpers-common/RushDirections";
 import { ServerWeapon } from "./ServerWeapon";
+import { ServerPowerUpCrystal } from "./ServerPowerUpCrystal";
+import { PowerUpTypes } from "../helpers-common/PowerUpTypes";
 
-export class ServerPlayer extends Player<ServerWorld, ServerPlayer, ServerWeapon> {
+export class ServerPlayer extends Player<ServerWorld, ServerPlayer, ServerWeapon, ServerPowerUpCrystal> {
     constructor(public user : SocketUser, world : ServerWorld, name : string) {
         super(world, name);
     }
@@ -18,6 +20,7 @@ export class ServerPlayer extends Player<ServerWorld, ServerPlayer, ServerWeapon
         this.replicate__health_changed();
         this.replicate__movementstate_changed(forceful);
         this.replicate__slot_changed();
+        this.replicate__powerup_state();
     });
   }
 
@@ -56,6 +59,10 @@ export class ServerPlayer extends Player<ServerWorld, ServerPlayer, ServerWeapon
         this.world.broadcast_packet(PacketNames.replicate_slot_change, this.uuid, this.get_selected_slot());
     }
 
+    replicate__powerup_state() {
+        this.world.broadcast_packet(PacketNames.replicate_player_crystal_state, this.uuid, this.powerup_slot, this.is_powerup_active, this.power_up_time_left);
+    }
+
     send_message(message : ITextComponent[]) {
         this.user.send_packet(PacketNames.send_message, message);
     }
@@ -64,6 +71,11 @@ export class ServerPlayer extends Player<ServerWorld, ServerPlayer, ServerWeapon
     /*
         Method replication handlers
     */
+
+    set_slot_powerup(type : PowerUpTypes) {
+        super.set_slot_powerup(type);
+        this.replicate__powerup_state();
+    }
     
     select_slot(slot : number) : boolean {
         const slot_changed = super.select_slot(slot);
@@ -106,6 +118,11 @@ export class ServerPlayer extends Player<ServerWorld, ServerPlayer, ServerWeapon
 
     generate_weapon(index : number) {
         return new ServerWeapon(this);
+    }
+
+    activate_powerup() {
+        super.activate_powerup();
+        this.replicate__powerup_state();
     }
 }
 

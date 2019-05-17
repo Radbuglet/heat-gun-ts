@@ -14,7 +14,9 @@ export class TestWorldClient extends GameClient {
         super(main_app, maploader, "", " ", new Vector(0, 0), {
             can_perform_next_slot_select: true,
             can_perform_regen: true,
-            can_perform_shot_damage: true
+            can_perform_shot_damage: true,
+            can_spawn_powerups: true,
+            can_pickup_powerups: true
         });
 
         setTimeout(() => {
@@ -40,7 +42,11 @@ export class TestWorldClient extends GameClient {
 
    handle_shot() {
 
-   } 
+   }
+
+   handle_powerup_activate() {
+       
+   }
 
    handle_stats_change() {
 

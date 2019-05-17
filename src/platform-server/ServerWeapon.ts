@@ -2,8 +2,9 @@ import { Weapon, ITrait } from "../helpers-common/Weapon";
 import { ServerPlayer } from "./ServerPlayer";
 import { ServerWorld } from "./ServerWorld";
 import Vector from "../helpers-common/helpers/Vector";
+import { ServerPowerUpCrystal } from "./ServerPowerUpCrystal";
 
-export class ServerWeapon extends Weapon<ServerWorld, ServerPlayer, ServerWeapon> {
+export class ServerWeapon extends Weapon<ServerWorld, ServerPlayer, ServerWeapon, ServerPowerUpCrystal> {
     upgrade_trait(trait: ITrait) : boolean {
         const did_change = super.upgrade_trait(trait);
 

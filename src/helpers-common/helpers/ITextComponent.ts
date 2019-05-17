@@ -1,6 +1,7 @@
 export interface ITextComponent {
     color : string
     text : string
+    opacity? : number
     bg? : string
     click_underline? : string
     click_url_action? : string

@@ -1,6 +1,6 @@
 import { World, WorldSimulationPermissions } from "../../helpers-common/World";
 import { ClientPlayer } from "./ClientPlayer";
-import { CanvasApplicationInterface } from "../../helpers-client/CanvasApplication";
+import { CanvasApplicationInterface, CanvasSubApplication } from "../../helpers-client/CanvasApplication";
 import { Layers, OneWayDirections, MapLoader, ITile } from "../../helpers-common/MapLoader";
 import { rainbow_color } from "../../helpers-client/color";
 import { Axis } from "../../helpers-common/helpers/Axis";
@@ -10,6 +10,7 @@ import { TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM } from "../../conf
 import Vector from "../../helpers-common/helpers/Vector";
 import { Rect } from "../../helpers-common/helpers/Rect";
 import { ClientWeapon } from "./ClientWeapon";
+import { ClientPowerUpCrystal } from "./ClientPowerUpCrystal";
 
 export interface IEditorRenderParams {
     hovered_objects : ITile[]
@@ -17,15 +18,21 @@ export interface IEditorRenderParams {
     x_ray : boolean
 }
 
-export class ClientWorld extends World<ClientWorld, ClientPlayer, ClientWeapon> {
+export class ClientWorld extends World<ClientWorld, ClientPlayer, ClientWeapon, ClientPowerUpCrystal> {
     public particle_system : ParticleSystem = new ParticleSystem();
 
     constructor(loader : MapLoader, public app : CanvasApplicationInterface, perms : WorldSimulationPermissions = {
         can_perform_next_slot_select: true,
         can_perform_regen: false,
-        can_perform_shot_damage: false
+        can_perform_shot_damage: false,
+        can_spawn_powerups: false,
+        can_pickup_powerups: false
     }) {
         super(loader, perms);
+    }
+
+    crystal_factory() {
+        return new ClientPowerUpCrystal(this);
     }
 
     replicate_new_beam() {}
@@ -129,6 +136,10 @@ export class ClientWorld extends World<ClientWorld, ClientPlayer, ClientWeapon> 
                 });
             }
         });
+    }
+
+    render_powerups(app : CanvasSubApplication) {
+        this.powerup_crystals.forEach(crystal => crystal.render(app));
     }
 
     render_bounding_box() {

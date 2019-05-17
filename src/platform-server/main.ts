@@ -82,7 +82,9 @@ const socketserver = socketio(server);
 const world = new ServerWorld(map_loader, {
     can_perform_next_slot_select: false,
     can_perform_regen: true,
-    can_perform_shot_damage: true
+    can_perform_shot_damage: true,
+    can_spawn_powerups: true,
+    can_pickup_powerups: true
 });
 
 socketserver.on("connection", socket => {
@@ -159,6 +161,13 @@ socketserver.on("connection", socket => {
                 player.using_scope = new_scope_state;
                 player.replicate__movementstate_changed(false);
             });
+        }
+    });
+
+    socket.on((PacketNames.perform_activate_powerup as number).toString(), () => {
+        if (socket_user.is_playing()) {
+            const player = socket_user.player;
+            player.activate_powerup();
         }
     });
 

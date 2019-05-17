@@ -22,8 +22,10 @@ import { ITextComponent } from "./helpers/ITextComponent";
 import { RushDirections } from "./RushDirections";
 import { ITile } from "./MapLoader";
 import { clamp_num } from "./helpers/Math";
+import { PowerUpCrystal } from "./PowerUpCrystal";
+import { PowerUpTypes, IPowerUpType, power_up_types } from "./PowerUpTypes";
 
-export abstract class Player<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> {
+export abstract class Player<TWorld extends World<TWorld, TPlayer, TWeapon, TCrystal>, TPlayer extends Player<TWorld, TPlayer, TWeapon, TCrystal>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon, TCrystal>, TCrystal extends PowerUpCrystal<TWorld, TPlayer, TWeapon, TCrystal>> {
   public position: Vector = new Vector(10, 10);
   public velocity: Vector = new Vector(0, 0);
   public using_scope: boolean = false;
@@ -44,6 +46,10 @@ export abstract class Player<TWorld extends World<TWorld, TPlayer, TWeapon>, TPl
   public uuid : string;
   private sync_controller = new ServerPosRollbacker(MAX_ROLLBACK_POSITIONS_ALLOWED);
   public collision_rect : Rect;
+
+  public powerup_slot : PowerUpTypes | null = null;
+  public is_powerup_active : boolean = false;
+  public power_up_time_left : number = 0;
 
   constructor(public world : TWorld, public name: string) {
     this.uuid = uuidv4();
@@ -110,20 +116,7 @@ export abstract class Player<TWorld extends World<TWorld, TPlayer, TWeapon>, TPl
   }
 
   spawn() {
-    while (true) {
-      this.world.spawn_rect(this.collision_rect);
-
-      if (this.get_movement_collisions(new Vector(0, 0)).length > 0) {
-        continue;
-      }
-
-      if (this.get_movement_collisions(new Vector(0, 1)).length === 0) {
-        continue;
-      }
-
-      break;
-
-    }
+    this.world.spawn_rect(this.collision_rect);
     console.log("Spawned player!");
   }
 
@@ -150,8 +143,52 @@ export abstract class Player<TWorld extends World<TWorld, TPlayer, TWeapon>, TPl
       }
     }
 
+    if (this.is_powerup_active) {
+      this.power_up_time_left -= update_evt.ticks * 0.1;
+      if (this.power_up_time_left <= 0) {
+        this.deactivate_powerup();
+      }
+
+    }
+
+    if (this.world.simulation_permissions.can_pickup_powerups) {
+      this.world.powerup_crystals.forEach(crystal => {
+        if (this.collision_rect.testcollision(crystal.collision_rect) && !this.is_powerup_active) {
+          this.set_slot_powerup(crystal.powerup_type);
+          this.world.remove_crystal(crystal);
+        }
+      });
+    }
+
     this.weapons.forEach(weapon => weapon.update(update_evt));
     this.sync_controller.attempt_sync(this.position);
+  }
+
+  set_slot_powerup(type : PowerUpTypes) {
+    this.powerup_slot = type;
+  }
+
+  get_slot_powerup() : IPowerUpType {
+    return this.powerup_slot !== null ? power_up_types.get(this.powerup_slot) : null;
+  }
+
+  activate_powerup() {
+    if (this.powerup_slot === null) {
+      console.warn("Failed to activate powerup. No powerup in slot");
+      return;
+    }
+    this.is_powerup_active = true;
+    this.power_up_time_left = this.get_slot_powerup().time;
+
+    if (this.powerup_slot === PowerUpTypes.instant_health) {
+      this.set_health(MAX_HEALTH);
+    }
+  }
+
+  deactivate_powerup() {
+    this.is_powerup_active = false;
+    this.power_up_time_left = 0;
+    this.powerup_slot = null;
   }
 
   sync_pos(expected_pos : Vector, callback : () => void) {

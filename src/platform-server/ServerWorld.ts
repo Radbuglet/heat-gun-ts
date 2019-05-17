@@ -5,8 +5,9 @@ import { PacketNames } from "../helpers-common/ProtocolDefs";
 import { IUpdate } from "../helpers-common/helpers/IUpdate";
 import Vector from "../helpers-common/helpers/Vector";
 import { ServerWeapon } from "./ServerWeapon";
+import { ServerPowerUpCrystal } from "./ServerPowerUpCrystal";
 
-export class ServerWorld extends World<ServerWorld, ServerPlayer, ServerWeapon> {
+export class ServerWorld extends World<ServerWorld, ServerPlayer, ServerWeapon, ServerPowerUpCrystal> {
     /*
         Replication logic
     */
@@ -21,6 +22,7 @@ export class ServerWorld extends World<ServerWorld, ServerPlayer, ServerWeapon> 
         this.wrapped_queue_packets(() => {
             this.players.forEach(player => player.replicate_own_state(forceful));
         });
+        this.broadcast_crystal_data();
     }
 
     broadcast_player_list() {
@@ -34,6 +36,18 @@ export class ServerWorld extends World<ServerWorld, ServerPlayer, ServerWeapon> 
             this.players.forEach(player => {
                 player.user.send_packet(PacketNames.replicate_player_list, player.uuid, player_list);
             });
+        });
+    }
+
+    broadcast_crystal_data() {
+        const crystal_list = {};
+
+        Array.from(this.powerup_crystals.values()).forEach(crystal => {
+            crystal_list[crystal.uuid] = crystal.serialize();
+        });
+
+        this.players.forEach(player => {
+            player.user.send_packet(PacketNames.replicate_crystal_list, crystal_list);
         });
     }
 
@@ -53,6 +67,16 @@ export class ServerWorld extends World<ServerWorld, ServerPlayer, ServerWeapon> 
             this.broadcast_player_list();
             this.replicate_everything(false);
         });
+    }
+
+    add_crystal(crystal : ServerPowerUpCrystal) {
+        super.add_crystal(crystal);
+        this.broadcast_crystal_data();
+    }
+
+    remove_crystal(crystal) {
+        super.remove_crystal(crystal);
+        this.broadcast_crystal_data();
     }
 
     update(update_evt: IUpdate) {
@@ -94,4 +118,11 @@ export class ServerWorld extends World<ServerWorld, ServerPlayer, ServerWeapon> 
     broadcast_packet(evtname : PacketNames, ...args) {
         this.players.forEach(player => player.user.send_packet(evtname, ...args));
     }
+
+    /*
+        Etc
+    */
+   crystal_factory() {
+       return new ServerPowerUpCrystal(this);
+   }
 }

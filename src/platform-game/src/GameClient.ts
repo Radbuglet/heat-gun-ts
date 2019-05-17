@@ -10,7 +10,7 @@ import { render_tablist } from "./TablistController";
 import { RushDirections } from "../../helpers-common/RushDirections";
 import { Rect } from "../../helpers-common/helpers/Rect";
 import { rainbow_color } from "../../helpers-client/color";
-import { WEAPONS_HELD, MAX_HEALTH, TPZONE_LEFT, TPZONE_TOP, TPZONE_RIGHT, TPZONE_BOTTOM, AIM_MAGNITUDE_DIST_MAX, AIM_MAGNITUDE_DIST_MIN } from "../../config/Config";
+import { MAX_HEALTH, AIM_MAGNITUDE_DIST_MAX, AIM_MAGNITUDE_DIST_MIN } from "../../config/Config";
 import { ITextComponent } from "../../helpers-common/helpers/ITextComponent";
 import { draw_text, limit_line_size, left_right_alignment, get_line_size } from "../../helpers-client/draw_text";
 import { CloudHorizon } from "./CloudHorizon";
@@ -74,6 +74,7 @@ export abstract class GameClient extends CanvasSubApplication {
 
     abstract handle_shot(lookdir : Vector, lookmag : number);
     abstract handle_scope(new_state : boolean);
+    abstract handle_powerup_activate();
     abstract handle_stats_change(weapon_index : number, stat_index : number, is_upgrade : boolean);
     abstract handle_dash(direction : RushDirections);
 
@@ -122,7 +123,8 @@ export abstract class GameClient extends CanvasSubApplication {
                     });
                 }
             });
-
+            
+            this.world.render_powerups(this);
             this.world.render_world(this.camera.get_view_rect(), visgroup, collided_dec_tile_index, null);
 
             this.draw(() => {
@@ -326,7 +328,7 @@ export abstract class GameClient extends CanvasSubApplication {
                                 time_div: 20, light: 30, saturation: 100, add_to_time: x * 4
                             }) : "#191919";
                             Rect.from_positions(cloned_sectioned_hpbar_rect.point_bottom_left(), cloned_sectioned_hpbar_rect.point_bottom_right().sub(new Vector(0, 10))).fill_rect_pixelfixed(ctx);
-    
+
                             sectioned_hpbar_rect.top_left.mutadd(sectioned_hpbar_rect.size.isolate_x());
                         }
                     });
@@ -358,16 +360,14 @@ export abstract class GameClient extends CanvasSubApplication {
                     ctx.fillStyle = "#008f32";
     
                     const theme_rainbow = get_theme_rainbow();
-    
                     const theme_dark = get_theme_dark();
-    
                     const theme_red = get_theme_red();
     
                     const leaderboard_data = this.get_leaderboard();
     
                     const font_family = "20px monospace";
     
-                    const leaderboard_header_line = [
+                    const leaderboard_header_line : ITextComponent[] = [
                         {
                             bg: theme_rainbow,
                             color: theme_dark,
@@ -471,6 +471,11 @@ export abstract class GameClient extends CanvasSubApplication {
                                 }
                             ],
                             [],
+                        ])
+                        
+                        .concat(this.generate_powerup_display())
+                        
+                        .concat([
                             [
                                 {
                                     bg: "",
@@ -516,6 +521,89 @@ export abstract class GameClient extends CanvasSubApplication {
 
         // Weapon stats UI
         this.weapon_stats_menu.render();
+    }
+
+    generate_powerup_display() {
+        const theme_rainbow = get_theme_rainbow();
+        const theme_dark = get_theme_dark();
+        const theme_red = get_theme_red();
+
+        const lines : ITextComponent[][] = [];
+
+        if (this.local_player.powerup_slot !== null) {
+            lines.push([
+                {
+                    color: theme_dark,
+                    bg: theme_rainbow,
+                    text: !this.local_player.is_powerup_active ? " [P] " : " -x- "
+                },
+                {
+                    color: this.local_player.get_slot_powerup().color,
+                    bg: theme_dark,
+                    text: " " + this.local_player.get_slot_powerup().name + " "
+                }
+            ]);
+
+            if (this.local_player.is_powerup_active) {
+                const disp_chars_count = Math.max(5, lines[0][0].text.length + lines[0][1].text.length) - 2;
+                const true_char_count = (this.local_player.power_up_time_left / this.local_player.get_slot_powerup().time) * disp_chars_count;
+                const time_left_char_count = Math.floor(true_char_count);
+
+                lines.push([
+                    {
+                        color: theme_red,
+                        bg: theme_dark,
+                        text: " "
+                    },
+                    {
+                        color: theme_red,
+                        bg: theme_dark,
+                        text: "X".repeat(Math.max(time_left_char_count - 1, 0))
+                    },
+                    {
+                        color: theme_red,
+                        bg: theme_dark,
+                        text: (time_left_char_count > 0 ? ((true_char_count % 1) >= 0.5 ? "X" : "x") : ""),
+                        opacity: true_char_count % 1
+                    },
+                    {
+                        color: theme_red,
+                        bg: theme_dark,
+                        text: " ".repeat(disp_chars_count - time_left_char_count)
+                    },
+                    {
+                        color: theme_red,
+                        bg: theme_dark,
+                        text: " "
+                    },
+                ]);
+            }
+
+            lines.push([
+                {
+                    color: theme_red,
+                    bg: theme_dark,
+                    text: ""
+                },
+            ]);
+        }
+
+        lines.push([
+            {
+                color: theme_red,
+                bg: theme_dark,
+                text: " NEAREST POWERUP: "
+            },
+            {
+                color: theme_rainbow,
+                bg: theme_dark,
+                text: Math.floor(Math.min(...Array.from(this.world.powerup_crystals.values()).map((crystal) => {
+                    return crystal.collision_rect.point_middle().distance(this.local_player.collision_rect.point_middle());
+                }))) + "Us "
+            },
+        ], []);
+        
+        return lines;
     }
 
     get_screen_center_pos() : Vector {
@@ -588,6 +676,11 @@ export abstract class GameClient extends CanvasSubApplication {
 
             if (e.code === "KeyZ") {
                 this.show_sidebar = !this.show_sidebar;
+            }
+
+            if (e.code === "KeyP") {
+                this.local_player.activate_powerup();
+                this.handle_powerup_activate();
             }
         }
 

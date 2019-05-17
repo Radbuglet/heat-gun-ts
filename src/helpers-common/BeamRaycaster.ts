@@ -4,10 +4,11 @@ import { World } from "./World";
 import { Player } from "./Player";
 import { Rect } from "./helpers/Rect";
 import { Weapon } from "./Weapon";
+import { PowerUpCrystal } from "./PowerUpCrystal";
 
 // @TODO implement reflections properly
 
-export interface BeamRaycasterConstructionArgs<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> {
+export interface BeamRaycasterConstructionArgs<TWorld extends World<TWorld, TPlayer, TWeapon, TCrystal>, TPlayer extends Player<TWorld, TPlayer, TWeapon, TCrystal>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon, TCrystal>, TCrystal extends PowerUpCrystal<TWorld, TPlayer, TWeapon, TCrystal>> {
     starting_position : Vector
     starting_direction : Vector
     max_dist : number
@@ -24,7 +25,7 @@ export interface BeamRaycasterConstructionArgs<TWorld extends World<TWorld, TPla
     chk_every : number
 }
 
-export class BeamRaycaster<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlayer extends Player<TWorld, TPlayer, TWeapon>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon>> extends BaseRaycaster {
+export class BeamRaycaster<TWorld extends World<TWorld, TPlayer, TWeapon, TCrystal>, TPlayer extends Player<TWorld, TPlayer, TWeapon, TCrystal>, TWeapon extends Weapon<TWorld, TPlayer, TWeapon, TCrystal>, TCrystal extends PowerUpCrystal<TWorld, TPlayer, TWeapon, TCrystal>> extends BaseRaycaster {
     private world : TWorld;
     private max_dist : number;
     private ray_collbox_size : Vector;
@@ -42,7 +43,7 @@ export class BeamRaycaster<TWorld extends World<TWorld, TPlayer, TWeapon>, TPlay
 
     public collided_player : TPlayer = null;
 
-    constructor(args : BeamRaycasterConstructionArgs<TWorld, TPlayer, TWeapon>) {
+    constructor(args : BeamRaycasterConstructionArgs<TWorld, TPlayer, TWeapon, TCrystal>) {
         super(args.starting_position, args.starting_direction);
 
         this.hidden_velocity = this.direction.clone();
