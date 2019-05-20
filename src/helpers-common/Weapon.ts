@@ -70,7 +70,7 @@ export const configurable_traits : ITrait[] = [
     {
         key: "fire_rate",
         name: "Faster Fire",
-        maxval: 4,
+        maxval: 5,
         cost: 3,
         filter_id: "gun"
     },
@@ -121,8 +121,8 @@ export const configurable_traits : ITrait[] = [
     {
         key: "additional_size",
         name: "Bigger bullet size",
-        maxval: 5,
-        cost: 3,
+        maxval: 7,
+        cost: 2,
         filter_id: "bul"
     },
     {
@@ -150,8 +150,8 @@ export const configurable_traits : ITrait[] = [
     {
         key: "kb_increase",
         name: "Increased Knockback",
-        maxval: 4,
-        cost: 3,
+        maxval: 6,
+        cost: 2,
         filter_id: "kb"
     },
 
@@ -159,13 +159,13 @@ export const configurable_traits : ITrait[] = [
         key: "scope",
         name: "Scope",
         maxval: 7,
-        cost: 0,
+        cost: 2,
         filter_id: "misc"
     },
     {
         key: "teleportation",
         name: "Teleportation",
-        maxval: 4,
+        maxval: 5,
         cost: 3,
         filter_id: "misc"
     },
